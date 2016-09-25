@@ -2,6 +2,15 @@
   <%= partial '/layouts/site_partials/header' %>
 
     <div class="container">
+        <h1 class="site-title">
+            <%= page_title %>
+        </h1>
+
+        <% if page_date %>
+            <h4 class="date">
+                <%=friendly_date page_date %>
+            </h4>
+        <% end %>
       <%= yield %>
 
     </div>

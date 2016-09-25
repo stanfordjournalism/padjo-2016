@@ -7,6 +7,10 @@ module PageMetaHelpers
     Array(page_data_get(:authors))
   end
 
+  def page_date
+    page_data_get(:date)
+  end
+
   def page_description
     page_data_get(:description)
   end

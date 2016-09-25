@@ -1,13 +1,60 @@
 ---
-title: Public Affairs Data Journalism
+title: Public Affairs Data Journalism I
 layout: /layouts/homepage_layout
 ---
 
-
-
 <section>
+    <div class="container">
+      <h1 class="site-title banner">
+        Public Affairs Data Journalism&ndash;I
+      </h1>
+
+      <h3>At Stanford University</h3>
+    </div>
+</section>
+
+
+<section class="sec">
   <div class="container">
-    <h1>Welcome</h1>
-    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio dolore veritatis maiores! Incidunt ullam, eaque officiis perspiciatis provident deserunt libero accusantium illum, est ab perferendis iusto vel quam soluta dolore.
+    <p class="h3">The journalism of ones and zeros and life and death.</p>
   </div>
+</section>
+
+
+
+<section id="meta">
+    <div class="container">
+
+        <div>
+            COMM 273D: Public Affairs Data Journalism I
+        </div>
+
+        <div>
+            Session: September 26 through December 8, 2016
+        </div>
+        <div>
+            Hours: Tuesdays and Thursdays, from 1:30 to 2:50PM
+        </div>
+        <div>
+            Location: McClatchy Hall (Building 120), Room 410
+        </div>
+        <div>
+            Instructor: <a href="http://stanford.edu/~dun/">Dan Nguyen</a>
+        </div>
+    </div>
+</section>
+
+
+
+<section id="schedule">
+    <div class="container">
+        <h2>Schedule</h2>
+
+        <% schedule.each do |lesson| %>
+            <div class="lesson">
+                <%=link_to friendly_date(lesson.date), lesson.url %>
+            </div>
+        <% end %>
+
+    </div>
 </section>
