@@ -1,0 +1,19 @@
+<footer id="site-footer">
+  <div class="container">
+    <h5 class="site-title">
+      <a href="<%=build? ? site_baseurl : '/' %>"><%=site_title%></a>
+    </h5>
+
+
+    <ul class="linkroll list-unstyled">
+        <% ['classes', 'stanford', 'me'].each do |rollname| %>
+            <% data.linkrolls[rollname].each_pair do |title, url| %>
+                <li><a href="<%=url%>"><%=title%></a></li>
+            <% end %>
+        <% end %>
+    </ul>
+
+
+
+  </div>
+</footer>

@@ -1,0 +1,14 @@
+
+<!--
+cut from the homepage. currently unused.
+-->
+
+
+<% resources = sitemap.resources.select{|r| r.path =~ /(?:tutorials|articles|testgroup)\/.*?(?:index|slideshow)\.html/ } %>
+<p><%=resources.length%> articles</p>
+<ul>
+  <% resources.each do |resource| %>
+    <% article = resource.data %>
+    <li><%= link_to resource.data.title, resource.url %></li>
+  <% end %>
+</ul>

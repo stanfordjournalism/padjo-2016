@@ -1,0 +1,10 @@
+<% wrap_layout :layout do %>
+  <%= partial '/layouts/site_partials/header' %>
+
+    <div class="container">
+      <%= yield %>
+
+    </div>
+
+  <%= partial '/layouts/site_partials/footer' %>
+<% end %>

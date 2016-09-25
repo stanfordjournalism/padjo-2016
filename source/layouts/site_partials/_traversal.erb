@@ -1,0 +1,23 @@
+
+<% if page_parent %>
+  <h2>Parent: <%=link_to page_parent.url, page_parent.url %></h2>
+<% end %>
+
+  <section>
+    <h2>Children</h2>
+    <% page_children.each do |p| %>
+      <li>
+        Section: <%= link_to p.url, p.url %>
+      </li>
+    <% end %>
+  </section>
+
+
+  <section>
+    <h2>Siblings</h2>
+    <% page_siblings.each do |p| %>
+      <li>
+        Section: <%= link_to p.url, p.url %>
+      </li>
+    <% end %>
+  </section>

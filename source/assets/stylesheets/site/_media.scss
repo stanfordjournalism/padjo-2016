@@ -1,0 +1,6 @@
+.mediawrap{
+  img{
+    @extend .img-responsive !optional;
+    border: thin solid $gray-default;
+  }
+}

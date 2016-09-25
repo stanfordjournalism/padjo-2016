@@ -1,0 +1,19 @@
+# Ignore bundler config
+/.bundle
+
+# Ignore the build directory
+/build
+
+# Ignore Sass' cache
+/.sass-cache
+
+.DS_Store
+Gemfile.lock
+/bower_components
+
+/_drafts
+/notes
+/source/memos
+.s3_sync
+
+site_config.yaml
