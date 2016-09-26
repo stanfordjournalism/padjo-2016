@@ -3,13 +3,15 @@ require 'lib/middleman_content_resource'
 
 
 def contentresource(obj)
-    if obj.is_a?(Middleman::Sitemap::Resource)
+    if obj.is_a?ContentResource
+        return obj
+    elsif obj.is_a?Hash
+        return HashResource.new(obj)
+    elsif obj.is_a?(Middleman::Sitemap::Resource)
         return MiddlemanContentResource.new(obj)
 
     elsif obj =~ /^https?/ # assume just a URL string
         return {title: obj, url: obj}
-    # else
-    #     return ContentResource(obj)
     end
 end
 

@@ -1,18 +1,9 @@
-class MiddlemanContentResource < ContentResource
-  attr_reader :middleman_resource, :source_file, :ranking
+class MiddlemanContentResource < ItemResource
+  attr_reader :middleman_resource, :source_file
   def initialize(resource)
+    super(resource)
     @middleman_resource = resource
     @source_file = resource.source_file
-    @url    = resource.url
-    @path   = resource.path
-    @image_url = resource.data.image_url
-    @title  = resource.data.title
-    # @ranking = resource.data.ranking || 99999
-    # @_listed = resource.data.listed
-    # @source_name = nil
-    @full_title = @title
-    @date   = Chronic.parse(resource.data.date) if resource.data.date
-    @description = resource.data.description
   end
 
   def content_size

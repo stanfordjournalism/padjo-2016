@@ -1,0 +1,28 @@
+<% wrap_layout :layout do %>
+  <%= partial '/layouts/site_partials/header' %>
+
+    <div class="container">
+        <h1 class="site-title">
+            <%=friendly_date page_date %>
+        </h1>
+
+
+        <h1>Agenda</h1>
+        <% if (agenda = page_data_get(:agenda)) %>
+            <% agenda.map{|a| contentresource(a) }.each do |item| %>
+                <div class="item">
+                    <h4 class="title"><%=link_to item.title, item.url %></h4>
+                    <div class="description">
+                        <%=item.description %>
+                    </div>
+
+                </div>
+
+            <% end %>
+        <% end %>
+      <%= yield %>
+
+    </div>
+
+  <%= partial '/layouts/site_partials/footer' %>
+<% end %>
