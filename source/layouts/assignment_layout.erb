@@ -1,0 +1,19 @@
+<% assignment = find_assignment(current_page) %>
+
+<% wrap_layout :layout do %>
+  <%= partial '/layouts/site_partials/header' %>
+
+    <div class="container assignment-layout">
+        <h5>Assignments</h5>
+        <h1 class="site-title">
+            <%=assignment.title %>
+        </h1>
+
+        <%= yield %>
+    </div>
+
+
+
+
+  <%= partial '/layouts/site_partials/footer' %>
+<% end %>

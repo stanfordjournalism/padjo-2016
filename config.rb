@@ -26,7 +26,9 @@ end
 ###
 
 set :layout, :page_layout
-page 'schedule/*.html', layout: :schedule_layout
+page /schedule\/\d{4}-\d{2}-\d{2}.html/, layout: :schedule_layout
+page 'assignments/*', layout: :assignment_layout
+
 # Per-page layout changes:
 # With no layout
 page '/*.xml', layout: false

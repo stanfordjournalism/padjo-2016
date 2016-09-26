@@ -1,11 +1,13 @@
 #site-header{
     margin-bottom: 1.5em;
-
+    padding-top: 0.5em;
+    border-bottom: thin dotted #099;
+    background: #f2f2f2;
 
   .site-title{
-    font-size: 1.0rem;
-    font-weight: bold;
-    color: black;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #777;
   }
 
 }

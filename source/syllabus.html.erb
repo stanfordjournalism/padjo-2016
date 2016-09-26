@@ -1,0 +1,14 @@
+---
+title: Syllabus for PADJO 2016
+---
+
+
+<section id="schedule">
+
+        <% schedule.each do |lesson| %>
+            <div class="lesson">
+                <%=link_to friendly_date(lesson.date), lesson.url %>
+            </div>
+        <% end %>
+
+</section>

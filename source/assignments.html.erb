@@ -1,0 +1,17 @@
+---
+title: Assignments
+---
+
+
+        <% assignments.each do |a| %>
+            <div class="assignment">
+
+                <div class="title">
+                    <%=link_to a.title, a.url %>
+                </div>
+                <div class="description">
+                    <%=a.description %>
+                </div>
+
+            </div>
+        <% end %>
