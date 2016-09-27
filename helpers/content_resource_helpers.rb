@@ -6,12 +6,20 @@ def contentresource(obj)
     if obj.is_a?ContentResource
         return obj
     elsif obj.is_a?Hash
-        return HashResource.new(obj)
+        if obj.relative_url.present?
+            r = find_sitemap_resource_by_relative_url(obj.relative_url)
+            puts "IS A HASH RELATIVE URL: #{obj.relative_url}"
+            puts "#{r.data.title} #{r.url}"
+            MiddlemanContentResource.new(r)
+        else
+            puts "IS JUST A HASH"
+            HashResource.new(obj)
+        end
     elsif obj.is_a?(Middleman::Sitemap::Resource)
         return MiddlemanContentResource.new(obj)
 
-    elsif obj =~ /^https?/ # assume just a URL string
-        return {title: obj, url: obj}
+    # elsif obj =~ /^https?/ # assume just a URL string
+    #     return {title: obj, url: obj}
     end
 end
 
