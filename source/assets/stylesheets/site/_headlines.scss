@@ -6,8 +6,9 @@ h5, .h5 { font-size: $font-size-h5; }
 h6, .h6 { font-size: $font-size-h6; }
 
 
-.banner.site-title{
+.banner .site-title{
     font-size: $font-size-huge;
+    line-height: 1.0em;
 }
 
 @media  screen and (max-width: breakpoint-max(sm)) {
@@ -18,7 +19,7 @@ h6, .h6 { font-size: $font-size-h6; }
     h5, .h5 { font-size: $font-size-h5 * 0.8; }
     h6, .h6 { font-size: $font-size-h6 * 0.8; }
 
-    .banner.site-title{
+    .banner .site-title{
         font-size: $font-size-h1;
     }
 }
@@ -27,6 +28,7 @@ h6, .h6 { font-size: $font-size-h6; }
 .site-title{
     a, a:link, a:visited{
         text-decoration: none;
+        border-bottom: none;
         color: inherit;
     }
 }

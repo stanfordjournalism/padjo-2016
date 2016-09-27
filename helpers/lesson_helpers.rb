@@ -11,9 +11,20 @@ module LessonHelpers
         AssignmentResource.new sitemap_resources.find{|a| a == page}
     end
 
+    def find_schedule_lesson(page)
+        rx = sitemap_resources.find{|r| r == page}
+        aggy = referencize(rx.data.agenda)
+        ScheduleResource.new(rx, aggy)
+    end
+
+
+    def referencize(things)
+        Array(things).map{|a| contentresource(a) }
+    end
+
     def schedule
         sitemap_resources.select{|r|
             r.path =~ /^schedule\/\d{4}/
-        }.map{|r| ScheduleResource.new(r) }
+        }.map{|r| ScheduleResource.new(r, referencize(r.data.agenda)) }
     end
 end

@@ -1,48 +1,59 @@
 <% assignment = find_assignment(current_page) %>
 
-<% wrap_layout :layout do %>
-  <%= partial '/layouts/site_partials/header' %>
-
-    <div class="container assignment-layout">
-        <h1 class="page-title">
+<% wrap_layout :page_layout do %>
+        <% content_for :page_title do %>
             <%=assignment.type%>: <%=assignment.title %>
-        </h1>
+        <% end %>
+        <% content_for :more_frontmatter do %>
 
-        <div class="card">
-            <div class="card-block">
-                <div class="due-date">
-                    Due:
-                    <%= assignment.friendly_deadline %>
+            <div class="card assignment-card">
+                <div class="card-block">
+                    <div class="att row">
+                        <div class="col-sm-2 att-label">
+                            Deadline
+                        </div>
+                        <div class="col-sm-10">
+                            <div class="deadline">
+                                <%= assignment.friendly_deadline %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="att row">
+                        <div class="col-sm-2 att-label">
+                            Points
+                        </div>
+                        <div class="col-sm-10">
+                            <span class="points">
+                                <strong><%=assignment.points%></strong>
+                            <span>
+                            <span class="points-type">
+                                <%=assignment.type%>
+                            </span>
+                            points
+                        </div>
+                    </div>
+                    <div class="att row">
+                        <div class="col-sm-2 att-label">
+                            Deliverables
+                        </div>
+                        <div class="col-sm-10">
+                            <section class="deliverables">
+                                <ul class="list">
+                                    <% assignment.deliverables.each do |d| %>
+                                        <li class="deliverable">
+                                            <%= markdownify d %>
+                                        </li>
+                                    <% end %>
+                                </ul>
+                            </section>
+                        </div>
+                    </div>
+
                 </div>
-
-
-                <div class="points">
-                    Points: <%=assignment.points%>
-                </div>
-
-                <% if assignment.deliverables %>
-                    <section class="deliverables">
-                    <div>Deliverables</div>
-                        <ul class="list">
-                            <% assignment.deliverables.each do |d| %>
-                                <li class="deliverable">
-                                    <%= markdownify d %>
-                                </li>
-                            <% end %>
-                        </ul>
-                    </section>
-                <% end %>
-
-
-
             </div>
-        </div>
 
-        <%= yield %>
-    </div>
+        <% end %>
 
 
-
-
-  <%= partial '/layouts/site_partials/footer' %>
+    <%= yield %>
 <% end %>

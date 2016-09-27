@@ -15,6 +15,14 @@ module PageMetaHelpers
     page_data_get(:description)
   end
 
+  def page_nutgraf?
+    page_nutgraf.present?
+  end
+
+  def page_nutgraf
+    page_data_get(:nutgraf) || page_description
+  end
+
   def page_image_url
     page_data_get(:image_url)
   end
@@ -29,5 +37,13 @@ module PageMetaHelpers
 
   def page_url
     current_page.url
+  end
+
+  def page_references
+    Array(page_data_get(:references)).map{|r| ReferenceResource.new(r)}
+  end
+
+  def page_references?
+    page_references.present?
   end
 end

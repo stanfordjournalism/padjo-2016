@@ -1,18 +1,17 @@
-<% wrap_layout :layout do %>
-  <%= partial '/layouts/site_partials/header' %>
+<% lesson = find_schedule_lesson(current_page) %>
 
-    <div class="container schedule-layout">
-        <h1 class="site-title">
-            <%=friendly_date page_date %>
-        </h1>
+<% content_for :page_title do %>
+    <%=friendly_date page_date %>
+<% end %>
 
 
+<% wrap_layout :page_layout do %>
         <section class="sec agenda">
             <h1>Agenda</h1>
-            <% if (agenda = page_data_get(:agenda)) %>
-                <% agenda.map{|a| contentresource(a) }.each do |item| %>
+            <% if (agenda = lesson.agenda) %>
+                <% agenda.each do |item| %>
                     <div class="item">
-                        <h4 class="title"><%=link_to item.title, item.url %></h4>
+                        <h5 class="title"><%=link_to item.title, item.url %></h5>
                         <div class="description">
                             <%=item.description %>
                         </div>
@@ -21,14 +20,11 @@
 
                 <% end %>
             <% end %>
-
         </section>
 
         <section class="sec">
           <%= yield %>
         </section>
 
-    </div>
 
-  <%= partial '/layouts/site_partials/footer' %>
 <% end %>

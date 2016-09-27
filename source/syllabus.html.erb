@@ -5,25 +5,25 @@ description: |
 ---
 
 
-<section id="schedule">
+<section id="schedule-list">
 
         <% schedule.each do |lesson| %>
-        <div class="lesson">
-
-            <div class="row">
-                <div class="col-sm-3">
-                    <div class="date">
-                        <%=link_to_unless lesson.stub?, friendly_date(lesson.date), lesson.url %>
+            <div class="lesson">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="date date-title">
+                            <%=link_to_unless lesson.stub?, friendly_date(lesson.date), lesson.url %>
+                        </div>
                     </div>
-                </div>
 
-                <div class="col-sm-9">
-                    <div class="agenda">
-                        <ul class="list agenda-items">
-                            <% lesson.agenda.each do |item| %>
-                                <li><%=item.title %></li>
-                            <% end %>
-                        </ul>
+                    <div class="col-sm-8">
+                        <div class="agenda">
+                            <ul class="list agenda-items">
+                                    <% lesson.agenda.each do |item| %>
+                                        <li><%=item.title %></li>
+                                    <% end %>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>

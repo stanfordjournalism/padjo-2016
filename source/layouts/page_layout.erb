@@ -1,19 +1,43 @@
+
 <% wrap_layout :layout do %>
   <%= partial '/layouts/site_partials/header' %>
+    <article class="page-layout">
+      <section id="frontmatter" class="sec">
+        <div class="container">
+            <h1 class="page-title">
+                <%= yield_content(:page_title) || page_title %>
+            </h1>
 
-    <div class="container">
-        <h1 class="site-title">
-            <%= page_title %>
-        </h1>
+            <% if page_nutgraf %>
+              <div class="nutgraf">
+                <%= markdownify page_nutgraf %>
+              </div>
+            <% end %>
 
-        <% if page_date %>
-            <h4 class="date">
-                <%=friendly_date page_date %>
-            </h4>
-        <% end %>
-      <%= yield %>
+            <%= yield_content :more_frontmatter %>
+        </div>
+      </section>
 
-    </div>
 
+      <section id="contentbody" class="sec">
+        <div class="container">
+          <%= yield %>
+        </div>
+      </section>
+
+
+      <% if page_references? %>
+        <section id="pagereferences" class="sec">
+          <div class="container">
+            <h6>References</h6>
+            <ul class="list-unstyled">
+              <% page_references.each do |r| %>
+                <li><%=link_to r.title, r.url%></li>
+              <% end %>
+            </ul>
+          </div>
+        </section>
+      <% end %>
+    </article>
   <%= partial '/layouts/site_partials/footer' %>
 <% end %>
