@@ -23,4 +23,9 @@
 
     <%= stylesheet_link_tag :site %>
     <%= javascript_include_tag :all %>
+
+    <%- if build? %>
+        <%= partial '/layouts/misc_partials/third_party_services' %>
+    <%- end %>
+
   </head>

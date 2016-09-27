@@ -2,32 +2,120 @@
 title: Assignments
 ---
 
+
+<section class="sec">
+
+    <p>
+        Assignment titles that are clickable are either due, or contain some boilerplate information that will be expanded upon. Non-clickable assignments are in flux. When finalize, they will be announced in class well-in-advance of their due dates. But you can anticipate them for now.
+    </p>
+    <p>
+        Assignments are also listed, in brief, in the <a href="/syllabus">Schedule/Syllabus</a>
+    </p>
+</section>
+
+
+
 <section id="assignments-list">
-    <table class="table assignments table-condensed table-striped">
-        <thead>
+
+
+<!--         <thead>
             <tr>
                 <th class="name">Name</th>
                 <th class="due-date">Due Date</th>
                 <th class="points">Points</th>
             </tr>
         </thead>
-        <tbody>
-            <% assignments.each do |a| %>
-                <tr class="assignment">
-                    <td class="name">
-                        <div class="title">
-                            <%=a.type%>: <%=link_to_unless a.stub?, a.title, a.url %>
-                        </div>
-                        <div class="description">
-                            <%=a.description %>
-                        </div>
-                    </td>
-                    <td class="due-date"><%=a.friendly_short_deadline%></td>
-                    <td class="points"><%=a.points%></td>
-                </tr>
-            <% end %>
-        </tbody>
+ -->
+        <% (1..12).each do |weeknum| %>
+            <% weekrange =  date_range_by_week_number(weeknum)
+               week_assignments = assignments.select{|a| a.due_date.between?(weekrange.begin, weekrange.end)}
+            %>
+
+        <h5 style="text-align: center;">Week <%=weeknum%></h5>
+        <table class="table assignments table-bordered table-striped table-responsive">
+
+            <tbody>
+                <% week_assignments.each do |a| %>
+                    <tr class="assignment">
+                        <td class="name">
+                            <div class="title">
+                                <%=a.type%>: <%=link_to_unless a.stub?, a.title, a.url %>
+                            </div>
+                            <div class="description">
+                                <%=a.description %>
+                            </div>
+                        </td>
+                        <td class="due-date">
+                            <%= a.due_date.strftime('%A') %><br>
+                            <%=a.friendly_short_deadline%>
+                        </td>
+                        <td class="points"><%=a.points%></td>
+                    </tr>
+                <% end %>
+            </tbody>
+
     </table>
+
+        <% end %>
+
+
 </section>
 
 
+
+<section class="sec" id="grading-policies">
+    <h2>Grading Policies</h2>
+
+    <%= partial '/content_partials/assignments/_grading_tables' %>
+
+
+    <h2>Pickiness</h2>
+    <p>
+        For assignments that require prose, I will not be penalizing students for failing to follow AP Style or even perfect grammar and spelling (within reason).
+    </p>
+    <p>
+        However, in the spirit of database code parsers, students will be expected to follow naming and other technical requirements to the exact letter. For example, if an assignment requires you to create a spreadsheet named <strong>foia-log</strong>, naming it <strong>foialog</strong> or <strong>Foia_log</strong> will result in a penalty. Get used to caring about the details when it comes to computational methods.
+    </p>
+
+    <h2>Late Assignments</h2>
+    <p>
+        Each assignment has a cutoff time. For the most part, I won't be checking things right at the crack of midnight, or the minute before class. However, assignments that are noticeably late, as in, a day or more later, will lose 10% of their maximum point value. After a week, late assignments cannot be turned in.
+    </p>
+
+    <h2>Attendance</h2>
+    <p>
+        You are allowed to drop one pop-quiz (but must turn in homework beforehand) if you give 3 days notice. In extreme situations, we can consider makeup work.
+    </p>
+</section>
+
+<section class="sec" id="about-the-grading">
+     <h1>Why This Work?</h1>
+    <p>
+        The intent behind this coursework is to better acclimate journalism students, who have a wide range of technical and mathematical backgrounds, to the rigorous mindset needed to learn database programming and efficiently collect, wrangle, and analyze data. The lowest common denominator is to just provide as much practice as possible.
+    </p>
+
+    <p>
+        The other factor is that among the other required core classes for Stanford journalism students, <em>Public Affairs Data Journalism I</em> is by far the easiest and most predictable. I understand that students, at a moment's notice, will have to miss class to rush to a scene of a news event. All I ask is that you cram in the coursework on your own time and pace. Unfortunately, students without much technical experience assume they can cram programming knowledge like they can churn out pages for a term paper.
+    </p>
+
+    <p>
+        So the quantity of coursework is meant to encourage students to approach it at a regular and frequent pace, like practicing any other skill.
+    </p>
+
+    <ul>
+        <li>
+            The homework is meant to be easy and somewhat repetitive, even to the point where the answers will be mostly given. The expectation is that you practice on your own until you can do it on your own, not just to get something turned in.
+        </li>
+        <li>
+            That quizzes at the beginning of class help enforce attendance and serve as a benchmark for how well students can recall the concepts covered in homework.
+        </li>
+        <li>
+            The midterm is almost entirely focused on database programming. And it is, for all intents and purposes, a <strong>final exam</strong>. If you've done the work so far and paid attention, it won't be difficult. If, however, you think you can skate on the homework and quizzes and cram the concepts, you'll learn in brutal fashion that programming is not something to be crammed in. Don't learn this the hard way.
+        </li>
+        <li>
+            For students who've passed the midterm, the project work will feel routine. That's the point. Learning the programming means learning how to clearly think about data in its most fundamental form.
+        </li>
+    </ul>
+
+
+</section>

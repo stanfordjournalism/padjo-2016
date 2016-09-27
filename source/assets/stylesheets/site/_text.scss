@@ -1,6 +1,10 @@
 
 
 a, a:link, a:visited{
-    border-bottom: thin dashed blue;
+    border-bottom: thin dashed black;
     text-decoration: none;
+}
+
+a:hover{
+    border-bottom: thin dashed black !important;
 }

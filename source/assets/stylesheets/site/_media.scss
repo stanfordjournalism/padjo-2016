@@ -10,4 +10,5 @@
 .container img{
     @extend .img-fluid;
     border: thin solid $gray-default;
+    margin-bottom: 2.0em;
 }

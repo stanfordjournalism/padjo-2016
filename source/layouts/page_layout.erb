@@ -29,15 +29,29 @@
       <% if page_references? %>
         <section id="pagereferences" class="sec">
           <div class="container">
-            <h6>References</h6>
+            <h4>References</h4>
             <ul class="list-unstyled">
               <% page_references.each do |r| %>
-                <li><%=link_to r.title, r.url%></li>
+                <li><%=link_to r.title, r.url%>
+                  <% if r.description %>
+                      &ndash; <span class="description"><%=r.description%></span>
+                  <% end %>
+                </li>
               <% end %>
             </ul>
           </div>
         </section>
       <% end %>
+
+
+    <section id="reefer" class="sec">
+      <div class="container">
+        <%= yield_content :reefer %>
+      </div>
+    </section>
+
+
+
     </article>
   <%= partial '/layouts/site_partials/footer' %>
 <% end %>

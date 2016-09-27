@@ -1,11 +1,16 @@
 ---
-title: Syllabus
+title: Syllabus and Lesson Schedule
 description: |
-    Lessons and readings for the Fall 2016 session of Public Affairs Data Journalism I
+    A listing of lessons and concepts planned for the Fall 2016 session of Public Affairs Data Journalism I
 ---
 
 
-<section id="schedule-list">
+<p>
+    Clickable-lesson dates will have fully-detailed notes. To see more information about the assignments, go to the <a href="/assignments">Assignments page</a>.
+</p>
+
+
+<section id="schedule-list" class="sec">
 
         <% schedule.each do |lesson| %>
             <div class="lesson">
@@ -20,8 +25,22 @@ description: |
                         <div class="agenda">
                             <ul class="list agenda-items">
                                     <% lesson.agenda.each do |item| %>
-                                        <li><%=item.title %></li>
+                                        <li>
+                                            <strong><%=item.title %></strong>
+                                            <% if item.description.present? %>
+                                                <div class="description"><%= markdownify item.description %></div>
+                                            <% end %>
+                                        </li>
                                     <% end %>
+
+                                    <ul>
+                                    <% assignments_due_on(lesson.date).each do |a| %>
+
+                                        <li><strong>Due at <%=a.due_time%>:</strong>
+                                            <%=link_to_unless a.stub?, a.contextual_title, a.url%></li>
+                                    <% end %>
+                                    </ul>
+
                             </ul>
                         </div>
                     </div>

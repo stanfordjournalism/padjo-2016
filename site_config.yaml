@@ -7,6 +7,8 @@ image_url: /assets/images/logo.png
 baseurl: "https://2016.padjo.org"
 
 
-services:
+third_party_services:
+  stub:
+    id: TK
   google_analytics:
     id: UA-55019978-1

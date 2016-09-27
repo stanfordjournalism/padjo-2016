@@ -26,4 +26,8 @@ module SiteConfigHelpers
     def site_title
       site_config[:title]
     end
+
+    def site_third_party_services
+      site_config[:third_party_services]
+    end
 end
