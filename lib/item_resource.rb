@@ -4,6 +4,7 @@ class ItemResource < ContentResource
     @path   = resource.path
     @image_url = resource.data.image_url
     @title  = resource.data.title
+    @nutgraf = resource.data.nutgraf
     # @ranking = resource.data.ranking || 99999
     # @_listed = resource.data.listed
     # @source_name = nil

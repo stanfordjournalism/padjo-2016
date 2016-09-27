@@ -1,0 +1,21 @@
+#assignments-list{
+
+    table.assignments{
+        font-size: 0.8rem;
+        table-layout: fixed;
+
+        .description{
+            font-size: 0.68rem;
+        }
+
+        td.name, th.name{
+            max-width: 60%;
+            width: 60%
+        }
+
+        td.points, th.points{
+            text-align: right;
+        }
+    }
+
+}

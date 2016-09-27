@@ -2,16 +2,32 @@
 title: Assignments
 ---
 
+<section id="assignments-list">
+    <table class="table assignments table-condensed table-striped">
+        <thead>
+            <tr>
+                <th class="name">Name</th>
+                <th class="due-date">Due Date</th>
+                <th class="points">Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% assignments.each do |a| %>
+                <tr class="assignment">
+                    <td class="name">
+                        <div class="title">
+                            <%=link_to a.title, a.url %>
+                        </div>
+                        <div class="description">
+                            <%=a.description %>
+                        </div>
+                    </td>
+                    <td class="due-date"><%=a.friendly_short_deadline%></td>
+                    <td class="points"><%=a.points%></td>
+                </tr>
+            <% end %>
+        </tbody>
+    </table>
+</section>
 
-        <% assignments.each do |a| %>
-            <div class="assignment">
 
-                <div class="title">
-                    <%=link_to a.title, a.url %>
-                </div>
-                <div class="description">
-                    <%=a.description %>
-                </div>
-
-            </div>
-        <% end %>

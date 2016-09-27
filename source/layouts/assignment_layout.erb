@@ -4,10 +4,40 @@
   <%= partial '/layouts/site_partials/header' %>
 
     <div class="container assignment-layout">
-        <h5>Assignments</h5>
-        <h1 class="site-title">
+        <div><a href="/assignments">Assignments</a></div>
+        <h1 class="page-title">
             <%=assignment.title %>
         </h1>
+
+        <div class="card">
+            <div class="card-block">
+                <div class="due-date">
+                    Due:
+                    <%= assignment.friendly_deadline %>
+                </div>
+
+
+                <div class="points">
+                    Points: <%=assignment.points%>
+                </div>
+
+                <% if assignment.deliverables %>
+                    <section class="deliverables">
+                    <div>Deliverables</div>
+                        <ul class="list">
+                            <% assignment.deliverables.each do |d| %>
+                                <li class="deliverable">
+                                    <%= markdownify d %>
+                                </li>
+                            <% end %>
+                        </ul>
+                    </section>
+                <% end %>
+
+
+
+            </div>
+        </div>
 
         <%= yield %>
     </div>
