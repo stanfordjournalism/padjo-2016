@@ -8,8 +8,24 @@ description: |
 <section id="schedule">
 
         <% schedule.each do |lesson| %>
-            <div class="lesson">
-                <%=link_to friendly_date(lesson.date), lesson.url %>
+        <div class="lesson">
+
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="date">
+                        <%=link_to_unless lesson.stub?, friendly_date(lesson.date), lesson.url %>
+                    </div>
+                </div>
+
+                <div class="col-sm-9">
+                    <div class="agenda">
+                        <ul class="list agenda-items">
+                            <% lesson.agenda.each do |item| %>
+                                <li><%=item.title %></li>
+                            <% end %>
+                        </ul>
+                    </div>
+                </div>
             </div>
         <% end %>
 

@@ -1,6 +1,13 @@
 .mediawrap{
   img{
-    @extend .img-responsive !optional;
+    @extend .img-fluid !optional;
     border: thin solid $gray-default;
   }
+}
+
+
+
+.container img{
+    @extend .img-fluid;
+    border: thin solid $gray-default;
 }

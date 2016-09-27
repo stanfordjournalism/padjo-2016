@@ -4,6 +4,7 @@ class MiddlemanContentResource < ItemResource
     super(resource)
     @middleman_resource = resource
     @source_file = resource.source_file
+    @stub = resource.data.stub
   end
 
   def content_size
@@ -11,7 +12,7 @@ class MiddlemanContentResource < ItemResource
   end
 
   def stub?
-    content_size < 1024
+    @stub == true # explicitly set
   end
 
 

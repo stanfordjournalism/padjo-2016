@@ -4,9 +4,8 @@
   <%= partial '/layouts/site_partials/header' %>
 
     <div class="container assignment-layout">
-        <div><a href="/assignments">Assignments</a></div>
         <h1 class="page-title">
-            <%=assignment.title %>
+            <%=assignment.type%>: <%=assignment.title %>
         </h1>
 
         <div class="card">

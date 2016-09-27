@@ -2,7 +2,9 @@ module LessonHelpers
     def assignments
         sitemap_resources.select{|r|
             r.path =~ /^assignments\/.*?index.html/
-        }.map{|r| AssignmentResource.new(r) }
+        }.map{|r| AssignmentResource.new(r)
+        }.sort_by{|r|
+            r.due_date}
     end
 
     def find_assignment(page)

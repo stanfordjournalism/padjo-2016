@@ -5,6 +5,7 @@ due_time: 1:30 PM
 description: |
   A warm-up of spreadsheet basics, data-entry prowess, and the very hard task of turning unstructured information into structured data.
 points: 10
+type: Homework
 deliverables:
   - |
     In your __padjo-2016__ folder on Google Drive, create a new spreadsheet named: __google-auto-accidents__ (exact spelling and capitalization)

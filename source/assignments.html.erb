@@ -16,7 +16,7 @@ title: Assignments
                 <tr class="assignment">
                     <td class="name">
                         <div class="title">
-                            <%=link_to a.title, a.url %>
+                            <%=a.type%>: <%=link_to_unless a.stub?, a.title, a.url %>
                         </div>
                         <div class="description">
                             <%=a.description %>

@@ -1,13 +1,14 @@
 class AssignmentResource < MiddlemanContentResource
-  attr_reader :due_date, :due_time, :points, :category, :deliverables
+  attr_reader :due_date, :due_time, :points, :category, :deliverables, :type
   def initialize(resource)
     super(resource)
     @due_time = resource.data.due_time || '11:59 PM'
     @_due_date = resource.data.due_date
-    @due_date = Chronic.parse("#{@_due_date}")
+    @due_date = Chronic.parse(@_due_date)
     @points = resource.data.points
     @category = resource.data.category
     @deliverables = Array(resource.data.deliverables)
+    @type = resource.data.type || 'Homework'
   end
 
 
