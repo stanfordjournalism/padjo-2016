@@ -24,6 +24,23 @@ description: |
                     <div class="col-sm-8">
                         <div class="agenda">
                             <ul class="list agenda-items">
+                                    <% adues = assignments_due_on(lesson.date) %>
+                                    <% if adues.present? %>
+                                        <div class="card">
+                                            <div class="card-block">
+                                                <ul>
+                                                    <% adues.each do |a| %>
+                                                        <li><strong>Due at <%=a.due_time%>:</strong>
+                                                            <br>
+                                                            <%=link_to_unless a.stub?, a.contextual_title, a.url%>
+                                                        </li>
+                                                    <% end %>
+                                                </ul>
+
+                                            </div>
+                                        </div>
+                                    <% end %>
+
                                     <% lesson.agenda.each do |item| %>
                                         <li>
                                             <strong><%=item.title %></strong>
@@ -32,14 +49,6 @@ description: |
                                             <% end %>
                                         </li>
                                     <% end %>
-
-                                    <ul>
-                                    <% assignments_due_on(lesson.date).each do |a| %>
-
-                                        <li><strong>Due at <%=a.due_time%>:</strong>
-                                            <%=link_to_unless a.stub?, a.contextual_title, a.url%></li>
-                                    <% end %>
-                                    </ul>
 
                             </ul>
                         </div>
