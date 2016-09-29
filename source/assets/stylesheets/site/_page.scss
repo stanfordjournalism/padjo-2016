@@ -24,4 +24,10 @@ ul{
 
 blockquote{
     @extend .blockquote;
+    font-size: 0.9rem;
+}
+
+
+#pagereferences .reference{
+    margin-bottom: 1.0em;
 }

@@ -17,3 +17,4 @@ Gemfile.lock
 .s3_sync
 
 site_config.yaml
+/_movies
