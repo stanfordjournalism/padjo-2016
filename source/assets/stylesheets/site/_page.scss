@@ -4,7 +4,7 @@ h1.page-title{
 
 
 .nutgraf{
-    font-size: 1.1rem;
+    font-size: 1.0rem;
     color: #777;
 }
 
@@ -25,11 +25,18 @@ ul{
 blockquote{
     @extend .blockquote;
     font-size: 0.9rem;
+    background-color: #f1f1f2;
+    border-left: 0.25rem solid #dae0e0;
 }
 
 
-#pagereferences .reference{
+#pagereferences .reference-item{
     margin-bottom: 1.0em;
+    font-size: 0.9em;
+
+    .description{
+        font-size: 0.9em;
+    }
 }
 
 #contentbody{

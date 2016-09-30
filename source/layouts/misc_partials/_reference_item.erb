@@ -1,0 +1,9 @@
+<li class="reference-item"><%=link_to r.title, r.url%>
+  <% if r.publisher %>
+    <span class="publisher"> [<%=r.publisher%>]</span>
+  <% end %>
+  <% if r.description %>
+      <br>
+      <span class="description"><%=r.description%></span>
+  <% end %>
+</li>
