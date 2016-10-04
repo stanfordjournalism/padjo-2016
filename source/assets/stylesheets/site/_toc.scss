@@ -1,0 +1,45 @@
+.table-of-contents{
+    ul{
+        li{
+            // list-style: none;
+            &.h1{ font-size: 1.1rem; }
+            &.h2{
+                font-size: 1.0rem;
+                margin-left: 2.0rem;
+                font-weight: normal;
+            }
+            &.h3{
+                font-size: 0.85rem;
+                margin-left: 4.0rem;
+                font-weight: normal;
+            }
+        }
+        // .toc-active {
+        //     background: #336699;
+        //     box-shadow: inset -5px 0px 10px -5px #000;
+        // }
+    }
+}
+
+
+
+ul#the-page-toc{
+    padding-left: 0.1rem;
+}
+
+// the toc for the beginning of a page gets special things
+// TODO: mebbe this should go into .page.scss?
+.page.table-of-contents{
+    .toc-card{
+        &.page{
+            background: white;
+        }
+        margin-bottom: 2.0rem;
+        padding-bottom: 1.0rem;
+
+        a:link, a:hover, a:visited{
+            // color: white;
+        }
+    }
+
+}
