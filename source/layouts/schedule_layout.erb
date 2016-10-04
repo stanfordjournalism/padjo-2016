@@ -17,9 +17,23 @@
                         </div>
 
                     </div>
-
                 <% end %>
             <% end %>
+
+
+            <% if (xa = assignments_assigned_on(lesson.date)) %>
+                <h2>Assignments</h2>
+                <% xa.each do |a| %>
+                    <div class="item">
+                        <h6 class="title"><%=link_to a.contextual_title, a.url %></h6>
+                        <div class="description">
+                            <%=a.description %>
+                        </div>
+                    </div>
+                <% end %>
+            <% end %>
+
+
         </section>
 
 

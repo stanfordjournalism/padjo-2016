@@ -1,0 +1,154 @@
+---
+title: Using LexisNexis Academic to Search for Old News
+description: |
+    Not all of the news and journalism made it to the web. Lexis-Nexis Academic gives us access to well-organized, news archives.
+---
+
+
+# Are you at Stanford?
+
+Are you logged on to Stanford's network? Then going to this URL will take you to a functional search box:
+
+[http://www.lexisnexis.com/hottopics/lnacademic/](http://www.lexisnexis.com/hottopics/lnacademic/)
+
+Are you not on Stanford's network? Then you can't access Stanford's subscription to LexisNexis. Try getting on to Stanford's network before continuing.
+
+
+# The Academic Search
+
+Going to the [URL mentioned above](http://www.lexisnexis.com/hottopics/lnacademic/) will take you to a front page like this:
+
+<img src="images/academic-search-homepage.png" alt="academic-search-homepage.png">
+
+I personally like going right to the __Advanced Options__, as it's confusing how the options from the default search box and which ones from the advanced options co-mingle. So just go __all advanced__.
+
+Clicking on __Advanced Options__ brings up this modal:
+
+<img src="images/academic-search-advanced-options.png" alt="academic-search-advanced-options.png">
+
+
+## Let's do a search!
+
+The "Build Your Own Segment Search" label is fantastically confusing. It basically just means, "type a query in LexisNexis's [weird query language](https://www.lexisnexis.com/communities/academic/w/wiki/54.advanced-search-build-your-own-search.aspx) into the search box". 
+
+
+But we just want to do a search, and LexisNexis will do literal searches. Typing in `hospital infections` will return all articles with the words "hospital" and "infections"
+
+
+After typing in `hospital infections` (or whatever you want), hit the red __Apply__ button:
+
+<img src="images/search-basic-apply.png" alt="search-basic-apply.png">
+
+Which takes you back to the standard search page with little fanfare:
+
+<img src="images/search-basic-apply-okbasic.png" alt="search-basic-apply-okbasic.png">
+
+Go ahead and hit the __Search button__ A page of results will appear shortly:
+
+
+## Too many results
+
+One of the things that LexisNexis is _terrible_ at is notifying you that your search found too many results. In my case, it seems that in all of LexisNexis, there were only __996__ results with the words `hospital` and `infections`:
+
+<img src="images/search-basic-hospital-infections-results.png" alt="search-basic-hospital-infections-results.png">
+
+The upshot is that there's no way to do a query just to see how many articles containing a query LexisNexis has. So we have to get used to filtering.
+
+## Viewing a result
+
+Before we refine our search, go ahead and click on any article. I'm clicking on the first: "PA. EXAMINES SEVERITY, COST OF HOSPITAL INFECTIONS"
+
+Which takes me to the article page with the full text:
+
+<img src="images/search-basic-hospital-infections-single-article.png" alt="search-basic-hospital-infections-single-article.png">
+
+Hitting the browser back button should take you back to the list of results.
+
+## Download all the results
+
+One more thing: if you've found a bunch of articles you like, LexisNexis allows you to download them en masse. In the top right of the listing, click on the little Disk icon:
+
+<img src="images/search-basic-hospital-infections-save-list-icon.png" alt="search-basic-hospital-infections-save-list-icon.png">
+
+It brings up a pop-up, in which you can download the entire result-set to your heart's content. I personally prefer these settings:
+
+I personally like these settings:
+
+- Format: HTML
+- Document Range: Select Items: 1-500 (you have to select fewer than 500)
+- Page Options: Cover Page (just to remind myself what I just downloaded)
+- Each Document on a New Page: Check
+
+
+<img src="images/search-basic-hospital-infections-save-list-popup.png" alt="search-basic-hospital-infections-save-list-popup.png">
+
+Click __Download__, and you'll be prompted to download a big ball of text by right-clicking a hard-to-see-link: 
+
+
+<img src="images/search-basic-hospital-infections-save-list-popup-ready.png" alt="search-basic-hospital-infections-save-list-popup-ready.png">
+
+
+# Filtering
+
+OK, now that we know how to download what we've found, let's go back to fixing the problem of finding too much. To go back to the search screen, it's probably easiest just to hit back on your browser.
+
+Anyway, get back to where the Advanced Options popup was active.
+
+## Filter with more syntax
+
+
+An obvious way to limit search results is to just add more terms and [search operators](http://help.lexisnexis.com/litigation/ac/law/law_6/eda_about_search_operators.htm) e.g. if I wanted to find stories with "hospital infections" and the word "lawsuit" within 10 words of "death":
+
+        (hospital infections) AND (lawsuit w/10 death)
+
+The LexisNexis search syntax is pretty straightforward and I'm able to get by with knowing just a few bits of it. I'll leave you to learn what's comfortable to you.
+
+
+## Filter by date
+
+Being able to search a date range is, in my opinion, _the_ killer feature of LexisNexis that you don't have with Google Search (other than content). So use it frequently. In fact, get used to using it because LexisNexis limits the number of results per query. So if you want all stories with "hospital infections" in the entire LexisNexis database, you'll have to get used to paginating by date.
+
+
+Using the date-picker is straightforward. Just fill in a date in mm/dd/yyyy format: in the following query, I'll be finding stories with hospital infections in the year 2015:
+
+<img src="images/search-advanced-hospital-infections-year.png" alt="search-advanced-hospital-infections-year.png">
+
+This query returns fewer than 500 results, so I can feel somewhat sure that I'm not missing anything due to LexisNexis's results limit.
+
+## Filter by content type
+
+Go back to the Advanced Options dialog. The other option I care about, and that's hard to do in Google, is to specify whether we want to search just newspapers, or things like law cases. For the most part, unless I really want a law case, the Newspapers items is just fine. So I uncheck everything else. The following query will search for `hospital infections` across every newspaper article before 2000:
+
+<img src="images/search-advanced-hospital-infections-year-2000-newspapers.png" alt="search-advanced-hospital-infections-year-2000-newspapers.png">
+
+
+
+# Filtering search results by groups
+
+Once we've executed a query, we have a few more specific options for narrowing down the findings. The left sidebar shows how the results are grouped by various categories, including publication type, publication title, even subject and geography.
+
+For example, of the 597 results in the current query, 595 are newspapers. And 44 of them are the Washington Post:
+
+<img src="images/search-advanced-hospital-infections-year-2000-newspapers-wapo-facet.png" alt="search-advanced-hospital-infections-year-2000-newspapers-wapo-facet.png">
+
+Click on the "Washington Post" will filter the list to just Washington Post articles. You can hit Back on your browser (I think), or, in the middle of the filtered results, click the tiny "View All Results" link to see unfiltered results:
+
+<img src="images/search-advanced-hospital-infections-year-2000-newspapers-wapo-facet-go-back.png" alt="search-advanced-hospital-infections-year-2000-newspapers-wapo-facet-go-back.png">
+
+The other groupings aren't as straightforward. For example, clicking on the "Subject" group reveals categories such as "Medicine & Health" and "Life Forms". Where did they come from? From LexisNexis's auto-categorizer. Maybe it's right, maybe not? I prefer to filter terms using literal search terms operators, rather than trust that their data system is properly tagging things:
+
+<img src="images/search-advanced-hospital-infections-year-2000-newspapers-subject-facets.png" alt="search-advanced-hospital-infections-year-2000-newspapers-subject-facets.png">
+
+
+That about covers all you need to know to get a lot of usage from LexisNexis Academic. For our purposes, just being able to efficiently search by date and publication is a huge advantage when doing research.
+
+
+
+
+
+
+
+
+
+
+

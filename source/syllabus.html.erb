@@ -43,12 +43,24 @@ description: |
 
                                     <% lesson.agenda.each do |item| %>
                                         <li>
-                                            <strong><%=item.title %></strong>
+                                            <strong><%=link_to_if item.url, item.title, item.url %></strong>
                                             <% if item.description.present? %>
                                                 <div class="description"><%= markdownify item.description %></div>
                                             <% end %>
                                         </li>
                                     <% end %>
+
+                                    <% if (xa = assignments_assigned_on(lesson.date)) %>
+                                        <% xa.each do |a| %>
+                                            <li class="item">
+                                                <h6 class="title"><%=link_to a.contextual_title, a.url %></h6>
+                                                <div class="description">
+                                                    <%=a.description %>
+                                                </div>
+                                            </li>
+                                        <% end %>
+                                    <% end %>
+
 
                             </ul>
                         </div>

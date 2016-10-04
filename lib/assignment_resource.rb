@@ -4,6 +4,7 @@ class AssignmentResource < MiddlemanContentResource
   def initialize(resource)
     super(resource)
     @due_time = resource.data.due_time || '12:00 AM'
+    @_assigned_date = resource.data.assigned_date
     @_due_date = resource.data.due_date
     @date = @due_date = Chronic.parse(@_due_date)
     @points = resource.data.points
@@ -12,6 +13,14 @@ class AssignmentResource < MiddlemanContentResource
     @requirements = Array(resource.data.requirements)
     @type = resource.data.type || 'Homework'
     @objective = resource.data.objective
+  end
+
+  def assigned?
+    @_assigned_date.present?
+  end
+
+  def assigned_date
+    Chronic.parse(@_assigned_date) if @_assigned_date
   end
 
   def contextual_title # todo, replace with full title

@@ -12,6 +12,11 @@ module LessonHelpers
         assignments.select{|r| r.due_date == somedate}
     end
 
+    def assignments_assigned_on(somedate)
+        assignments.select{|r| r.assigned? && r.assigned_date == somedate}.sort_by{|a| [a.due_date, a.title]}
+    end
+
+
     def assignments
         sitemap_resources.select{|r|
             r.path =~ /^assignments\/.*?index.html/
