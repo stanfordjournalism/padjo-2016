@@ -1,0 +1,131 @@
+---
+title: Getting Started with Carto Builder
+description: |
+  Logging in, creating a dataset, and making a map with Carto Builder and USGS Earthquake data.
+---
+
+# Getting started
+
+You can create an account at [carto.com](https://carto.com). But if you're at Stanford and have a Stanford login, you can sign-up at [stanford.carto.com/signup](https://stanford.carto.com/signup). Presumably, Stanford has a nicer free plan with Carto, but either domain will work.
+
+
+![image login.png](/images/login.png)
+
+## First login
+
+<img src="images/welcome-dashboard.png" alt="welcome-dashboard.png">
+
+<img src="images/not-connected-datasets.png" alt="not-connected-datasets.png">
+
+## Connect a dataset
+
+## Get a dataset
+http://earthquake.usgs.gov/earthquakes/feed/v1.0/csv.php
+http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_month.csv
+
+
+<img src="images/connect-dataset.png" alt="connect-dataset.png">
+
+
+<img src="images/connected-dataset-ready.png" alt="connected-dataset-ready.png">
+
+<img src="images/edit-your-map.png" alt="edit-your-map.png">
+
+<img src="images/hello-builder-edit-map.png" alt="hello-builder-edit-map.png">
+
+
+## Style a dataset
+
+
+Click on the Style subhead.
+
+Style some basic colors, such as the fill and stroke color:
+
+<img src="images/hello-builder-style-map-reddots.png" alt="hello-builder-style-map-reddots.png">
+
+Play around with the types of aggregation. Think of aggregation as doing a group-by in a Pivot Table, except we're doing that grouping by geospatial coordinates. 
+
+The square-bin option can be thought of as putting all of the earthquake points into a nearest square __bin__. When the selected __Operation__ is __Count__, then the darkness of the bin represents the number of points in a given bin.
+
+
+
+Try changing the __Operation__ to __SUM__, and choose __mag__ as the column to _sum_:
+
+<img src="images/hello-builder-style-map-square-bin-sum-mag" alt="hello-builder-style-map-square-bin-sum-mag">
+
+Now the bins are colored based on the sum of the __magnitude values__ of its respective earthquake points. Which is probably not helpful in most real-world analyses of earthquake impact, because 100 magnitude 2.0 earthquakes is not at all as interesting to us as a single M8.0 quake, assuming "us" refers to humans who depend on human-built physical structures.
+
+With that in mind, it might be more interesting to use the __MAX__ operation for binning. Now the darkness of a square bin is determined by the biggest earthquake to hit in that bin's area:
+
+<img src="images/hello-builder-style-map-square-bin-max-mag" alt="hello-builder-style-map-square-bin-max-mag">
+
+
+# Return to data
+
+A lot of Carto's feature and design is optimized for users to think about things visually. But underneath the slick web interface is the same data that we see in any spreadsheet and database.
+
+
+## The Data sidebar
+
+Click the __Data__ subhead; the right-side of the interface will probably stay the same, but the left-side will reveal a sidebar of datapoints about our datapoints, e.g. "point count", and various histograms showing the distribution of values:
+
+## The Data table view
+
+To focus the right-side on the raw data, at the bottom of the map, there's a mini-icon bar that represents the two kinds of data views: tables and points. Right now, __points__ is active, so click on the other icon to see the __tables__ view:
+
+<img src="images/hello-builder-switch-to-tables-from-icons-menubar.png" alt="hello-builder-switch-to-tables-from-icons-menubar.png">
+
+And here's the raw data in table form:
+
+<img src="images/hello-builder-data-tables-view.png" alt="hello-builder-data-tables-view.png">
+
+
+### Differences
+
+Just a spreadsheet, right?
+
+A couple of things to note. First of all, the import process added a couple of Carto-specific columns, cartodb_id and the_geom. Pay them no mind, these are for Carto's internal use.
+
+Second, _unlike_ a spreadsheet, the process to sort and rearrange the data, nevermind just editing a cell, is very rudimentary and clunky compared to a modern spreadsheet:
+
+<img src="images/hello-builder-data-tables-edit-cell.png" alt="hello-builder-data-tables-edit-cell.png">
+
+That's because it's not really a spreadsheet, it's a database. When we imported our raw data CSV into Carto, it stored it into a SQL database (PostgreSQL to be exact). Databases, if you haven't learned already, are not really meant to be freely interacted with in the way that spreadsheets are.
+
+In fact, we will rarely be interacting with the data sidebar or the table, via the GUI. Instead, we'll be using SQL mode.
+
+You can get to SQL mode by directing your attention to the bottom of the left-panel Data sidebar where there's a toggle for __Values__ and __SQL__:
+
+<img src="images/hello-builder-data-toggle-sql.png" alt="hello-builder-data-toggle-sql.png">
+
+While we're at this step, go ahead and switch the right-panel to the Map view:
+
+<img src="images/hello-builder-data-sql-map-view.png" alt="hello-builder-data-sql-map-view.png">
+
+And if you know any SQL, go ahead and write it and hit the __Apply__ button.
+
+In the example below, I've written a SQL query that effectively filters the dataset to earthquakes of magnitude greater than 5.0. And as we'd expect, that results in far fewer datapoints on the map:
+
+<img src="images/hello-builder-data-sql-map-view-where-mag-5-0.png" alt="hello-builder-data-sql-map-view-where-mag-5-0.png">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ One of my favorites is the Hexbinning.
+
+
