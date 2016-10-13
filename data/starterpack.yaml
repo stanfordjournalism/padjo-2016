@@ -1,0 +1,138 @@
+
+- title: M3.0+ Earthquakes in the Contiguous U.S., 1995 through 2015
+  path: /files/data/starterpack/usgs/usgs-lower-us.sqlite
+  description: |
+    Earthquakes within contiguous United States, from 1995 through 2015, that have a magnitude of at least 3.0 as measured by the U.S. Geological Survey
+  size_mb: 52.3
+  table_count: 1
+  links:
+    - title: USGS Earthquake Catalog
+      url: http://earthquake.usgs.gov/earthquakes/search/
+    - title: Earthquake Catalog Data Terms
+      url: http://earthquake.usgs.gov/earthquakes/feed/v1.0/glossary.php
+    - title: Example Google Spreadsheet
+      url: https://docs.google.com/spreadsheets/d/1GdYEXyGNeDMgUDlsidhMDnp1HdIcfkCLzh8WhOh1hM4
+    - title: Direct download for M3.0+ quake data from 1995 through 2015
+      url: http://earthquake.usgs.gov/fdsnws/event/1/query.csv?starttime=1995-01-01%2000:00:00&endtime=2015-12-31%2023:59:59&maxlatitude=50&minlatitude=24.6&maxlongitude=-65&minlongitude=-125&minmagnitude=3&orderby=time-asc
+
+
+- title: Census 2000 Surnames
+  description: |
+    The most popular last names and their racial breakdowns as catalogued by the U.S. Census in 2000.
+  path: /files/data/starterpack/census/census2000names.sqlite
+  size_mb: 23.3
+  table_count: 1
+  links:
+    - title: Census homepage for 2000 Surnames data
+      url: http://www.census.gov/topics/population/genealogy/data/2000_surnames.html
+    - title: Example Google Spreadsheet
+      url: https://docs.google.com/spreadsheets/d/15G0cLi9MEnWjllaFA8T_FGCNj_rlSXlxFSZBpYCtavs
+    - title: Direct download of data
+      url: http://www2.census.gov/topics/genealogy/2000surnames/names.zip
+
+
+
+- title: Dallas Police Officer-Involved Shootings
+  path: /files/data/starterpack/dallas-ois/dallas-ois.sqlite
+  size_mb: 0.4
+  table_count: 3
+  description: |
+    Officer-involved shootings as disclosed by the Dallas Police Department. Includes separate tables for officer and subject/suspect information.
+  links:
+    - title: Dallas PD homepage for Officer Involved Shootings Data
+      url: http://www.dallaspolice.net/ois/ois
+    - title: Socrata data page
+      url: https://www.dallasopendata.com/Public-Safety/Dallas-Police-Officer-Involved-Shootings/4gmt-jyx2
+    - title: Direct download of CSV data
+      url: https://www.dallasopendata.com/api/views/4gmt-jyx2/rows.csv?accessType=DOWNLOAD
+
+
+- title: Florida Death Row Roster
+  path: /files/data/starterpack/florida-deathrow/florida-deathrow.sqlite
+  size_mb: 0.1
+  table_count: 1
+  description: |
+    Inmates currently on Florida's death row, with basic biographical information.
+  links:
+    - title: Florida Department of Corrections Death Row Roster
+      url: http://www.dc.state.fl.us/activeinmates/deathrowroster.asp
+    - title: Example Google spreadsheet
+      url: https://docs.google.com/spreadsheets/d/12AFPLsTqILHGGL4TFbGCd_3PQ6KhDqZWtIQKaZ3D1Sg
+
+- title: Salaries of City Officials from the California Peninsula
+  path: /files/data/starterpack/publicpay/peninsula_publicpay.sqlite
+  size_mb: 65.9
+  table_count: 1
+  description: |
+    Anonymized salary and benefits information for city officials in San Mateo, Santa Clara, and San Francisco counties, as released by the California state controller.
+  links:
+    - title: California State Controller's homepage for Government Compensation
+      url: http://publicpay.ca.gov/
+    - title: Browsable web interface of California city salaries
+      url: http://publicpay.ca.gov/Reports/Cities/Cities.aspx
+    - title: Landing page for raw exports of salary data
+      url: http://publicpay.ca.gov/Reports/RawExport.aspx
+    - title: Example Google Spreadsheet
+      url: https://docs.google.com/spreadsheets/d/1nTdSBLcUxrm29jZ1Tn6tZ8fYYNHPv_h79m0JVK_5RFI
+
+
+- title: SFPD Incidents, 2012 through 2015
+  path: /files/data/starterpack/sfpd-incidents/sfpd-incidents.sqlite
+  size_mb: 98.3
+  table_count: 1
+  description: |
+    Incidents reported to the San Francisco Police Department from 2012 through 2015.
+  links:
+      - title: About the data
+        url: https://data.sfgov.org/Public-Safety/SFPD-Incidents-from-1-January-2003/tmnf-yvry/about
+      - title: Data as collected by the Hello World Data project
+        url: https://github.com/helloworlddata/sfpd-incidents
+      - title: Direct download as CSV of all data
+        url: https://data.sfgov.org/api/views/tmnf-yvry/rows.csv?accessType=DOWNLOAD
+      - title: Example Google spreadsheet
+        url: https://docs.google.com/spreadsheets/d/1kMoLf48msyRKgBCAXQFWKSTwNmiEKjbbRS4-I05GwBg
+
+
+- title: San Francisco Restaurant Health Inspections
+  path: /files/data/starterpack/sfscores/sfscores.sqlite
+  description: |
+    The San Francisco Dept. of Public Health's database of eateries, inspections of those eateries, and violations found during the inspections.
+  size_mb: 9.8
+  table_count: 3
+  links:
+    - title: Official web search of the inspections database
+      url: "https://101g-xnet.sfdph.org:8443/ords/f?p=132:1"
+    - title: "SFGate: Restaurant scores are more public now -- but are they improving food safety?"
+      url: http://www.sfgate.com/restaurants/article/Kitchen-not-so-confidential-San-Francisco-s-2620475.php
+    - title: Direct download
+      url: https://extxfer.sfdph.org/food/SFFoodProgram_Complete_Data.zip
+    - title: Example Google spreadsheet
+      url: https://docs.google.com/spreadsheets/d/1Ag5DBIviYiuRrt2yr3nXmbPFV-FOg5fDH5SM3ZEDnpw
+
+- title: Social Security Administration Baby Names, 1980 through 2015
+  path: /files/data/starterpack/ssa-babynames/ssa-babynames.sqlite
+  description: |
+    Baby names as recorded for Social Security Number applications, counted by sex, nationwide, from 1980 through 2015.
+  size_mb: 81.0
+  table_count: 1
+  links:
+    - title: Social Security Administration landing page for baby name data
+      url: https://www.ssa.gov/oact/babynames/limits.html
+    - title: Direct download for national data
+      url: https://www.ssa.gov/oact/babynames/names.zip
+
+
+
+- title: California School SAT Performance and Poverty Data
+  path: /files/data/starterpack/cde-schools/cdeschools.sqlite
+  description: |
+    A database containing geospatial information, as well as SAT average scores and Free-or-Reduced-Price Meal eligibility data, for California schools.
+  size_mb: 14.8
+  table_count: 3
+  links:
+    - title: Landing page for California school directory
+      url: http://www.cde.ca.gov/ds/si/ds/pubschls.asp
+    - title: Landing page for Student Poverty FRPM Data
+      url: http://www.cde.ca.gov/ds/sd/sd/filessp.asp
+    - title: Landing page for Postecondary Preparation test results
+      url: http://www.cde.ca.gov/ds/sp/ai/

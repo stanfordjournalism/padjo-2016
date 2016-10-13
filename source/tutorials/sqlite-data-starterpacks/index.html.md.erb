@@ -1,0 +1,56 @@
+---
+title: SQLite Data Starter Packs
+description: |
+  This is a collection of public datasets conveniently packaged as SQLite databases to practice on. You don't have to worry about the data cleaning/import process, just download the SQLite database files and query them from your favorite SQLite client.
+---
+
+
+<% datasets = data.starterpack %>
+
+# Quick links to the datasets
+<table class="table table-bordered table-condensed table-striped">
+  <tbody>
+  <% datasets.each do |d| %>
+  <tr>
+    <td> <%=d.title %>
+      <ul class="list list-inline">
+        <li class="list-inline-item">[<%= link_to "SQLite", d.path %>]</li>
+        <li class="list-inline-item">[<%= link_to "More info", '#' + slugify("More info " + d.title) %>] </li>         
+      </ul>
+    </td>
+    <td><%= d.size_mb %> MB </td>
+    <td><%= d.table_count %></td>
+  </tr>
+<% end %>
+</tbody>
+</table>
+
+
+
+
+
+# About the datasets
+
+<% datasets.each do |d| %>
+<div class="dataset sec" id="more-info-<%=slugify d.title%>">
+  
+  <h2 class="h4"><%=d.title %></h2>
+  <div class="description">
+    <%=markdownify d.description %>
+  </div>
+
+  <div>
+    <strong>Download the SQLite database:</strong> 
+    <%=link_to "#{d.table_count} tables / #{d.size_mb} MB", d.path %>
+  </div>
+
+  <h6>Related links</h6>
+  <ul class="list">
+    <% d.links.each do |link| %>
+      <li><%= link_to link.title, link.url %></li>
+    <% end %>
+  </ul>
+</div>
+<% end %>
+
+

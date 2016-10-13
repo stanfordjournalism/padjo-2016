@@ -1,4 +1,8 @@
 module MarkupHelpers
+    def slugify(txt)
+      Middleman::Util::UriTemplates::safe_parameterize(txt)
+    end
+
     def markdownify(str = nil, &block)
       if str.nil? && !block_given?
         return ""

@@ -40,11 +40,15 @@ blockquote{
 }
 
 #contentbody{
-    h1, h2, h3{
-        margin-top: 1.0rem;
+    h1{ margin-top: 2.5rem; }
+    h2, h3{
+        margin-top: 2.0rem;
     }
 
     h4{
+        margin-top: 1.2rem;
+    }
+    h5, h6{
         margin-top: 0.8rem;
     }
 }
