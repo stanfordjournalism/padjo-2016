@@ -19,7 +19,7 @@ module LessonHelpers
 
     def assignments
         sitemap_resources.select{|r|
-            r.path =~ /^assignments\/.*?index.html/
+            r.path =~ /^assignments\/.*?index.html/ && r.data.due_date != '9999-99-99'
         }.map{|r| AssignmentResource.new(r)
         }.sort_by{|r|
             puts r.url

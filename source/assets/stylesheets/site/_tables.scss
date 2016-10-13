@@ -8,6 +8,10 @@ table {
   background-color: transparent;
   width: 100%;
 
+  th, td{
+    vertical-align: top;
+  }
+
   // th{
   //   font-weight: bold;
   //   padding: 8px;
@@ -24,6 +28,11 @@ table {
   // }
 }
 
+table.table-bordered.table-data{
+  th, td{
+    border: thin solid #888;
+  }
+}
 
 table.table-sm{
   font-size: $font-size-sm;
@@ -42,4 +51,9 @@ table.table-dual{
     text-align: right;
   }
 
+}
+
+
+td .hi{
+  background: yellow;
 }
