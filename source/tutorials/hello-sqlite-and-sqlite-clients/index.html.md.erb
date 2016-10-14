@@ -1,0 +1,609 @@
+---
+title: Getting to Know SQLite with a Client and a Database
+description: |
+    A brief description of the SQLite database software, specifically, how to navigate a SQLite database file using a SQLite client.
+
+references:
+  - relative_url: /tutorials/sqlite-data-starterpacks
+  - title: DB Browser for SQLite Homepage
+    url: http://sqlitebrowser.org/
+    description: |
+      DB Browser is a cross-platform SQLite client with a relatively friendly point-and-click interface for easing the transition from Excel to SQL.
+  - title: SQLite Manager for Firefox
+    url: https://addons.mozilla.org/en-US/firefox/addon/sqlite-manager/
+    description: |
+      Like most browsers, 
+  - title: Official docs for Command Line Shell For SQLite
+    url: https://www.sqlite.org/cli.html
+    description: |
+      Do you often imagine yourself as Darlene/Elliott/Trenton/Tyrell from "Mr. Robot"? SQLite comes with a spartan command-line interface for writing and executing queries.
+---
+
+
+# Quick start and learn-by-doing
+
+If you're completely new to SQLite and databases in general, it may be easier to learn via _doing_. This section contains a quick-start-click-here-type-this hand-holding walkthrough that _should_ work on a relatively modern computer and operating system, while being understandable by a novice spreadsheet user.
+
+## Download and launch the DB Browser for SQLite client
+
+Go to the [sqlitebrowser.org](http://sqlitebrowser.org/) homepage and download the relevant executable:
+
+<img src="images/dbbrowser-homepage.png" alt="dbbrowser-homepage.png">
+
+Now __Install__ the client by...doing whatever you usually do to install an application. This may include going to your __Downloads__ folder and double-clicking on what you just downloaded.
+
+For Mac users, you'll get the standard popup that asks you to download the funny icon to your __Applications__ folder:
+
+<img src="images/dbbrowser-homepage.png" alt="dbbrowser-homepage.png">
+
+
+Go to your Applications folder, find the __DB Browser for SQLite__ icon, and __double-click__ it:
+
+
+<img src="images/run-dbbrowser-from-applications.jpg" alt="run-dbbrowser-from-applications.jpg">
+
+
+If you've managed to install the latest version, __3.9.1__, __DB Browser__ will look something like this:
+
+<img src="images/dbbrowser-launch-3.9.1.png" alt="dbbrowser-launch-3.9.1.png">
+
+(If you're at around version 3.8, it should look _similar_ and the differences aren't important)
+
+Just like we can open __Microsoft Excel__ without specifying a file, we can open our database client and start empty. But that's no fun. So __exit__  DB Browser and move on to the next step of downloading a pre-build SQLite database file.
+
+
+## Download SQLite database files
+
+I've created a "starter pack" of SQLite databases that are interesting and relatively easy to explore: [SQLite Data Starter Packs](/tutorials/sqlite-data-starterpacks).
+
+At the top of the page, you can get a quick overview of what's available. But to keep things simple, let's download the following database:
+
+- [Florida Death Row Roster](/files/data/starterpack/florida-deathrow/florida-deathrow.sqlite)
+
+Clicking the above link should immediately download the file into your Downloads folder, with this filename by default:
+
+- florida-deathrow.sqlite
+
+
+### Opening a sqlite Database File
+
+What's that `.sqlite` extension mean? It's just a human-readable label (as all file extensions and names are) to remind us that the file can't be opened in Microsoft Excel or a text-editor.
+
+By convention, when you installed __DB Browser for SQLite__, DB Browser should have established itself as the default program to open `.sqlite` files when you double-click them. If not, you should be able to right-click the file and specify which program to use for opening a given file.
+
+Try opening the `florida-deathrow.sqlite` file in DB Browser:
+
+<img src="images/open-with-db-browser-popup.png" alt="open-with-db-browser-popup.png">
+
+And here's what DB Browser looks like when you've launched it while specifying a database file to open:
+
+<img src="images/db-browser-launched-database.png" alt="db-browser-launched-database.png">
+
+
+### One panel to rule them all
+
+This is just a quick cosmetic action that you can ignore or reverse later: in most programs, I like having just one window open. And for whatever reason, DB Browser defaults to opening two panels. The left-panel is fine. But the right-panel, titled "Edit Database Cell" is not only empty, but will not be particularly useful for the vast majority of our SQLite work. So just close it by hitting the __X__ in the corner, or toggling the option in the __View__ submenu:
+
+<img src="images/db-browser-disable-edit-cellview.png" alt="db-browser-disable-edit-cellview.png">
+
+And now we just have one panel:
+
+<img src="images/db-browser-one-panel.png" alt="db-browser-one-panel.png">
+
+
+Much cleaner!
+
+
+# Browsing data in a database
+
+I'll cover the interface features _specific_ to __DB Browser__ in another tutorial. For now, it's more important we acquaint ourselves with the fundamental aspects of a __database__.
+
+
+If you've followed my steps exactly, your client, i.e. __DB Browser__ has the [Florida death row roster](/files/data/starterpack/florida-deathrow/florida-deathrow.sqlite) database opened and ready to explore.
+
+## But what's a database?
+
+But what _is_ this death row data? Where did it come from? And what makes it a "database" instead of a spreadsheet?
+
+The data came from this [Florida Department of Corrections webpage](http://www.dc.state.fl.us/activeinmates/deathrowroster.asp) -- I wrote a quickie web-scraper but you can just assume I copied it by hand into a SQLite database file:
+
+<img src="images/florida-deathrow-roster-page.png" alt="florida-deathrow-roster-page.png">
+
+But why a SQLite database file? Just by looking at the webpage, you might assume that the tabular death row data can fit in a standard spreadsheet. 
+
+And you would be right: [here's the death row roster as a Google Spreadsheet](https://docs.google.com/spreadsheets/d/12AFPLsTqILHGGL4TFbGCd_3PQ6KhDqZWtIQKaZ3D1Sg/):
+
+<img src="images/florida-death-row-spreadsheet.png" alt="florida-death-row-spreadsheet.png">
+
+There's really nothing about this data that requires it to be in a database. In fact, because of its simple structure and small size, this death row data _should_ be in a spreadsheet, where we can use all the powerful spreadsheet techniques -- such as sorting, filtering, aggregating -- that we're perfectly comfortable with.
+
+But I imported this data into a SQLite database so that it's easier to see how those spreadsheet techniques map as database techniques. And also, to reaffirm the point that what makes data _data_ is its structure, not the program you read it with.
+
+## Viewing the data with a database client
+
+Later in this lesson, we'll see that the core concept of "opening a database" does not entitle us to actually _seeing_ the data as we're accustomed to when opening a spreadsheet. But for now, let's take advantage of __DB Browser__, which is a client specifically designed to make databases seem point-and-click friendly.
+
+Bring your attention to the nav bar that sits atop the main panel view. Currently, the __Database Structure__ tab should be highlighted.
+
+This __Database Structure__ view isn't interesting to us right now, though you might have noticed that it appears to list a single table named `inmates` with what seems to be field names that correspond to the [column names we saw in the Google Spreadsheet](https://docs.google.com/spreadsheets/d/12AFPLsTqILHGGL4TFbGCd_3PQ6KhDqZWtIQKaZ3D1Sg/edit#gid=0).
+
+
+<img src="images/db-browser-navbar-db-structure-default.png" alt="db-browser-navbar-db-structure-default.png">
+
+Whatever. Click on the next nav tab: __Browse Data__:
+
+
+<img src="images/db-browser-navbar-browse-data.png" alt="db-browser-navbar-browse-data.png">
+
+This _seems_ to have the convenience of a spreadsheet view; we can scroll up and down the list of rows. There's convenient __Filter__ boxes above every column. And if we double-click a field, we can...edit the data?
+
+If you play with this data-browsing view for more than a few seconds, it should be obvious that it is _substantially_ inferior to what we're used to with a modern spreadsheet. This is because the [great open-source authors of DB Browser](http://sqlitebrowser.org/) lack design skills, but because _databases aren't meant to be interactive_ like spreadsheets are.
+
+It's hard to understand that "feature" now until we get into more important, substantial data. The other way to think of it is: when we work with databases, we have better ways of managing data than manually-fixing it by hand.
+
+
+# Querying the data
+
+One last stop on the DB Browser interface: in the nav bar, click the __Execute SQL__ tab:
+
+<img src="images/db-browser-navbar-execute-sql.png" alt="db-browser-navbar-execute-sql.png">
+
+It looks like nothing, but this the main canvas on which we will _write programs_ to command the computer to fetch, explore, arrange, and calculate insights from data with far more sophistication and scale than we could with a spreadsheet.
+
+Having a blank canvas should feel intimidating. Remember the death row data as a webpage and [spreadsheet](https://docs.google.com/spreadsheets/d/12AFPLsTqILHGGL4TFbGCd_3PQ6KhDqZWtIQKaZ3D1Sg/)?
+
+<img src="images/florida-death-row-spreadsheet.png" alt="florida-death-row-spreadsheet.png">
+
+By default, a spreadsheet shows everything before you can ask otherwise. By default, a database shows you nothing, until you tell it what you want to see.
+
+## Hello, SQL
+
+SQL is a programming language for SQLite and other databases in the SQL-family. No need to go into more background, so let's just write some code, starting with [Brian Kernighan's classic "Hello, World" program](http://blog.hackerrank.com/the-history-of-hello-world/), the proper program for when we have no f-----g clue what we're doing or if anything is even working properly.
+
+The top box in the __Execute SQL__ view is just a standard text input box. Type:
+
+```
+Hello, World
+```
+
+Hit __Enter__. 
+
+
+<img src="images/hello-world-i-think.png" alt="hello-world-i-think.png">
+
+Then _wait_.
+
+## Sitting, waiting, wishing, with the prompt
+
+If you're completely new to programming, you might be confused at how DB Browser -- and indeed, the SQLite database engine -- seems to be doing _nothing_ even though you've typed some code and even hit __Enter__.
+
+This is __perfectly rational__, even though it's hard for experienced programmers (including me) to understand how even a novice could be confused.
+
+It's rational, because if you've been using modern computers with any regularity and even proficiency, since, say 2010, then you may have either forgotten, never realized, or never experienced the computer just _waiting_ for you.
+
+As soon as you open your web browser, your computer is sending off thousands of bytes of data relating to either what you were browsing in a previous session or what you are expected to browse in the next few minutes. As soon as you type in a couple characters into Google, Google already has an opinion about what you're confused with: 
+
+<img src="images/hello-world-i-think.png" alt="hello-world-i-think.png">
+
+[Facebook's system knows you and your friends so well that](https://www.facebook.com/help/122175507864081?helpref=uf_permalink), as soon as you upload a photo, it can basically tag the faces in the photo even before you see the uploaded photo in your browser. As soon as you start typing _anything_ to a friend, Facebook's servers are processing your words, even if you [don't send the message](http://newsfeed.time.com/2013/12/16/facebook-is-keeping-track-of-every-post-you-write-and-dont-publish/)
+
+Hell, you can't even _load a file_ in a modern spreadsheet program without it, the spreadsheet program, imposing its opinions and throwing [error messages](http://superuser.com/questions/210027/why-does-excel-think-csv-files-are-sylk) or [corrupting the original data](http://superuser.com/questions/413226/why-does-excel-treat-long-numeric-strings-as-scientific-notation-even-after-chan).
+
+SQLite and the DB Browser client are as sophisticated as any modern software you use day-to-day. But DB Browser, aside from making some very narrow and simple auto-complete suggestions as we write a query, will do _nothing_ until we hit the __Execute__ button. So feel free to make mistakes, you're not being judged...yet:
+
+<img src="images/db-browser-wtf-sql.png" alt="db-browser-wtf-sql.png">
+
+And the SQLite engine itself, well, it takes minimalism to an extreme, as we'll see later.
+
+
+
+### Execute!
+
+OK, let's get back to work. In DB Browser, the button that looks like the Play button on a music player will execute whatever code we've written:
+
+<img src="images/db-browser-execute-button.png" alt="db-browser-execute-button.png">
+
+Go ahead and hit it...And now comes the judgment:
+
+<img src="images/hello-sql-failure.png" alt="hello-sql-failure.png">
+
+`Hello, World` is not proper SQL syntax. And so, we get a syntax error. In DB Browser, the bottom box is the __results console__ and worth paying attention to later.
+
+Here's one way to say "Hello, World", following the rules of SQL:
+
+```
+SELECT 'Hello, World';
+```
+
+Hooray, congrats on your first SQL program:
+
+<img src="images/hello-sql-success.png" alt="hello-sql-success.png">
+
+We'll elaborate later the details of the DB Browser interface. The important message is in the results console: `not an error` 
+
+
+#### Syntax highlighting
+
+As you typed that command, you might notice that the color of the text changes. This is referred to as __syntax-highlighting__: SQL is a formal, and pretty simple language. DB Browser knows that `SELECT`, in that context, is a SQL keyword, hence, the bolding. And in SQL, when text is enclosed in single-quote-marks, it has a whole different meeting.
+
+For example, write and execute:
+
+```
+SELECT 'SELECT';
+```
+
+<img src="images/select-select-quotes.png" alt="select-select-quotes.png">
+
+
+And now is the time to experiment and deliberately _break things_. In fact, that should be your mentality going forward if you hope to get a grasp of how SQL and databases work in the short time we have to study them.
+
+What happens when we un-quote that second `SELECT`?
+
+```
+SELECT SELECT;
+```
+
+Another syntax error:
+
+<img src="images/select-select-error.png" alt="select-select-error.png">
+
+
+## Mind your grammar and syntax
+
+Again, we'll be exploring this in much more detail later, but SQL is a _language_. Grammar and punctuation have meaning in the same ways they do in human languages, and missing a single word or punctuation mark or rule can be problematic:
+
+Wrong: "She enjoys mans laughter."
+
+Correct: "She enjoys man's laughter."
+
+
+### Error messages are good
+
+It's hard to get used to being _wrong_, and the thing with a computer program, database or otherwise, is that it never tires of telling you when and why you're wrong. But this is an _asset_: we _want_ to fail fast.
+
+Ask this patent troll, [who only found out about his poor punctuation after losing millions of dollars in a lawsuit](http://www.thisamericanlife.org/radio-archives/episode/496/transcript).
+
+Because there are scenarios far worse than being _wrong_. You can be technically correct, but absolutely _wrong_:
+
+Grammatically correct: "She enjoys manslaughter."
+
+
+# A whirlwind tour of SQL 
+
+In subsequent lessons, we'll learn the SQL needed to elevate our data work. For now, I'll demonstrate how SQL can be used to find the kind of insights we found with spreadsheets.
+
+
+Assuming you're following along with the [Florida Death Row Roster as SQLite database](/files/data/starterpack/florida-deathrow/florida-deathrow.sqlite), try just typing and execute the same code I write below:
+
+
+
+## Show me the data
+
+
+### Select and show all rows, all columns
+
+Unlike spreadsheets, we can't get something, nevermind everything, without writing code:
+
+```sql
+SELECT *
+FROM "inmates";
+```
+<img src="images/select-all-from-inmates.png" alt="select-all-from-inmates.png">
+
+### Select specific columns
+
+Remember how real-life datasets often contain irrelevant or redundant columns, and how these columns can make it hard to just _read_ the spreadsheet? And the work it takes to manually hide or delete the columns? By being explicit in our SQL query, we declare exactly what we want and only what we want:
+
+```sql
+SELECT 
+    "Inmate Name", "Race/Gender", 
+    "Crime", "Date Received"
+FROM "inmates";
+```
+
+<img src="images/select-inmate-columns.png" alt="select-inmate-columns.png">
+
+### Sorting rows by column values
+
+Not much more work than clicking a column-header in a spreadsheet -- and a _lot_ more precise. Here's the list of inmates ordered by youngest first -- i.e. "birthdate in descending order":
+
+```sql
+SELECT *
+FROM "inmates"
+ORDER BY "Date of Birth" DESC;
+```
+
+<img src="images/sort-inmate-dob.png" alt="sort-inmate-dob.png">
+
+
+### Limiting the number of rows
+ 
+After doing a sort, we often don't care about the entire dataset. We just care about what is at the top of the sort. In a spreadsheet, we have to jump through a few hoops to hide the noise. With SQL, it's just another clause:
+
+```sql
+SELECT *
+FROM "inmates"
+ORDER BY "Date of Birth" ASC
+LIMIT 5;
+```
+
+<img src="images/sort-inmate-dob-limit-5.png" alt="sort-inmate-dob-limit-5.png">
+
+
+### Deriving columns
+
+Not much different than creating a new column in spreadsheet filled with values derived from a formula, e.g:
+
+    =(B2+C2) / 100
+
+But in SQL, we don't have to memorize arbitrary column-letters. Or do the mouse-clicking to insert a new column and replicating the values. We don't even have to _create_ a column at all. We merely declare the formulas and calculations we wish to see:
+
+```sql
+SELECT 
+  "Inmate Name",
+  SUBSTR("Date of Birth", 1, 4),
+  SUBSTR("Date Received", 1, 4)
+FROM "inmates";
+```
+
+<img src="images/derived-inmate-years.png" alt="derived-inmate-years.png">
+
+
+### Aliasing column names
+
+Another step required in the spreadsheet version of data-insertion: naming the new columns.
+
+We don't have to do that in SQL, as you can see in the previous screenshot. But if we want nicer, human-friendly headers, we just need to be a little more explicit:
+
+
+```sql
+SELECT 
+  "Inmate Name",
+  SUBSTR("Date of Birth", 1, 4) AS "birth_year",
+  SUBSTR("Date Received", 1, 4) AS "received_year"
+FROM "inmates";
+```
+
+<img src="images/derived-inmate-years-aliased.png" alt="derived-inmate-years-aliased.png">
+
+
+And we can do math, too: what is the youngest age that someone has entered death row? That's a function of the difference between `received_year` and `birth_year`:
+
+```sql
+SELECT 
+  "Inmate Name",
+  (SUBSTR("Date Received", 1, 4) - SUBSTR("Date of Birth", 1, 4)) 
+    AS age_received
+FROM "inmates"
+ORDER BY age_received ASC;
+```
+
+<img src="images/inamtes-age-receieved.png" alt="inamtes-age-receieved.png">
+
+
+
+
+A nice side-effect of all this aliasing and rearranging of columns: we _never alter the underlying data_. In contrast, it's nearly impossible to do a sort of a spreadsheet without actually changing how the data is arranged.
+
+Sometimes, we don't want that.
+
+## Filtering
+
+To me, filtering data in spreadsheets has not only required a significant investment in the soul-killing work of learning-the-menus-of-a-spreadsheet, the process has always been quirky and prone to catastrophic human-error. This is why I never really teach how to filter data using a spreadsheet.
+
+Filtering in SQL uses the same kind of conditional thinking -- "show me rows in which some column is equal to/greater than/less than some other value" -- but we can express it in code, rather than finicky checkboxes:
+
+### Find all inmates from a specific County
+
+```sql
+SELECT * 
+FROM inmates
+WHERE "County" = "Polk";
+```
+
+<img src="images/inamtes-county-polk.png" alt="inamtes-county-polk.png">
+
+The conditional logic can be as flexible as we need it: Black males born after 1980, or, female inmates:
+
+
+```sql
+SELECT * 
+FROM inmates
+WHERE 
+  ("Race/Gender" = 'BM' AND "Date of Birth" > '1980-01-01')
+  OR SUBSTR("Race/Gender", 2, 1) = 'F';
+```
+
+<img src="images/inmates-where-bm-or-f.png" alt="inmates-where-bm-or-f.png">
+
+
+
+
+## Aggregations
+
+Pivot tables are a killer feature of spreadsheets, and SQL, because of the rigid nature of databases, can't do all the fancy data-rearrangement that a pivot table can. 
+
+But with aggregation functions and the `GROUP BY` clause, we can count, sum, average across categories in a dataset.
+
+### Getting a count of rows
+
+First, how many rows in this dataset?
+
+```sql
+SELECT COUNT(1) FROM `inmates`;
+```
+
+<img src="images/select-count-inmates.png" alt="select-count-inmates.png">
+
+But some inmates are in for multiple crimes. So we need to count _distinct_ ID numbers for the prisoners: 
+
+```sql
+SELECT COUNT(DISTINCT "DC#") AS totalinmates
+FROM inmates;
+```
+
+<img src="images/inmates-count-total-distinct.png" alt="inmates-count-total-distinct.png">
+
+But if we're interested in getting a list of inmates sorted by number of  crimes committed, we use `GROUP BY` to facet by a column value:
+
+```sql
+SELECT "DC#", "Inmate Name", COUNT(1) AS crimecount
+FROM inmates
+GROUP BY "DC#"
+ORDER BY crimecount DESC
+LIMIT 10;
+```
+
+<img src="images/inmates-sort-crimecount-desc.png" alt="inmates-sort-crimecount-desc.png">
+
+
+
+### Getting a count by `Race/Gender`
+
+Want a demographic count of distinct inmates? No problem:
+
+```sql
+SELECT "Race/Gender", 
+COUNT(DISTINCT "DC#") AS inmatecount
+FROM inmates
+GROUP BY "Race/Gender"
+ORDER BY inmatecount DESC;
+```
+
+<img src="images/inmates-group-by-demographics.png" alt="inmates-group-by-demographics.png">
+
+
+### Group and aggregate with whatever values you want
+
+(note: There is a much more rigorous and sane way of calculating dates and time spans. I ignore it for brevity's sake)
+
+What if I wanted to get a count of inmates by _age_? That can roughly and sloppily calculated with: `2016 - SUBSTR("Date of Birth", 1, 4)`:
+
+
+```sql
+SELECT 
+  2016 - SUBSTR("Date of Birth", 1, 4) AS "age",
+  COUNT(DISTINCT "DC#") AS inmatecount
+FROM inmates
+GROUP BY "age"
+ORDER BY "age" ASC;
+```
+
+<img src="images/inmates-group-by-age.png" alt="inmates-group-by-age.png">
+
+
+Those age groups (by each year) are a bit too granular. Let's do something simpler: group inmates by the decade in which they were born:
+
+
+```sql
+SELECT 
+  SUBSTR("Date of Birth", 1, 3) * 10 
+    AS "decadeborn",
+  COUNT(DISTINCT "DC#") AS inmatecount
+FROM inmates
+GROUP BY "decadeborn"
+ORDER BY "decadeborn" ASC;
+```
+
+<img src="images/inmates-group-by-decadeborn.png" alt="inmates-group-by-decadeborn.png">
+
+
+One more aggregation: By race and by decade, and let's simplify it to "black" and "white":
+
+
+```sql
+SELECT 
+  SUBSTR("Date of Birth", 1, 3) * 10 
+    AS "decadeborn",
+  SUBSTR("Race/Gender", 1, 1) 
+    AS race,
+  COUNT(DISTINCT "DC#") AS inmatecount
+FROM inmates
+WHERE race IN('B', 'W')
+GROUP BY "decadeborn", "race"
+ORDER BY "decadeborn", "race" ASC;
+```
+
+<img src="images/inmates-race-decade.png" alt="inmates-race-decade.png">
+
+
+
+# Porting data 
+
+
+I think that's enough random SQL queries for now. Let's get back to the other parts of data work, particularly _visualization_.
+
+Databases generally focus on storing and sorting through data. Which is why they can open and crunch datasets thousands of times bigger and faster than what spreadsheets can do. The tradeoff is that they aren't good for much else. Unlike spreadsheets, the typical database does not come with a built-in chart maker.
+
+No problem. Spreadsheets are a great visualization tool. All we need to do is export our data out of the database, and import it into a spreadsheet.
+
+I liked the most recent aggregation we did of Florida inmates. Did the results look like a table, i.e. a spreadsheet? That's because for all intents and purposes, it _is_ another table. Unlike a spreadsheet, we don't have to create a new tab/table/sheet to store our results.
+
+## Exporting data
+
+OK, one more DB-Browser-specific-tip. In the __Execute SQL__ view, with the results shown, there is a little button in the bottom-right that allows us to __Export to CSV__:
+
+<img src="images/inmates-export-to-csv.png" alt="inmates-export-to-csv.png">
+
+We'll be directed to a pop-up menu: the default options are fine, though you should set "New line characters" to "Unix" just to be safe:
+
+<img src="images/inmates-export-to-csv-options.png" alt="inmates-export-to-csv-options.png">
+
+What does our new CSV file look like when we then import it into a new spreadsheet? [Exactly as you'd expect](https://docs.google.com/spreadsheets/d/17ST4BCtriPPnGZHzTR6s4F-LpC6NYIAUSZbl6iQjVgQ/edit#gid=391272853):
+
+<img src="images/imported-agg-florida-inmates.png" alt="imported-agg-florida-inmates.png">
+
+Now, we do a [quick Pivot Table to rearrange the data specifically to how spreadsheet-chart-making-tools wants it](https://docs.google.com/spreadsheets/d/17ST4BCtriPPnGZHzTR6s4F-LpC6NYIAUSZbl6iQjVgQ/edit#gid=1907468360):
+
+
+<img src="images/imported-agg-florida-inmates-pivoted.png" alt="imported-agg-florida-inmates-pivoted.png">
+
+
+Note that this visual rearranging of data is one thing that is almost insurmountably difficult in SQL, so much that doing analysis in SQL and porting it to a spreadsheet is something you'll get used to doing.
+
+
+Finally, we visualize, using Google Spreadsheet's chart wizard:
+
+<img src="images/imported-agg-florida-inmates-pivoted.png" alt="imported-agg-florida-inmates-pivoted.png">
+
+Here's the chart in its [interactive glory](https://docs.google.com/spreadsheets/d/17ST4BCtriPPnGZHzTR6s4F-LpC6NYIAUSZbl6iQjVgQ/edit#gid=1721577448):
+
+<iframe src="https://docs.google.com/spreadsheets/d/17ST4BCtriPPnGZHzTR6s4F-LpC6NYIAUSZbl6iQjVgQ/pubchart?oid=2128001031&amp;format=interactive"></iframe>
+
+Nothing spectacular, but this is just a quick demo. Everything we breezed through here applies for every dataset that we put into a database, and we haven't even gotten to the interesting and powerful parts of SQL.
+
+
+# Other clients
+
+DB Browser is a great client for working with SQLite databases. But it's a _client_ -- a graphical one at that -- not SQLIte itself. Here's a few other alternatives:
+
+- [SQLite Manager for Firefox](https://addons.mozilla.org/en-US/firefox/addon/sqlite-manager/): I used to use this for teaching, but its interface was clunky enough that it unnecessarily distracted students.
+- [Base](https://menial.co.uk/base/) : this OSX-specific client will cost you $25 but, as with any paid product, it has a decent layer of polish. However, I found DB Browser has more than enough polish for me.
+- [Navicat for SQLite](https://www.navicat.com/products/navicat-for-sqlite): Another commercial solution, but cross-platform. I've used Navicat as a client for other databases, such as MySQL, with good success.
+
+In this sense, DB Browser and other clients are _not_ analogous to Excel and spreadsheet files: if you open a spreadsheet in Excel, and then open it in Apple Numbers or Google Spreadsheets, you may end up with very different results.
+
+A database client, however, is meant to be a thin shell over the database engine itself.
+
+
+## Going Mr. Robot with the command-line
+
+(this is a stub section, though going forward, most of my SQLIte demonstrations will be from the terminal)
+
+<iframe width="853" height="480" src="https://www.youtube.com/embed/PGjLhOhMLXc?rel=0" frameborder="0" allowfullscreen></iframe>
+
+SQLite doesn't have many bells and whistles, but it does come with a text-only client. I highly recommend it if you ever find yourself hating having to learn point-and-click interfaces. It's not for novices, but once you become confident in SQL as a language, you'll enjoy its minimalism.
+
+Here's [the official docs/instructions for SQLite's "command line shell"](https://www.sqlite.org/cli.html).
+
+How to activate it: Go to your system's shell or Terminal and type `sqlite3` to run the SQLite database engine:
+
+<script type="text/javascript" src="https://asciinema.org/a/89127.js" id="asciicast-89127" async></script>
+
+That's basically what's going on underneath the hood of DB Browser and every other client that you execute `SELECT 'hello world';` on.
+
+As with DB Browser, we typically want to jump into a database when launching SQLite. From the command-line, we can specify the name of the database that we want to use. In the snippet below, I open a database that's in my `Downloads` folder, then run a few meta commands so that the text output is easier to read before I run a query:
+
+<script type="text/javascript" src="https://asciinema.org/a/89129.js" id="asciicast-89129" async></script>
+
+

@@ -12,6 +12,7 @@ end
 
 PAGE_FRONTMATTER = """---
 title: Title
+stub: true
 description: |
     lorem ipsum title title title
 ---

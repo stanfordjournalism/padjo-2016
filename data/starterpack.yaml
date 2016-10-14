@@ -1,3 +1,15 @@
+- title: American Community Survey 1-Year Data for 2015
+  path: /files/data/starterpack/census-acs-1year/acs-1-year-2015.sqlite
+  description: |
+    Selected demographic data, including population by ethnicity and wealth, for U.S. states, places, and congressional districts. Note that the `places` table doesn't have complete data.
+  size_mb: 0.25
+  table_count: 3
+  links:
+    - title: "Census Developer page for American Community Survey 1-Year Data (2015, 2014, 2013, 2012, 2011)"
+      url: http://www.census.gov/data/developers/data-sets/acs-1yr.html
+    - title: Example Google Spreadsheet
+      url: https://docs.google.com/spreadsheets/d/1F9VvxfH_Ta0XC5eO5m1a0Ymwd_9GUZxLf3PIk-6BbRw/edit#gid=1827400384
+
 
 - title: M3.0+ Earthquakes in the Contiguous U.S., 1995 through 2015
   path: /files/data/starterpack/usgs/usgs-lower-us.sqlite
@@ -14,6 +26,21 @@
       url: https://docs.google.com/spreadsheets/d/1GdYEXyGNeDMgUDlsidhMDnp1HdIcfkCLzh8WhOh1hM4
     - title: Direct download for M3.0+ quake data from 1995 through 2015
       url: http://earthquake.usgs.gov/fdsnws/event/1/query.csv?starttime=1995-01-01%2000:00:00&endtime=2015-12-31%2023:59:59&maxlatitude=50&minlatitude=24.6&maxlongitude=-65&minlongitude=-125&minmagnitude=3&orderby=time-asc
+
+
+- title: S.F. Food Inspections (LIVES)
+  description: |
+    A single-table, flattened version of the health department's food inspection data. This is what Yelp uses to tie health scores to business listings.
+  path: /files/data/starterpack/sf-food-inspections-lives/sf-food-inspections-lives.sqlite
+  size_mb: 16.4
+  table_count: 1
+  links:
+    - title: Socrata data page
+      url: https://data.sfgov.org/Health-and-Social-Services/Food-Inspections-LIVES-Standard/pyih-qa8i
+    - title: Direct download of CSV
+      url: https://data.sfgov.org/api/views/pyih-qa8i/rows.csv?accessType=DOWNLOAD
+    - title: Example Google Spreadsheet
+      url: https://docs.google.com/spreadsheets/d/1PvLaWCqxxCXqcQ9F8LGZqD3oi5k2e1-Dj3Gq3iE10go/edit#gid=1107606727
 
 
 - title: Census 2000 Surnames
@@ -110,7 +137,7 @@
       url: https://docs.google.com/spreadsheets/d/1Ag5DBIviYiuRrt2yr3nXmbPFV-FOg5fDH5SM3ZEDnpw
 
 - title: Social Security Administration Baby Names, 1980 through 2015
-  path: /files/data/starterpack/ssa-babynames/ssa-babynames.sqlite
+  path: /files/data/starterpack/ssa-babynames/ssa-babynames-nationwide-since-1980.sqlite
   description: |
     Baby names as recorded for Social Security Number applications, counted by sex, nationwide, from 1980 through 2015.
   size_mb: 81.0

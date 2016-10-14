@@ -12,7 +12,7 @@ class ReferenceResource < HashResource
         _date = resource[:published_at] || resource[:date]
 
         @date  = @published_at =  Chronic.parse(_date) if _date
-        @publisher = resource[:publisher] || Addressable::URI.parse(@url).host
+        @publisher = resource[:publisher] # || Addressable::URI.parse(@url).host
         @description = resource[:description]
         @authors = Array(resource[:authors])
     end

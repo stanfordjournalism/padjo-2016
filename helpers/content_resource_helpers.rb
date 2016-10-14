@@ -26,3 +26,7 @@ def find_sitemap_resource_by_relative_url(rel_url)
     r = sitemap_resources.find{|p| p.url == rel_url }
 end
 
+
+def link_to_cr(cr)
+    link_to(cr.title, cr.url)
+end

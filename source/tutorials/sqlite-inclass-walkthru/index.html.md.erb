@@ -1,0 +1,55 @@
+---
+title: SQLite Basic In-class Walkthrough
+description: |
+  Some scattered notes on using SQLite that hopefully we can cover in class (2016-10-13)
+---
+
+# Past walkthroughs
+
+Tutorials from the past year: the dataset is different, but same concepts and syntax:
+
+
+- [SELECTing rows FROM data tables](http://2015.padjo.org/tutorials/sql-basics/select-and-from/)
+- [LIMIT and ORDER BY in SQL Queries](http://2015.padjo.org/tutorials/sql-basics/limit-and-order/)
+- [Using the WHERE clause to filter data in SQL](http://2015.padjo.org/tutorials/sql-basics/where-clause-as-filter/)
+
+See if you can walkthrough this example: again, different database, but basically the same data: [Baby steps with SQLite and baby names data
+](http://2015.padjo.org/assignments/baby-names-baby-sql/)
+
+
+Datasets for this year can be found at: [SQLite Data Starter Packs](2016.padjo.org/tutorials/sqlite-data-starterpacks)
+
+## Example of SF crime data
+
+Download the data from here: [SFPD Incidents, 2012 through 2015](http://2016.padjo.org/tutorials/sqlite-data-starterpacks/#toc-sfpd-incidents-2012-through-2015)
+
+
+Get a list of crime categories:
+
+```sql
+SELECT DISTINCT(category) FROM incidents;
+```
+
+
+Get the 10 most recent robberies:
+
+```sql
+SELECT * from incidents
+WHERE category='ROBBERY'
+ORDER BY datetime DESC
+LIMIT 10;
+```
+
+Get a group count of robberies and how they end up:
+
+```sql
+SELECT category, resolution, 
+  COUNT(1) as "thecount"
+FROM incidents
+WHERE category='ROBBERY'
+GROUP BY category, resolution
+ORDER BY "thecount" DESC;
+```
+
+
+
