@@ -3,7 +3,7 @@ require 'hashie'
 require 'pathname'
 require 'lib/content_resource'
 
-activate :pry
+activate :syntax, :line_numbers => false
 activate :directory_indexes
 activate :sprockets
 set :site_config, ::Hashie::Mash.new(YAML.load_file("./site_config.yaml"))
@@ -11,6 +11,7 @@ set :site_config, ::Hashie::Mash.new(YAML.load_file("./site_config.yaml"))
 
 # Reload the browser automatically whenever files change
 configure :development do
+  activate :pry
   activate :livereload
 end
 

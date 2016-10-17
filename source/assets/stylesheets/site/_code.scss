@@ -1,0 +1,32 @@
+@import "syntax/monokai-theme";
+
+/*pre{
+  margin: $element-margins;
+}*/
+
+pre.highlight{
+  @extend .monokai-syntax;
+  background: #333;
+  padding: 1.0em;
+}
+
+pre.highlight.plaintext{
+  background: #555;
+}
+
+
+pre.highlight.plaintext code, pre.repl .plaintext{
+    color: $gray-lighter;
+}
+
+
+//http://stackoverflow.com/questions/22950812/gist-how-to-set-the-height-and-width-of-an-embedded-gist
+.gist{
+  .gist {max-width: 100%;}
+  .gist-file,.gist-data {
+    height: 350px;
+    max-width: 100%;
+  }
+
+/*  margin: $element-margins auto;*/
+}

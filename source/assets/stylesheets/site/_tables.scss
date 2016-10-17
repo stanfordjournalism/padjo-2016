@@ -1,15 +1,20 @@
 
-table {
+.table {
   border-collapse: collapse;
   border-spacing: 0;
-}
+  min-width: 50%;
+  max-width: 100%;
+  width: auto;
 
-table {
   background-color: transparent;
-  width: 100%;
 
   th, td{
     vertical-align: top;
+  }
+
+  thead th{
+    border-bottom: 2px solid #666;
+    background-color: #ffe9ff;
   }
 
   // th{
@@ -32,6 +37,10 @@ table.table-bordered.table-data{
   th, td{
     border: thin solid #888;
   }
+
+  thead th{
+
+  }
 }
 
 table.table-sm{
@@ -40,6 +49,13 @@ table.table-sm{
 
 table.table-data{
   font-family: $font-family-monospace;
+}
+
+table.table-sql{
+  @extend .table;
+  @extend .table-bordered;
+  @extend .table-data;
+  @extend .table-sm;
 }
 
 table.table-dual{

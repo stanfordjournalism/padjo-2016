@@ -15,6 +15,7 @@ gem 'middleman-compass', '>= 4.0.0'
 gem 'middleman-pry'
 gem "middleman-sprockets"
 gem 'middleman-s3_sync'
+gem "middleman-syntax"
 gem 'mime-types'
 # extra gems
 gem 'addressable'

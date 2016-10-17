@@ -1,0 +1,575 @@
+---
+title: "SQL: The SELECT Statement"
+description: |
+  THe SELECT statement is how we retrieve data from a SQL database.
+nav:
+  next: /tutorials/sqlite-from
+---
+
+
+# SELECT is our most important SQL statement
+
+One of the nice things about SQL is that, as a language, its vocabulary is very restricted in size. When it comes to dealing with data, there's only __4__ types of statements we use. The 3 statements other than `SELECT` are: `DELETE`, `INSERT`, and  `UPDATE`. And if English is your language, you can probably guess what those keywords do.
+
+For our purposes and use-cases, we will only _occasionally_ use `UPDATE`, and _rarely_ use `INSERT` and `UPDATE`. The vast majority our SQL work involves querying the database to ask it for data. And this is the main purpose of `SELECT`.
+
+## The structure of a typical `SELECT` statement
+
+As simple as the `SELECT` statement sounds, it can _look_ quite complicated when we start adding the optional clauses needed to refine our query. But the core concept involves _selecting_ data rows from a __table__.
+
+Pretend we have a __table__ named `people` that looks like this:
+
+|  name | age |  country  |
+|-------|-----|-----------|
+| Jane  |  42 | Indonesia |
+| Zach  |  28 | Canada    |
+| Nan   |  38 | England   |
+| Derek |  32 | India     |
+{:.table-sql}
+
+A `SELECT` statement to fetch just the `name` column for _all_ the rows looks like this:
+
+
+~~~sql
+SELECT "name"
+FROM "people";
+~~~
+
+The result:
+
+|  name |
+|-------|
+| Jane  |
+| Zach  |
+| Nan   |
+| Derek |
+{:.table-sql}
+
+
+And if we want the `country` and `age` columns, in that order:
+
+~~~sql
+SELECT "country", "age"
+FROM "people";
+~~~
+
+The result:
+
+|  country  | age |
+|-----------|-----|
+| Indonesia |  42 |
+| Canada    |  28 |
+| England   |  38 |
+| India     |  32 |
+{:.table-sql}
+
+
+# Just the `SELECT` for now
+
+99.9% of our `SELECT` queries will involve the `FROM` clause, among many other optional clauses. But for this lesson, we'll focus on the bare minimum syntax of a `SELECT` statement, just as if we were studying grammar and starting with its most basic form: a subject and verb.
+
+To reiterate, we will almost _never_ use `SELECT` without a `FROM`. But breaking down the syntax to its independent components will help us understand the (mostly) consistent logic of SQL's design. Also, we can focus on a a few concepts of style in the language (such as the use of single and double-quote marks) that are vital to practice and understand now before our queries get too complicated.
+
+## "Hello, World" in SQL
+
+Let's follow the advice of computing pioneer [Brian Kernighan](http://blog.hackerrank.com/the-history-of-hello-world/) and start off by writing a "Hello, World" program in SQL. Incidentally, this also gets us to about the bare minimum of a valid SQL statement:
+
+
+(Mind the single quote marks)
+
+~~~sql
+SELECT 'Hello, world';
+~~~
+{:.table-sql}
+
+
+Your SQL client should return something that looks like this:
+
+<img src="images/hello-world.png" alt="hello-world.png">
+
+
+As I've mentioned before, a SQL client with graphical user interface will have some visual cruft to make things easier to read. In the screenshot above, the client returns what looks to be a simple table, in which the header row has a value similar to its lone data row:
+
+
+|  'Hello, world'  |
+|------------------|
+|  Hello, world    |
+{:.table-sql}
+
+
+
+Technically, the actual value returned by the database in response to our simple query, is simply:
+
+
+~~~
+Hello, world
+~~~
+
+That's a mostly irrelevant technical detail, but I wanted to point this out for the purposes of accuracy. For the conventions of the rest of the SQL lessons, we can just assume the database will return a header row with all of our requests, i.e.
+
+| 'Hello, world' |
+|----------------|
+| Hello, world   |
+
+## Bending and breaking "Hello, world"
+
+In general, when learning new syntax, it's good practice to _bend and break_ what we've just learned. Can we go even _more_ minimalist than `SELECT 'Hello, world';`?
+
+~~~sql
+SELECT;
+~~~
+
+Apparently not; the database engine returns not a value but an error:
+
+~~~
+Error: near ";": syntax error
+~~~
+
+Your client may "prettify" that error message with a bit more context:
+
+<img src="images/select-error.png" alt="select-error.png">
+
+How about if we remove those single quote marks?
+
+~~~sql
+SELECT Hello, world;
+~~~
+
+You should get an error message like this:
+
+~~~
+no such column: Hello
+~~~
+
+OK, let's try something less minimal:
+
+~~~sql
+SELECT 'Hello';
+~~~
+
+| 'Hello' |
+|---------|
+| Hello   |
+{:.table-sql}
+
+Let's go excessive:
+
+~~~sql
+SELECT 'Hello 12389JADSFJf';
+~~~
+
+| 'Hello 12389JADSFJf' |
+|----------------------|
+| Hello 12389JADSFJf   |
+
+
+Let's go more meta:
+
+~~~sql
+SELECT 'SELECT Hello World;';
+~~~
+
+|  'SELECT Hello World;'  |
+|-------------------------|
+|  SELECT Hello World;    |
+{:.table-sql}
+
+
+
+
+
+
+
+# Literal string values with single-quote marks
+
+When writing a narrative in English, when we want to describe an event, we just, well write it as a sentence:
+
+> Bob ate an orange.
+
+What if we don't want to describe _Bob eating an orange_. What if we want to describe another character, _Alice_, who herself asserts (aloud) the boring fact of Bob eating oranges? We use quotation marks:
+
+> "Bob ate an orange," Alice said.
+
+This need to differentiate between something that _happens_ versus something that was _said_ exists in programming languages, too. Or rather, we need to differentiate between the text that represents actual _code_, and text that represents some _literal_ value, such as `'Hello world'`.
+
+In SQLite, and other common SQL dialects, we use __single quotation marks__.
+
+That's why this works:
+
+~~~sql
+SELECT 'Hello world';
+~~~
+
+But the following raises an error:
+
+~~~sql
+SELECT Hello world;
+~~~
+
+&ndash; because without the single-quotes, the database engine thinks that we're trying to execute a SQL command of not just `SELECT` but `Hello world`. But `Hello world` are not actual keywords in the SQL language.
+
+It's like the difference between this gibberish English sentence:
+
+> Bobloblawlobblog Bob blogged.
+
+And this grammatically-correct English sentence describing gibberish:
+
+> "Bobloblawlobblog," Bob blogged .
+
+
+Going forward, I'll be describing these quoted-values as __literal string values__. Though admittedly, in the simple SQL we've written so far, these literal string values don't seem to have much value.
+
+## Syntax highlighting of literal strings
+
+If you're using a graphical SQL client, it should highlight the literal string values in a different color from the rest of the code. Note in the example below, how `'SELECT;Whatever;'` is colored __red__, compared to the bold blue of the non-literal string value:
+
+<img src="images/syntax-highlight-red-whatever.png" alt="syntax-highlight-red-whatever.png">
+
+
+
+
+
+## Literal single-quotes
+
+What if at some point we need to write a SQL query that includes a single-quote in the literal string value? 
+
+The following query will return an error:
+
+~~~sql
+SELECT 'The world's end is 'ere, I think';
+~~~
+Our intent is to print the literal string value of, `The world's end is 'ere, I think`. But the database engine interprets the second single-quote as the closing delimiter for the string value of, `The world`. It then interprets `end is` as actual SQL code, which is not valid SQL syntax.
+
+If you're using a modern SQL client, you'll notice that the syntax highlighting for the query looks broken:
+
+<img src="images/syntax-error-end-ere.png" alt="syntax-error-end-ere.png">
+
+The most straightforward way to represent a single-quote as a literal string value is a bit confusing: follow it immediately with _another single-quote_. Which, yes, will _look_ like a double-quote:
+
+~~~sql
+SELECT 'The world''s end is ''ere, I think';
+~~~
+
+Don't worry, the SQLite database engine, and your syntax-highlighting client, won't be confused:
+
+<img src="images/syntax-correct-double-single-quotes-ere.png" alt="syntax-correct-double-single-quotes-ere.png">
+
+
+
+###  Single-quotes vs double-quotes in SQLite
+
+An aside: If you're coming from another programming language like Python, you might wonder if __double-quotation__ marks can be used to denote literal string values in SQLite.
+
+The answer is: __Yes__..._technically_. That is, this won't raise an error in SQLite:
+
+~~~sql
+SELECT "Hello world";
+~~~
+
+&ndash; But only because SQLite is tolerant of using double-quotes when you should be using single-quotes. As we'll see in the next few lesson, double quote marks have an additional meaning in SQLite. And in a variant such as PostreSQL, mixing up single-quotes and double-quotes will actually throw an error.
+
+So despite SQLite's tolerance, it's best to get into the habit of _not_ interchanging single-quotes and double-quotes.
+
+
+# Commas to separate values
+
+
+Let's revisit the "Hello world" program but include a comma in the literal string, as is suggested by English grammar rules:
+
+~~~sql
+SELECT 'Hello, world';
+~~~
+
+|  'Hello, world'  |
+|------------------|
+|  Hello, world    |
+{:.table-sql}
+
+
+In SQL syntax, the __comma__ has an important meaning: it's used to separate a series of _values_. For example, what if we want to return two separate string values of `Hello` and `world`, instead of a single string value of `Hello, world`?
+
+To return two separate values, use the __comma__ to separate the two quoted string values:
+
+~~~sql
+SELECT 'Hello', 'world';
+~~~
+
+|  'Hello' | 'world'  |
+|----------+----------|
+|  Hello   | world    |
+{:.table-sql}
+
+
+## A trivial note about aliasing column headers
+
+Note: The following is a bit of trivia that is nice to be _aware_ of, because forgetting commas is one of the most common SQL typos. However, unlike other SQL typos, forgetting commas in this context _will not raise an error_. And, like all silent problems, this is a _very bad thing_.
+{:.aside-warning}
+
+OK, we learned a new syntax rule, so that means we should try to break it. 
+
+Try omitting the comma:
+
+~~~sql
+SELECT 'Hello' 'world';
+~~~
+
+As it turns out, this doesn't result in an error. But it does result in something confusing (for now); the database engine interprets the second string value as what we want to name the _column_:
+
+|  world  |
+|---------|
+|  Hello  |
+{:.table-sql}
+
+This, as we'll learn later, is referred to as __aliasing__. Here's an even more elaborate version:
+
+~~~sql
+SELECT 'Hello' 'salutation', 'world' 'subject';
+~~~
+
+|  salutation | subject  |
+|-------------+----------|
+|  Hello      | world    |
+{:.table-sql}
+
+
+Does that seem confusing and incredibly difficult to parse? Because it _is_. As we'll learn later, when we want to alias column headers, we will use the SQL keyword `AS`, which is optional, but recommended for readability:
+
+~~~sql
+SELECT 'Hello' AS 'salutation', 'world' AS 'subject';
+~~~
+
+|  salutation | subject  |
+|-------------+----------|
+|  Hello      | world    |
+{:.table-sql}
+
+
+# Numerical literals
+
+String literals are one type of literal values. Another is numerical literals, such as integers and decimal numbers, e.g. `42`, `-142`, `4.02`.
+
+Because no SQL keywords begin with a number, the SQL interpreter _knows_ that a standalone number is just a _literal number_ value:
+
+~~~sql
+SELECT 42;
+~~~
+
+|  42  |
+|------|
+|  42  |
+{:.table-sql}
+
+What we learned about commas for separating values applies to number literals, too:
+
+~~~sql
+SELECT 42, 12077, -9.05
+~~~
+
+|  42 | 12077 | -9.05  |
+|-----+--------+-----|
+|  42 | 12077 | -9.05  |
+{:.table-sql}
+
+
+Remember how Excel and other modern spreadsheets will sometimes format big numbers using commas as a separator to make it easier for us humans to _visually_ interpret those numbers?
+
+<img src="images/excel-formatted-numbers-commas.png" alt="excel-formatted-numbers-commas.png">
+
+
+Databases, by default, do not care about making things visually easy for humans. And this means they do not share our (American) convention of using commas as visual decoration. 
+
+Can you predict the result of the following query?
+
+
+~~~sql
+SELECT 12,456, 99,999, -144,566;
+~~~
+
+|  12 | 456 | 99 | 999 | -144 | 566  |
+|-----+-----+----+-----+------+------|
+|  12 | 456 | 99 | 999 | -144 | 566  |
+{:.table-sql}
+
+
+## Valid number formats
+
+So SQL has a limited view on what a number value "looks like". Generally, a number literal must begin with a numerical digit; the exception is __negative numbers__, which begin with a minus-sign.
+
+These are all valid number values in SQL:
+
+~~~sql
+SELECT 42, 9.9, 0.6, -0.001, 70000.80008, 000002;
+~~~
+
+|  42 | 9.9 | 0.6 | -0.001 | 70000.80008 | 000002  |
+|-----+-----+-----+--------+-------------+---------|
+|  42 | 9.9 | 0.6 | -0.001 | 70000.80008 | 2       |
+{:.table-sql}
+
+The following examples will _not_ be interpreted as number values, o:
+
+- `nine`
+- `Four score`
+- `3,001.9` (this will be interpreted as two number values)
+
+## Numerical calculations
+
+Printing literal number and string values is pretty boring, because it's just the database echoing back what we told it to `SELECT`. 
+
+So let's do some math: SQL interprets many of the basic arithmetic operators as expected:
+
+
+~~~sql
+SELECT 867-5309;
+~~~
+
+|  867-5309  |
+|------------|
+|  -4442     |
+{:.table-sql}
+
+
+~~~sql
+SELECT 10 + 900.9 / 6;
+~~~
+
+|  10 + 900.9 / 6  |
+|------------------|
+|  160.15          |
+{:.table-sql}
+
+~~~sql
+SELECT 4 + -6 / 2, (4 + -6) / 2;
+~~~
+
+|  4 + -6 / 2 | (4 + -6) / 2  |
+|-------------+---------------|
+|  1          | -1            |
+{:.table-sql}
+
+There's not much more to this concept. Just to make things interesting, remember aliasing column headers with `AS`? We'll cover it in a later lesson, but this should make sense:
+
+~~~sql
+SELECT 867-5309 AS 'not jenny''s number';
+~~~
+
+|  not jenny's number  |
+|----------------------|
+|  -4442               |
+{:.table-sql}
+
+
+
+## Numbers in literal string values
+
+Let's now try to bend and break the syntax. What happens if we _quote_ the numbers?
+
+~~~sql
+SELECT '42', '101.02', '-0.55';
+~~~
+
+|  '42' | '101.02' | '-0.55'  |
+|-------+----------+----------|
+|  42   | 101.02   | -0.55    |
+{:.table-sql}
+
+Actually, there won't be any _visual_ difference with just numbers. But throw some math in there to see the difference:
+
+~~~sql
+SELECT '2 + 3';
+~~~
+
+|  '2 + 3'  |
+|-----------|
+|  2 + 3    |
+{:.table-sql}
+
+Because the numbers are quoted, the SQL interpreter treats the numbers, and the plus sign, as any other literal string value:
+
+~~~sql
+SELECT 'fire + ice';
+~~~
+
+|  'fire + ice'  |
+|----------------|
+|  fire + ice    |
+{:.table-sql}
+
+Unquoting the plus sign in an attempt to "add" the string literals of `fire` and `ice` will not result in an arithmetic operation:
+
+
+~~~sql
+SELECT 'fire + ice', 'fire' + 'ice';
+~~~
+
+|  'fire + ice' | 'fire' + 'ice'  |
+|---------------+-----------------|
+|  fire + ice   | 0               |
+{:.table-sql}
+
+
+_However_ -- due to SQLite's somewhat unusual (for database software) tolerance for human input -- adding together quoted strings _will_ result in math:
+
+~~~sql
+SELECT '2 + 3', '2' + '3';
+~~~
+
+|  '2 + 3' | '2' + '3'  |
+|----------+------------|
+|  2 + 3   | 5          |
+{:.table-sql}
+
+
+However, adding together two string literals that contain what _look_ like numbers will _not_ work:
+
+~~~sql
+SELECT 1234 - 5000, '1234 - 5000', '1,234' - '5,000';
+~~~
+
+|  1234 - 5000 | '1234 - 5000' | '1,234' - '5,000'  |
+|--------------+---------------+--------------------|
+|  -3766       | 1234 - 5000   | -4                 |
+{:.table-sql}
+
+
+Insanity, right? If I thought that doing `SELECT '1,234' - '5,000';` were a regular situation in SQL, I might argue that we need to memorize how SQLite behaves. But attempting arithmetic on numbers-as-string-literals is _not_ a common or recommended use case. I didn't even know what the above query would result in until I tried it myself.
+
+I wish that SQLite threw an error rather than tried doing nonsensical math. But it doesn't. Which means two things:
+
+1. Avoid situations where you're mixing operations of __number__ literals and __string__ literals, such as `'99,999' - 1`. Just subtract numbers from other numbers, e.g. `99999 - 1`.
+2. We haven't even gotten to the "data" part of SQL databases, but if your SQLite data contains mixed numbers and strings and you are _unaware_ of that, you may get some unexpected results.
+
+For what it's worth, Excel has this same annoyingly tolerant behavior with numbers as string values when running formulas:
+
+
+<img src="images/excel-99999-1-text.png" alt="excel-99999-1-text.png">
+
+
+
+
+# Conclusion
+
+If you're new to SQL and/or programming in general, this lesson might feel _maddeningly nonsensical_ . It *should*. The key part of this lesson, for our immediate purposes, is that SQL has a `SELECT` statement that works like this:
+
+
+~~~sql
+SELECT 42, 'Hello World';
+~~~
+
+And that's it. Because that concept is so simple -- too simple, in fact, to base an entire tutorial around -- I threw in other parts of SQL syntax such as the meaning of single quotes and commas, and the concept of string and number literals. Because while `SELECT` is extremely easy to remember, all of those other syntax rules will be where you will make _many_ errors, whether a novice or expert. So it's good to get acquainted with them now, when all you have to worry about is `SELECT`, before we throw in the other concepts and keywords.
+
+In the [next lesson](/tutorials/sqlite-from/), we'll see how to _select_ something we care about: data __from__ a database.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
