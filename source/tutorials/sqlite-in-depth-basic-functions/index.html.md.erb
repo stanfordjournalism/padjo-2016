@@ -1,0 +1,69 @@
+---
+title: "SQL In-Depth: Basic Functions"
+description: |
+  TK Formulas and Functions
+nav:
+  next: /tutorials/sqlite-in-depth-aliases
+  previous: /tutorials/sqlite-in-depth-sort-limit
+---
+
+
+
+## Math functions and columns
+
+One of the most powerful and accessible features of spreadsheets is the ability to transform values in a column with a __function__. For now, we'll limit ourselves to arithmetic operations.
+
+### Just 2 + 3
+
+Let's start with a simple example, akin to 'Hello, world' -- can you guess what the (nonsensical) result will be?
+
+~~~sql
+SELECT 2 + 3
+FROM states;
+~~~
+
+We're accessing the `states` table, but didn't ask for any of its columns. And so we get 52 rows of the same calculation and its result:
+
+
+|  2 + 3  |
+|---------|
+|  5      |
+|  5      |
+|  5      |
+|  5      |
+|  5      |
+|  5      |
+|  5      |
+{:.table-sql}
+
+To be fair, we can easily get this same result in a spreadsheet by writing the formula `=2+3` and then repeating it for every row:
+
+<img src="images/excel-dumb-2-plus-3-function.png" alt="excel-dumb-2-plus-3-function.png">
+
+One difference between doing it in a database query versus a spreadsheet is that the `SELECT` query never alters the database, it just fetches data. Whereas in the spreadsheet example above, I've inherently changed the data and structure of my spreadsheet, in a destructive way.
+
+OK, let's select for the `name` column just to reaffirm the difference between asking for a literal value (string _or_ number) and an actual column of the table:
+
+
+```sql
+SELECT name, 2+3
+FROM states;
+```
+
+The top 5 rows of the 52 results:
+
+|  name       | 2+3  |
+|-------------+------|
+|  Alabama    | 5    |
+|  Alaska     | 5    |
+|  Arizona    | 5    |
+|  Arkansas   | 5    |
+|  California | 5    |
+{:.table-sql}
+
+
+### Performing calculations on column values
+
+Let's now try some queries that calculate something of actual interest.
+
+We'll start off with a simple selection of the `name`, `white`, and `total_population` columns of each 

@@ -1,0 +1,574 @@
+---
+title: "SQL In-Depth: The FROM Clause"
+description: |
+  We want to select data FROM a data table.
+nav:
+  next: /tutorials/sqlite-in-depth-sort-limit
+  previous: /tutorials/sqlite-in-depth-select
+  landing: /tutorials/sqlite-unit-overview-select-sort-transform
+references:
+  - title: The homepage for the Census American Community Survey
+    url: https://www.census.gov/programs-surveys/acs/
+  - title: The CensusReporter's primer on the ACS
+    url: https://censusreporter.org/topics/getting-started/ 
+  - title: The Google Sheets version of my sample Census ACS 1-Year-Data from 2015
+    url: https://docs.google.com/spreadsheets/d/1F9VvxfH_Ta0XC5eO5m1a0Ymwd_9GUZxLf3PIk-6BbRw/edit#gid=1827400384
+  - title: The SQLite file of my sample Census ACS 1-Year-Data from 2015
+    url: /files/data/starterpack/census-acs-1year/acs-1-year-2015.sqlite
+---
+
+
+
+# FROM is Simple
+
+Like the [previous lesson on the `SELECT` statement](/tutorials/sqlite-select), there's not much to the `FROM` keyword, so much of this lesson's material is meant to acquaint you with general SQL syntax and concepts.
+
+In fact, we covered `FROM` at the beginning of the previous lesson, because we will almost never use `SELECT` without `FROM`. Here's the example I used: 
+
+Given a data __table__ named `people` that looks like this:
+
+|  name | age |  country  |
+|-------|-----|-----------|
+| Jane  |  42 | Indonesia |
+| Zach  |  28 | Canada    |
+| Nan   |  38 | England   |
+| Derek |  32 | India     |
+{:.table-sql}
+
+We use `SELECT` to specify which columns we want -- e.g. `age` and `name`, in that order -- and we use `FROM` to specify that we want the data from the table named `people`:
+
+~~~sql
+SELECT "age", "name"
+FROM "people";
+~~~
+
+The result:
+
+| age |  name |
+|-----|-------|
+|  42 | Jane  |
+|  28 | Zach  |
+|  38 | Nan   |
+|  32 | Derek |
+{:.table-sql}
+
+And that's all there is to the `FROM` clause. Unlike `SELECT`, which is a kind of _statement_, the `FROM` clause is pretty straightforward. In fact, I think one of the hardest parts about it is just remembering that `FROM` is always written _after_ `SELECT`, even though in typical human-to-human English, we might phrase a query in the opposite order, e.g.
+
+> Could you open the file named "people" and get me the listed ages and names?
+
+
+## Spreadsheets "know" what to do
+
+The other confusing thing about SQL and databases is the fact that we need to *ask* for anything at all. When we open a spreadsheet in Excel, we expect Excel to load the spreadsheet's data and then make it immediately accessible to us. If the spreadsheet contains multiple sheets, the first/default sheet is made visible, and we can navigate to the other sheets on our own.
+
+For example, take a look at this [spreadsheet of U.S. Census Data](https://docs.google.com/spreadsheets/d/1F9VvxfH_Ta0XC5eO5m1a0Ymwd_9GUZxLf3PIk-6BbRw/edit#gid=1827400384), which includes demographic data that [I've extracted from the American Community Survey 1-Year Data for 2015](http://www.census.gov/data/developers/data-sets/acs-1yr.html). 
+
+Clicking [this link](https://docs.google.com/spreadsheets/d/1F9VvxfH_Ta0XC5eO5m1a0Ymwd_9GUZxLf3PIk-6BbRw/edit#gid=1827400384) should take you to the first page of the spreadsheet: demographic by __U.S. State__; here's a screenshot:
+
+<a href="https://docs.google.com/spreadsheets/d/1F9VvxfH_Ta0XC5eO5m1a0Ymwd_9GUZxLf3PIk-6BbRw/edit#gid=1827400384"><img src="images/acs-1yr-2015-state-ghseet.png" alt="acs-1yr-2015-state-ghseet.png"></a>
+
+This spreadsheet contains 2 other sheets -- labeled `congressional-district` and `place` -- that are identical in data schema, except the numbers are for U.S. House districts and [Census-designated places -- "a concentration of population defined by the United States Census Bureau for statistical purposes only."](https://en.wikipedia.org/wiki/Census-designated_place). If you want to see those sheets, you just click on the corresponding tabs:
+
+
+<img src="images/acs-1yr-2015-places-tab.png" alt="acs-1yr-2015-places-tab.png">
+
+
+## The "do-nothing" database
+
+In contrast, when we open up a SQLite database file, _nothing seems to happen_.
+
+Try it yourself. Here's a link to the SQLite version of that 2015 Census ACS data; click to download and save it to your hard drive, and then open it in your SQLite client:
+
+[starterpack/census-acs-1year/acs-1-year-2015.sqlite](/files/data/starterpack/census-acs-1year/acs-1-year-2015.sqlite)
+
+
+If you're using DB Browser for SQLite, opening the SQLite data file might look something like this, where some boilerplate information about the data tables is shown: 
+
+<img src="images/dbbrowser-acs-data-opened-boilerplate.png" alt="dbbrowser-acs-data-opened-boilerplate.png">
+
+A nice feature of the DB Browser client is that it _does_ provide some SQLite conveniences, which you can see by clicking on the __Browse Data__ nav button:
+
+<img src="images/dbbrowser-acs-data-browse-data-nav.png" alt="dbbrowser-acs-data-browse-data-nav.png">
+
+But the more true-to-reality view of how databases work can be found by clicking through to the __Execute SQL__ panel, in which we're presented with a blank area to write a SQL query:
+
+<img src="images/dbbrowser-acs-data-blank-execute-sql.png" alt="dbbrowser-acs-data-blank-execute-sql.png">
+
+The database engine makes no assumptions or guesses about what we, the user, want or expect to see. Instead, we have to tell SQLite __exactly what we want__.
+
+# Selecting data from the Census ACS 1-Year Database
+
+Before we try out `FROM`, let's do what we [learned in the previous lesson on `SELECT`](/tutorials/sqlite-select): how to say "Hello, world". It's no different here, even though we have an entirely different database loaded:
+
+~~~sql
+SELECT 'Hello, world';
+~~~
+
+<img src="images/dbbrowser-acs-data-blank-hello-world.png" alt="dbbrowser-acs-data-blank-hello-world.png">
+
+OK, now let's revisit at the example query I gave at the top of this lesson:
+
+~~~sql
+SELECT "age", "name"
+FROM "people";
+~~~
+
+Heck, let's run that same exact query to see what happens:
+
+<img src="images/dbbrowser-acs-data-blank-select-from-error-people.png" alt="dbbrowser-acs-data-blank-select-from-error-people.png">
+
+The core part of that error message is:
+
+~~~
+no such table: people
+~~~
+
+&ndash; which means exactly what it seems to: there's no table in our database named `people`. Which is what we saw when [I referenced the Google sheets version of the ACS data](https://docs.google.com/spreadsheets/d/1F9VvxfH_Ta0XC5eO5m1a0Ymwd_9GUZxLf3PIk-6BbRw/edit#gid=1824096163).
+
+Here's another look at the sheets in the spreadsheets, along with a few of the headers:
+
+<img src="images/google-sheets-acs-states-closeup.png" alt="google-sheets-acs-states-closeup.png">
+
+I was a bit inconsistent when converting the spreadsheet to SQLite database. For example, instead of naming the SQLite table `state`, I named it `states`. So let's select __from__ `states` instead of the non-existent `people` table.
+
+And -- because I plan on elaborating in excruciating, pedantic detail later -- let's strip out the __double-quotation__ marks around the table and field names. The resulting query is:
+
+~~~sql
+SELECT age, name
+FROM states;
+~~~
+
+<img src="images/select-age-name-states.png" alt="select-age-name-states.png">
+
+And now we have another straightforward error message:
+
+~~~
+no such column: age
+~~~
+
+OK, let's keep things simple: let's just get the `name` column, which _does_ exist in the Census ACS data:
+
+
+~~~sql
+SELECT name
+FROM states;
+~~~
+
+Success! Sweet, simple success:
+
+<img src="images/select-name-from-states-acs-success.png" alt="select-name-from-states-acs-success.png">
+
+OK, let's include another column that we see on the [spreadsheet version of the data](https://docs.google.com/spreadsheets/d/1F9VvxfH_Ta0XC5eO5m1a0Ymwd_9GUZxLf3PIk-6BbRw/edit#gid=1827400384): `total_population`
+
+
+As we learned previously, the __comma__ is used to separate multiple values in a query, e.g. `SELECT 'hello', 'world';` versus `SELECT 'hello, world';`. The same applies to separating multiple column names in a query:
+
+~~~sql
+SELECT name, total_population
+FROM states;
+~~~
+
+Here's the first 5 rows of the results as returned by SQLite:
+
+|  name                 | total_population  |
+|-----------------------+-------------------|
+|  Alabama              | 4858979           |
+|  Alaska               | 738432            |
+|  Arizona              | 6828065           |
+|  Arkansas             | 2978204           |
+|  California           | 39144818          |
+{:.table-sql}
+
+And here's what it might look like in your client -- take a quick note how the console log at the bottom helpfully states the number of rows returned:
+
+```
+52 rows returned in 0ms from: SELECT name, total_population
+FROM states
+```
+
+<img src="images/select-states-name-totalpop-from-acs1yr.png" alt="select-states-name-totalpop-from-acs1yr.png">
+
+(There's 50 states, plus the 2 non-states of `District of Columbia` and `Puerto Rico`)
+
+## Quick note about confusing console results in DB Browser for SQLite
+
+This is a quick quirk specific to the interface of the [DB Browser client](http://sqlitebrowser.org/). As you might have accidentally found out, __whitespace__ in the query doesn't seem to have an effect. We'll cover this in much more detail in a different lesson. But in the context of this early lesson, you might add a few newline characters to your query, i.e. blank lines after the semi-colon. And then when you press one of the __Execute__ buttons -- depending on where your __cursor__ is (i.e. the blinky thing), you might get an opaque message in the console: `not an error;`
+
+<img src="images/db-browser-execute-line-console-not-an-error.png" alt="db-browser-execute-line-console-not-an-error.png">
+
+This is because, as far as I can tell, you executed one of the blank lines. And what is even more confusing is that the results panel, i.e. the table of result rows, doesn't seem to change.
+
+Anyway, to avoid this confusion as you're following along, you can __highlight__ the line of code you want to run (getting used to hitting Command-A, the keyboard shortcut for __Select All__, is, no joke, a vital programming skill/reflex) before hitting the Execute button:
+
+<img src="images/db-browser-execute-line-console-select-all.png" alt="db-browser-execute-line-console-select-all.png">
+
+----------
+
+
+As I mentioned earlier, all 3 tables have the same data structure. Let's run the same selection of columns but extract it from the `places` table:
+
+```sql
+SELECT name, total_population
+FROM places;
+```
+
+
+There's a lot more "places" than the 50 United States (plus 2 territories), as you might see in the console log shown by your SQLite client: 596 to be exact.
+
+<img src="images/select-places-name-totalpop-from-acs-1yr.png" alt="select-places-name-totalpop-from-acs-1yr.png">
+
+
+Let's add another column to the fun: `white`, which refers to the number of persons counted by the Census as being Caucasian. And let's put that column _between_ `name` and `total_population`
+
+
+```sql
+SELECT name, white, total_population
+FROM places;
+```
+
+The results will be a bit confusing: where we expect numbers for the `white` column, we'll instead see `NULL`, which is not a __literal string value__, but a special value in SQL that means: nothing, nada, nil, zilch, etc. `NULL` is a concept we'll cover in more detail later, it's enough to know that it means _nothing_ (which is different than `0`)
+
+<img src="images/select-name-white-totalpop-places-nulls.png" alt="select-name-white-totalpop-places-nulls.png">
+
+The plain text version of the top 10 results:
+
+|  name                           | white  | total_population  |
+|---------------------------------+--------+-------------------|
+|  Birmingham city, Alabama       | NULL   | 214911            |
+|  Dothan city, Alabama           | NULL   | 67536             |
+|  Hoover city, Alabama           | NULL   | 84839             |
+|  Huntsville city, Alabama       | NULL   | 189114            |
+|  Mobile city, Alabama           | NULL   | 194305            |
+|  Montgomery city, Alabama       | 66139  | 200586            |
+|  Tuscaloosa city, Alabama       | NULL   | 98338             |
+|  Anchorage municipality, Alaska | 175448 | 298695            |
+|  Avondale city, Arizona         | 31978  | 80683             |
+|  Casas Adobes CDP, Arizona      | 45005  | 65265             |
+{:.table-sql}
+
+
+Not to get into too much detail about the Census or the American Community Survey -- because I'm definitely not an expert -- but the[ ACS 1-Year-Data](http://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?src=bkmk) is just an estimate, and the roughest of the estimates that the ACS does (there's also the 5-Year-Data, which was not yet calculated for 2015 when I wrote this tutorial)
+
+According [to this page on factfinder.census.gov](http://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?src=bkmk), *"a blank indicates that the estimate is not significantly different from the estimate of the most current year"*, i.e. I should have collected the data from 2014. Oh well.
+
+Let's query the third table in this database, the name of which is `congressional_districts`. This requires a trivial change to the query, so to make things fun if you're a novice: try to erase the code we've written so far and write it out by scratch -- remember, `SELECT` precedes the `FROM`.
+
+As we can see by skimming the results, the ACS 1-Year estimates for the `white` population of each Congressional districts, seems to have changed enough for each district that virtually all of the `white` cells have a number instead of a `NULL` value:
+
+<img src="images/select-acs-white-congressional-districts-results.png" alt="select-acs-white-congressional-districts-results.png">
+
+## Writing database code versus spreadsheet button-pushing 
+
+So `FROM` is pretty straightforward, but one thing you might have inferred from the example queries above is how, unlike double-clicking to open a spreadsheet file, we have to tell the SQLite engine _everything_ needed to see the data: this includes the name of the table __from__ which we want the data, to __select__ing each of the individual columns _and_ the order in which we want to see them.
+
+The Census database I've provided has multiple tables and columns, but even if we had a database that contained only single table containing a single column, we still would have to specify the name of that lone column in the `SELECT`, and the name of the table in the `FROM` clause.
+
+SQL simply does not make assumptions about what the user wants to do. After all, we saw in the previous lesson how we could write a "Hello world" SQL query without referring to a database at all.
+
+
+Even as a purportedly experienced programmer who should know better, it took me a long time to accept that typing all that code to do something so basic was not just an annoying "feature" of SQL, but fundamental to how SQL databases function, including their ability to quickly scale in handling datasets far bigger than can fit a spreadsheet.
+
+If you're new to programming, it can/will be frustrating having to learn what seems like so much code to do what you were able to do with a couple of clicks in a spreadsheet. But think of the extra investment of time this way: we're learning how to teach our computers exactly what we want them to do with our data. It's more work up front, but the alternative is a passive life in computation, in which we depend on spreadsheet-makers to create (admittedly *powerful*) buttons and then to teach us how to push those buttons.
+
+
+# SQL syntax practice with FROM
+
+We know how to use `FROM` and, as I said earlier, it's a simple keyword as far as SQL goes. Where things get complicated -- though no fault of `FROM` itself -- is applying all the syntax details we've learned so far.
+
+Keep the Census ACS database open in your SQLite client ([here's the link](/files/data/starterpack/census-acs-1year/acs-1-year-2015.sqlite) to download it in case you've skipped the previous section). 
+
+## Hello...states?
+
+Let's start off with good ol' "Hello, world" from the very first lesson, which should work exactly as before:
+
+~~~sql
+SELECT 'Hello, world';
+~~~
+
+OK, if SQL is as consistent a language as I've claimed, then piling on the `FROM states` clause that we executed in the previous example queries should also "just work" -- _without changing what we've selected_, i.e. `Hello, world`:
+
+~~~sql
+SELECT 'Hello, world'
+FROM states;
+~~~
+
+OK, this is where things might get weird. Mostly because this is a query that has no real-world value, which means that its results also have no real-world value, but we're doing this for the intellectual exercise.
+
+Here's what your results should look like: a long list of `Hello, world` values, one for each of the  __52__ rows in the `states` table:
+
+<img src="images/select-hello-world-from-states.png" alt="select-hello-world-from-states.png">
+
+What happened here? Even though we didn't specify a single column from the `states` table, the database engine is _still_ accessing the `states` table. Because after all, we did _explicitly_ include `FROM states` in our query. And the database engine, unassuming and obedient as it is, has no choice but to follow our instructions, as nonsensical as they are.
+
+So how do we interpret the results -- 52 rows of `Hello, world`? By including `FROM states` in our query, we essentially asked the database engine to fetch every record, i.e. _row_, in the `states` table, but none of the actual data of those records, i.e. the _columns_. Instead, we only specified the string literal `Hello, world`, and that's exactly what we get for _every record_ in the `states` table.
+
+If we instead query `FROM congressional districts`, we can guess what happens: 437 rows of `Hello, world`.
+
+### Asking for a literal string and a column
+
+OK, let's ask for the `name` column of `states`, along with `Hello, world`. Again, we use __commas__ to separate the different values that we want. 
+
+
+```sql
+SELECT name, 'Hello, world'
+FROM states LIMIT 10;
+```
+Here's the top ten rows of the 52 results:
+
+|         name         | 'Hello, world' |
+|----------------------|----------------|
+| Alabama              | Hello, world   |
+| Alaska               | Hello, world   |
+| Arizona              | Hello, world   |
+| Arkansas             | Hello, world   |
+| California           | Hello, world   |
+| Colorado             | Hello, world   |
+| Connecticut          | Hello, world   |
+| Delaware             | Hello, world   |
+| District of Columbia | Hello, world   |
+| Florida              | Hello, world   |
+{:.table-sql}
+
+Again, that column of `Hello, world` string literals is nonsensical. But by including the `name` column, we can at least confirm that the database engine is accessing the `states` table.
+
+### A `name` column by any other literal `'name'`...
+
+__Quick brain teaser:__ what happens if we single-quote the column name `name` in our query? Again, remember how the database engine makes _no assumptions_, even if our query is _clearly_ stupid and pointless.
+
+~~~sql
+SELECT 'name', 'Hello, world'
+FROM states;
+~~~
+
+The obedient database engine interprets our query code exactly as we wrote it, including the request for a string literal value of `name`, and doesn't attempt to save us from getting 52 rows of useless results:
+
+|  'name' | 'Hello, world'  |
+|---------+-----------------|
+|  name   | Hello, world    |
+|  name   | Hello, world    |
+|  name   | Hello, world    |
+|  name   | Hello, world    |
+|  name   | Hello, world    |
+|  name   | Hello, world    |
+|  name   | Hello, world    |
+{:.table-sql}
+
+Here's a typical mistake with the quotation marks; can you predict what the result will be?
+
+~~~sql
+SELECT 'name, total_population'
+FROM states;
+~~~
+
+And here's a more common and subtle mistake that will make (slightly) more sense when we cover the concept of __aliasing__:
+
+~~~sql
+SELECT name 'Hello, world'
+FROM states;
+~~~
+
+|  Hello, world          |
+|------------------------|
+|  Alabama               |
+|  Alaska                |
+|  Arizona               |
+|  Arkansas              |
+|  California            |
+{:.table-sql}
+
+Here's a variation of that mistaken query, with even more confusing results:
+
+```sql
+SELECT 'Hello, world' name  
+FROM states;
+```
+
+|  name          |
+|----------------|
+|  Hello, world  |
+|  Hello, world  |
+|  Hello, world  |
+|  Hello, world  |
+|  Hello, world  |
+|  Hello, world  |
+|  Hello, world  |
+|  Hello, world  |
+{:.table-sql}
+
+
+
+
+## The difference between a syntax error and incorrect results
+
+Before moving on, it's important to point out the common characteristic in every erroneous query in the previous section: _none_ of the queries contained __SQL syntax errors__. The _results_ may have been erroneous as far as we humans are concerned. But they were perfectly valid SQL as far as the database engine is concerned. That's why none of the queries raised an _error message_ from the SQL interpreter.
+
+One of my biggest pet peeves is when novice programmers say, *"There's something wrong with my code"*. Or, the maddeningly vague, *"It didn't work."* Both complaints have a fatal flaw in thinking: that there is only one way for things to work. Or rather, that there is only one kind of error.
+
+We've already seen how the database engine does not protect us from blatantly stupid queries. Because the database engine only cares about whether we give it valid and proper SQL syntax. It doesn't care about what we _want_ from the results, such as, say..._accuracy_. That's why you should consider yourself _incredibly_ lucky when a bad query results in an __error message__. Because there are plenty of database queries that are _fine_ to the computer, but catastrophic as far as humans are concerned.
+
+
+### Actual `FROM` errors
+
+So let's make some _actual_ SQL errors. Here's an obvious one:
+
+~~~sql
+SELECT name, Hello, world 
+FROM states;
+~~~
+
+```
+no such column: Hello
+```
+
+Wrapping up keywords as literal string values is a sure way to screw up a query: 
+
+~~~sql
+SELECT name 
+'FROM' states;
+~~~
+
+It's so nonsensical to the database engine that it can't even begin to guess how badly we've screwed up:
+
+```
+near "states": syntax error
+```
+
+# The meaning quotation marks (double-quotes)
+
+Before ending this lesson, I want to cover one more seemingly minor syntax "feature" of SQL (specifically, SQLite's flavor), because I plan on including it in subsequent examples.
+
+We've learned how the __apostrophe__, i.e. the "single-quote", is used to denote literal string values:
+
+~~~sql
+SELECT 'Hello world!';
+~~~
+
+__Quotation marks__, which I will informally refer to as "double-quote marks", denote a different kind of value as far as SQLite is concerned.  Instead of a _string literal value_, double-quote marks denote values that refer to  _actual names_. Such as the actual names of tables and columns in the database. 
+
+For the [Census dataset](/files/data/starterpack/census-acs-1year/acs-1-year-2015.sqlite) we've been using, the __table__ names are `states`, `places`, and `congressional_districts`. And the __column__ names include `name`, `total_population`, `white`, `black`, `below_poverty`, and `foreign_born_population`, among others.
+
+This is where the double-quote marks fit into a typical query:
+
+~~~sql
+SELECT "name", "total_population"
+FROM "states";
+~~~
+
+And the results, as visually rendered by a SQL client:
+
+<img src="images/db-browser-select-doublequote-results-sample.png" alt="db-browser-select-doublequote-results-sample.png">
+
+And just to reiterate the fundamental difference between single-quote and double-quote marks:
+
+~~~sql
+SELECT "name", 'name', 
+"total_population", 'total_population'
+FROM "states";
+~~~
+
+The top 5 rows from the results:
+
+|  name       | 'name' | total_population | 'total_population'  |
+|-------------+--------+------------------+---------------------|
+|  Alabama    | name   | 4858979          | total_population    |
+|  Alaska     | name   | 738432           | total_population    |
+|  Arizona    | name   | 6828065          | total_population    |
+|  Arkansas   | name   | 2978204          | total_population    |
+|  California | name   | 39144818         | total_population    |
+{:.table-sql}
+
+
+Or, if you prefer the SQL graphical client screenshot:
+
+<img src="images/select-from-single-and-double-quoted-columns-dbbrowser.png" alt="select-from-single-and-double-quoted-columns-dbbrowser.png">
+
+
+## The annoying tolerance of SQLite
+
+One thing you might have noticed in your SQL client is that the _syntax highlighting_ makes no distinction, color-wise, for tokens enclosed in single-quotes versus double-quotes. For example, in DB Browser, double-quoted and single-quoted strings are __red__ alike:
+
+
+<img src="images/select-from-single-and-double-quoted-just-the-query-db-browser.png" alt="select-from-single-and-double-quoted-just-the-query-db-browser.png">
+
+&ndash; which is kind of an annoying inconvenience when it comes to reading the query to examine it for errors. However, there's a good reason why DB Browser and other syntax-highlighting clients have this ambiguous syntax-highlighting: because SQLite (and other SQL variants), will sometimes treat single-quotes and double-quotes as _interchangeable_, depending on the context.
+
+For example, before I executed the query for myself, I would have been good money that enclosing the _table name_ in single quotes, e.g. `FROM 'states'` would result in a syntax error:
+
+~~~sql
+SELECT name, total_population
+FROM 'states';
+~~~
+
+Nope:
+
+<img src="images/single-quote-table-name-is-all-ok.png" alt="single-quote-table-name-is-all-ok.png">
+
+
+I _did_ know that the SQLite interpreter, when encountering double-quoted values that refer to non-existent column names, would treat those double-quoted values as literal string values rather than throw an error:
+
+~~~sql
+SELECT "name", "ASDKFJADSFKL!!!"
+FROM "states";
+~~~
+
+<img src="images/double-quote-blahblah.png" alt="double-quote-blahblah.png">
+
+My preference as a programmer and teacher of SQL is that the SQLite interpreter would see that `"ASDKFJADSFKL!!!"` as a column name, try to locate that column in the `states`, and then raise an error message, e.g. `no such column "ASDKFJADSFKL!!!"`.  But SQLite doesn't because its designers thought that SQLite could do a _little_ work on behalf of the user, rather than being so strict about syntax and the names of things.
+
+This is actually quite a reasonable and human-friendly approach, which is indicative of how much the SQLite database is beloved and used in today's software. It's kind of annoying to me, as a teacher, when I'm trying to scare students into being extra careful with their code.
+
+The designers of the DB Browser client also acted reasonably by deciding to syntax-highlight all quoted values, single _or_ double, as strings. Because who can really know what the user actually wants. Or how the SQLite database engine will compensate for the user's mistakes.
+
+
+
+### Optional-schoptional
+
+If you've followed this lesson from the beginning, you might recall that we started out with this hypothetical example in which we double-quoted the column and table names:
+
+~~~sql
+SELECT "age", "name"
+FROM "people";
+~~~
+
+But inexplicably, in the example queries for the Census database, I advised you to drop the double-quotes for simplicity's sake:
+
+~~~sql
+SELECT name, total_population, 'hello'
+FROM states;
+~~~
+
+And if you're using DB Browser, you'll notice that it makes a smart judgment call that the token, `states`, is likely a table name, and is thus highlighted in __bold cyan__. And the column names of `name` and `total_population` are   distinctly-styled from the literal string value of `hello`, so that every part of the query is easy to visually parse:
+
+<img src="images/db-browser-nice-syntax-hilites.png" alt="db-browser-nice-syntax-hilites.png">
+
+Contrast the readability of that syntax highlighting with the "properly" double-quoted query. Not only do we have to deal with the extra visual noise of those double-quotation marks, but we can't tell table/column names from literal string values: 
+
+<img src="images/db-browser-nice-syntax-hilites.png" alt="db-browser-nice-syntax-hilites.png">
+
+And not to sound like a hypocrite, but when I write SQL queries for my own work, I almost never double-quote table/column names. Because it's annoying.
+
+That said, I highly recommend -- nay, I _urge_ you, as a novice, to get into the habit of double quoting table and column names. 
+
+Two main reasons:
+
+1. In the real-world, we'll encounter databases that have column/table names that simply cannot be left unquoted, such as a column name of `"First Name"`. It's best to get in the habit of double-quoting things, especially if you, like me, are prone to mix up single- and double- quotes in SQLite.
+2. When our SQL queries get more complicated, and real-world database naming conventions get sloppier, it can be hard to tell what is meant to be a table/column name, and what is meant to be a SQL keyword. For example, when a data table has a column named `COUNT`, which is easy to confuse with the SQL function named `COUNT`. Double-quotes help alleviate that ambiguity.
+
+
+# Conclusion
+
+This was a very long tutorial despite `FROM` being quite possibly the simplest aspect of the SQL syntax. As long as you remember how the `SELECT` keyword works with the `FROM` clause, e.g.
+
+~~~sql
+SELECT "first name", "birthdate"
+FROM "My Family Table";
+~~~
+
+&ndash; then you at least know how to write the most common kind of data-fetching query.
+
+On a concept level, the fact that the `FROM` clause exists in SQL is a reflection of the reality that databases don't just have a single, "default" table to work with, as most spreadsheets do. With databases -- and all programming in general -- we, the human user, are required to know the details of our data, and more importantly, the details of what we want.
+
+So far, we've learned how to dictate the _horizontal_ arrangement of the results returned by a SQL query, i.e. the columns. In the [next lesson](/tutorials/sqlite-in-depth-sort-limit), we'll learn the syntax to specify the _vertical_ arrangement of results. Or, as most people refer to it, the _sorting order_. 
+
+
+
