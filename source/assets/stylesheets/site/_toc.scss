@@ -1,3 +1,9 @@
+.toc-card{
+    .header{
+        @extend .h4;
+    }
+}
+
 .table-of-contents{
     ul{
         li{

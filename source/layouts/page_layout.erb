@@ -14,12 +14,36 @@
                   <div class="card-block">
                     <%= markdownify page_nutgraf %>
 
-            <div class="toc-card">
-              <div class="header">Table of contents</div>
-              <div class="body">
-                <%= partial '/layouts/misc_partials/toc' %>
-              </div>
-            </div>
+
+                      <% if page_sequence? %>
+                        <section class="sequence sec">
+                          <p>
+                            <em>This article is part of a series:</em>
+                            <% if (o = page_landing_in_sequence) %>
+                                <%=link_to o.title, o.url %>
+                            <% end %>
+                            </p>
+
+
+                          <% if (o = page_previous_in_sequence) %>
+                            <div>
+                              Previous article: <%=link_to o.title, o.url %>
+                            </div>
+                          <% end %>
+                          <% if (o = page_next_in_sequence) %>
+                            <div>
+                              Next article: <%=link_to o.title, o.url %>
+                            </div>
+                          <% end %>
+                        </section>
+                      <% end %>
+
+                      <div class="toc-card sec">
+                        <div class="header">Table of contents</div>
+                        <div class="body">
+                          <%= partial '/layouts/misc_partials/toc' %>
+                        </div>
+                      </div>
 
 
                   </div>
@@ -39,24 +63,56 @@
       </section>
 
 
-      <% if page_references? %>
-        <section id="pagereferences" class="sec">
-          <div class="container">
-            <h4>References</h4>
-            <ul class="list-unstyled references">
-              <% page_references.each do |r| %>
-                <li>
-                 <%= partial '/layouts/misc_partials/reference_item',
-                     :locals => {:r => r} %>
-                </li>
-              <% end %>
-            </ul>
-          </div>
-        </section>
-      <% end %>
-
 
     <section id="reefer" class="sec">
+          <% if page_sequence? %>
+          <div class="container">
+
+            <section class="sequence sec">
+
+              <p>
+                <em>This article is part of a series:</em>
+                <% if (o = page_landing_in_sequence) %>
+                    <%=link_to o.title, o.url %>
+                <% end %>
+                </p>
+
+
+              <% if (o = page_previous_in_sequence) %>
+                <div>
+                  Previous article: <%=link_to o.title, o.url %>
+                </div>
+              <% end %>
+              <% if (o = page_next_in_sequence) %>
+                <div>
+                  Next article: <%=link_to o.title, o.url %>
+                </div>
+              <% end %>
+            </section>
+
+              </div>
+
+          <% end %>
+
+        <% if page_references? %>
+          <section id="pagereferences" class="sec">
+            <div class="container">
+              <h4>References</h4>
+              <ul class="list-unstyled references">
+                <% page_references.each do |r| %>
+                  <li>
+                   <%= partial '/layouts/misc_partials/reference_item',
+                       :locals => {:r => r} %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </section>
+        <% end %>
+
+
+
+
       <div class="container">
         <%= yield_content :reefer %>
       </div>

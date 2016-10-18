@@ -1,5 +1,7 @@
 class ItemResource < ContentResource
   def initialize(resource)
+    raise ArgumentError.new("the resource parameter is nil, rather than an object") if resource.nil?
+
     @url    = resource.url
     @path   = resource.path
     @image_url = resource.data.image_url

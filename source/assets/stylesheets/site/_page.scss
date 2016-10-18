@@ -12,6 +12,13 @@ h1.page-title{
     margin-top: 2.5em;
 }
 
+.well{
+    //shortcut for .card-content, just padding for now
+    padding: 1.0rem;
+    border: thin solid #ccc;
+
+}
+
 
 ul{
     padding-left: 1em;
@@ -37,6 +44,15 @@ blockquote{
     .description{
         font-size: 0.9em;
     }
+}
+
+#reefer{
+    border-top: 2px dashed #aaa;
+
+    .sequence{
+        @extend .well;
+    }
+
 }
 
 #contentbody{

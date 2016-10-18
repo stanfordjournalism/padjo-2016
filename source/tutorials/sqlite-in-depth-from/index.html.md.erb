@@ -2,10 +2,10 @@
 title: "SQL In-Depth: The FROM Clause"
 description: |
   We want to select data FROM a data table.
-nav:
+sequence:
   next: /tutorials/sqlite-in-depth-sort-limit
   previous: /tutorials/sqlite-in-depth-select
-  landing: /tutorials/sqlite-unit-overview-select-sort-transform
+  landing: /tutorials/sqlite-overview-select-sort-transform
 references:
   - title: The homepage for the Census American Community Survey
     url: https://www.census.gov/programs-surveys/acs/
@@ -57,9 +57,14 @@ And that's all there is to the `FROM` clause. Unlike `SELECT`, which is a kind o
 > Could you open the file named "people" and get me the listed ages and names?
 
 
-## Spreadsheets "know" what to do
 
-The other confusing thing about SQL and databases is the fact that we need to *ask* for anything at all. When we open a spreadsheet in Excel, we expect Excel to load the spreadsheet's data and then make it immediately accessible to us. If the spreadsheet contains multiple sheets, the first/default sheet is made visible, and we can navigate to the other sheets on our own.
+# Spreadsheets versus databases
+
+Let's take a step back to consider a fundamental difference between the nature -- and the default behavior -- of spreadsheets and databases.
+
+## Spreadsheets "know" what to do with a simple double-click
+
+When we open a spreadsheet in Excel, we expect Excel to load the spreadsheet's data and then make it immediately accessible to us. If the spreadsheet contains multiple sheets, the first/default sheet is made visible, and we can navigate to the other sheets on our own.
 
 For example, take a look at this [spreadsheet of U.S. Census Data](https://docs.google.com/spreadsheets/d/1F9VvxfH_Ta0XC5eO5m1a0Ymwd_9GUZxLf3PIk-6BbRw/edit#gid=1827400384), which includes demographic data that [I've extracted from the American Community Survey 1-Year Data for 2015](http://www.census.gov/data/developers/data-sets/acs-1yr.html). 
 
@@ -181,10 +186,10 @@ Here's the first 5 rows of the results as returned by SQLite:
 
 And here's what it might look like in your client -- take a quick note how the console log at the bottom helpfully states the number of rows returned:
 
-```
+~~~
 52 rows returned in 0ms from: SELECT name, total_population
 FROM states
-```
+~~~
 
 <img src="images/select-states-name-totalpop-from-acs1yr.png" alt="select-states-name-totalpop-from-acs1yr.png">
 
@@ -207,10 +212,10 @@ Anyway, to avoid this confusion as you're following along, you can __highlight__
 
 As I mentioned earlier, all 3 tables have the same data structure. Let's run the same selection of columns but extract it from the `places` table:
 
-```sql
+~~~sql
 SELECT name, total_population
 FROM places;
-```
+~~~
 
 
 There's a lot more "places" than the 50 United States (plus 2 territories), as you might see in the console log shown by your SQLite client: 596 to be exact.
@@ -221,10 +226,10 @@ There's a lot more "places" than the 50 United States (plus 2 territories), as y
 Let's add another column to the fun: `white`, which refers to the number of persons counted by the Census as being Caucasian. And let's put that column _between_ `name` and `total_population`
 
 
-```sql
+~~~sql
 SELECT name, white, total_population
 FROM places;
-```
+~~~
 
 The results will be a bit confusing: where we expect numbers for the `white` column, we'll instead see `NULL`, which is not a __literal string value__, but a special value in SQL that means: nothing, nada, nil, zilch, etc. `NULL` is a concept we'll cover in more detail later, it's enough to know that it means _nothing_ (which is different than `0`)
 
@@ -271,48 +276,62 @@ Even as a purportedly experienced programmer who should know better, it took me 
 If you're new to programming, it can/will be frustrating having to learn what seems like so much code to do what you were able to do with a couple of clicks in a spreadsheet. But think of the extra investment of time this way: we're learning how to teach our computers exactly what we want them to do with our data. It's more work up front, but the alternative is a passive life in computation, in which we depend on spreadsheet-makers to create (admittedly *powerful*) buttons and then to teach us how to push those buttons.
 
 
-# SQL syntax practice with FROM
+# Practicing the use and misuse of the FROM clause
 
-We know how to use `FROM` and, as I said earlier, it's a simple keyword as far as SQL goes. Where things get complicated -- though no fault of `FROM` itself -- is applying all the syntax details we've learned so far.
+We know how to use `FROM`. As I asserted earlier, it's a simple keyword and clause as far as SQL goes. 
 
-Keep the Census ACS database open in your SQLite client ([here's the link](/files/data/starterpack/census-acs-1year/acs-1-year-2015.sqlite) to download it in case you've skipped the previous section). 
+Where things get complicated -- though no fault of `FROM` itself -- is applying all the syntax rules we've learned so far.
 
-## Hello...states?
+Keep the Census ACS database open in your SQLite client ([here's the link](/files/data/starterpack/census-acs-1year/acs-1-year-2015.sqlite) to download it in case you've skipped the previous section), as we will continue to query it in these next examples.
 
-Let's start off with good ol' "Hello, world" from the very first lesson, which should work exactly as before:
+## Hello, 'world'. Hello, states?
+
+Let's start from what we know: "Hello, world"
 
 ~~~sql
 SELECT 'Hello, world';
 ~~~
 
-OK, if SQL is as consistent a language as I've claimed, then piling on the `FROM states` clause that we executed in the previous example queries should also "just work" -- _without changing what we've selected_, i.e. `Hello, world`:
+If SQL is as consistent a language as I've claimed, and the following independent and dependent clauses are valid SQL:
+
+1. `SELECT 'Hello, world'`
+2. `FROM states`
+
+Then combining the two into a query should also be valid SQL syntax:
 
 ~~~sql
 SELECT 'Hello, world'
 FROM states;
 ~~~
 
-OK, this is where things might get weird. Mostly because this is a query that has no real-world value, which means that its results also have no real-world value, but we're doing this for the intellectual exercise.
+OK, this is where things might get weird. But this is because this is a query that is _valid SQL_, but not much real-world relevance, just like the "Hello, world"-query in general. Which means that the results won't have much real-world relevance.
+
+But we're doing this for the intellectual exercise and, like "Hello, world", just to confirm that at least the _logic_ is consistent.
 
 Here's what your results should look like: a long list of `Hello, world` values, one for each of the  __52__ rows in the `states` table:
 
 <img src="images/select-hello-world-from-states.png" alt="select-hello-world-from-states.png">
 
-What happened here? Even though we didn't specify a single column from the `states` table, the database engine is _still_ accessing the `states` table. Because after all, we did _explicitly_ include `FROM states` in our query. And the database engine, unassuming and obedient as it is, has no choice but to follow our instructions, as nonsensical as they are.
+What happened here? Even though we didn't specify a single _actual_ column from the `states` table, e.g. `name` or `total_population`, the database engine is _still_ accessing the `states` table. Because we _did_ explicitly include `FROM states` in our query. And the database engine, unassuming and obedient as it is, has no choice but to follow our instructions to the letter, the results be damned.
 
-So how do we interpret the results -- 52 rows of `Hello, world`? By including `FROM states` in our query, we essentially asked the database engine to fetch every record, i.e. _row_, in the `states` table, but none of the actual data of those records, i.e. the _columns_. Instead, we only specified the string literal `Hello, world`, and that's exactly what we get for _every record_ in the `states` table.
+So how do we interpret the results, i.e. those 52 rows of `Hello, world`? 
 
-If we instead query `FROM congressional districts`, we can guess what happens: 437 rows of `Hello, world`.
 
-### Asking for a literal string and a column
+By including `FROM states` in our query, we essentially demanded the database engine to fetch every record, i.e. _row_, from the `states` table. However, we didn't ask for any actual data values from records, i.e. the _columns_.  Instead, we specified just the string literal `Hello, world`. 
+
+And that's exactly what we get -- for each and every of the __52__ records in the `states` table.
+
+What if we queried `FROM congressional districts`? Same thing, except the result set would number __437 rows__ of `Hello, world`.
+
+### Asking for a literal string compared to asking for a column name
 
 OK, let's ask for the `name` column of `states`, along with `Hello, world`. Again, we use __commas__ to separate the different values that we want. 
 
 
-```sql
+~~~sql
 SELECT name, 'Hello, world'
 FROM states LIMIT 10;
-```
+~~~
 Here's the top ten rows of the 52 results:
 
 |         name         | 'Hello, world' |
@@ -378,10 +397,10 @@ FROM states;
 
 Here's a variation of that mistaken query, with even more confusing results:
 
-```sql
+~~~sql
 SELECT 'Hello, world' name  
 FROM states;
-```
+~~~
 
 |  name          |
 |----------------|
@@ -398,13 +417,24 @@ FROM states;
 
 
 
-## The difference between a syntax error and incorrect results
+## The huge difference between "wrong" code, "wrong" results, and syntax errors
 
-Before moving on, it's important to point out the common characteristic in every erroneous query in the previous section: _none_ of the queries contained __SQL syntax errors__. The _results_ may have been erroneous as far as we humans are concerned. But they were perfectly valid SQL as far as the database engine is concerned. That's why none of the queries raised an _error message_ from the SQL interpreter.
+What did all of the queries in the previous section have in common? Besides having nonsensical results.  Yes, the queries were _problematic_. But they were all _problematic_ in one important, similar way.  
 
-One of my biggest pet peeves is when novice programmers say, *"There's something wrong with my code"*. Or, the maddeningly vague, *"It didn't work."* Both complaints have a fatal flaw in thinking: that there is only one way for things to work. Or rather, that there is only one kind of error.
+The problematic aspect: none the queries, as executed, had actual __SQL syntax errors__. 
 
-We've already seen how the database engine does not protect us from blatantly stupid queries. Because the database engine only cares about whether we give it valid and proper SQL syntax. It doesn't care about what we _want_ from the results, such as, say..._accuracy_. That's why you should consider yourself _incredibly_ lucky when a bad query results in an __error message__. Because there are plenty of database queries that are _fine_ to the computer, but catastrophic as far as humans are concerned.
+Or more to the point: they were _correct_ as far as SQL syntax as the database engine is concerned. If there _were_ an error, the database engine would raise an error, such as `no such column`. But if the SQL is valid, the query can be _successfully_ executed by the database engine.
+
+A perfectly correct SQL query can return a set of results that we didn't want or expect. Not only does this _not_ mean the query was wrong, it doesn't mean that the results are wrong. Because maybe we, the user, have incorrect assumptions about what the database contains.
+
+Or, more to the point: the database engine cannot save us from inaccuracies in the data, or in how we wrote the query, or in our expectations. Think of the database like the fabled  magical genie that grants three wishes; if we make a stupid request, it will give us stupid results, and it's all our fault.
+
+This is why one of my biggest pet peeves is when novice programmers say, *"There's something wrong with my code"*. Or, the maddeningly vague, *"It didn't work."* Both complaints have a fatal flaw in thinking: that there is only one way for things to work. Or rather, that there is only one kind of error.
+
+So the database engine does not protect us from blatantly stupid queries. Nor does it have any idea if the results are relevant to our expectations. That's why we should consider yourselves _incredibly_ lucky when a bad query results in an __error message__. We have to fix our query to get past the error message, which gives us a chance to notice fix any errors of assumption in the query.
+
+The scenario that will keep us up at night is when the computer thinks a query is _correct_. But the results, as far as what we humans need to know, could be catastrophic.
+
 
 
 ### Actual `FROM` errors
@@ -416,9 +446,9 @@ SELECT name, Hello, world
 FROM states;
 ~~~
 
-```
+~~~
 no such column: Hello
-```
+~~~
 
 Wrapping up keywords as literal string values is a sure way to screw up a query: 
 
@@ -429,11 +459,11 @@ SELECT name
 
 It's so nonsensical to the database engine that it can't even begin to guess how badly we've screwed up:
 
-```
+~~~
 near "states": syntax error
-```
+~~~
 
-# The meaning quotation marks (double-quotes)
+# The meaning of double-quote marks
 
 Before ending this lesson, I want to cover one more seemingly minor syntax "feature" of SQL (specifically, SQLite's flavor), because I plan on including it in subsequent examples.
 
@@ -458,6 +488,8 @@ And the results, as visually rendered by a SQL client:
 
 <img src="images/db-browser-select-doublequote-results-sample.png" alt="db-browser-select-doublequote-results-sample.png">
 
+## Single- vs double- quotes
+
 And just to reiterate the fundamental difference between single-quote and double-quote marks:
 
 ~~~sql
@@ -481,6 +513,11 @@ The top 5 rows from the results:
 Or, if you prefer the SQL graphical client screenshot:
 
 <img src="images/select-from-single-and-double-quoted-columns-dbbrowser.png" alt="select-from-single-and-double-quoted-columns-dbbrowser.png">
+
+
+- Single-quotes, e.g. `'birthday'`: denote literal string values, e.g. the word, _birthday_, literally.
+- Double-quotes, e.g. `"birthday"`: denotes a reference to some attribute of the database, e.g. a table has column (i.e. header) of `birthday` 
+
 
 
 ## The annoying tolerance of SQLite
@@ -521,7 +558,7 @@ The designers of the DB Browser client also acted reasonably by deciding to synt
 
 
 
-### Optional-schoptional
+### Optional-schmoptional
 
 If you've followed this lesson from the beginning, you might recall that we started out with this hypothetical example in which we double-quoted the column and table names:
 

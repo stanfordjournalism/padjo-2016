@@ -28,7 +28,7 @@ task :makepage, [:path] do |t, args|
         puts "Skipping: #{full_destpath} exists"
     else
         full_destdir.mkpath
-        full_destpath.write(PAGE_FRONTMATTER)
+        full_destpath.write(PAGE_FRONTMATTER.sub(/title: Title/, "title: #{relative_destpath}"))
         puts("Creating: #{full_destpath}")
     end
 end
