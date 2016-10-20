@@ -1,7 +1,802 @@
 ---
-title: "SQL Overview: Selecting, sorting, and transforming data"
+title: "SQL Part 1: Select, Sort, and Transform Data"  
 description: |
-  Basic operations of working with data using SQL, and the basic patterns of SQL syntax itself TK
+  This this first unit of SQL lessons, we cover the syntax and concepts to fetch, sort, and -- as we've done using spreadsheet functions -- transform data values. 
+
+sequence:
+  previous: /tutorials/data-primer-census-acs1-demographics
 ---
 
+# An overview of selecting, sorting, and transforming data 
+
+This tutorial has two roles:
+
+##### 1. A walkthrough of basic SQL syntax and concepts, with a variety of exercises and real-world data to practice
+
+
+We are using Census data for this SQL walkthrough. I won't be spending much time explaining the details or the foundational basics, because we don't need to worry about them yet. Instead, we'll focus on the "big picture" of learning and using SQL. The details can come later. 
+
+##### A landing page for the first _unit_ of SQL lessons
+
+The details -- from how to write "Hello, world" in SQL (and re-write, break, and re-write), to the difference between single-quote-marks and double-quote-marks -- will be covered in standalone lessons, to ease the cognitive overload. For example, last year, `SELECT` and `FROM` [were in the same lesson](http://2015.padjo.org/tutorials/sql-basics/select-and-from/). Now, they're in 2 separate lessons. 
+
+
+Note: These are still being refactored and cleaned from when they were just one, giant book of a webpage. Apologies for the delay, the rewrite/revisions ended up being more in-depth than anticipated:
+
+- The SELECT statement: our most common kind of query. Virtually every program we write starts off with `SELECT`.
+- The FROM clause: A simple keyword used to specify exactly what datatable to select data from.
+- LIMIT and ORDER: Sort results in the order you need; limit the distraction and damage from data overload.
+- Using functions to transform data values: Remember doing functions in spreadsheets. Same deal with SQL. 
+- Aliasing: real-world databases have awful, confusing names. We can specify our own labels for tables, columns, and calculations, to write more readable queries. 
+
+   
+
+
+
+## Follow the walkthrough
+
+
+So please read along and do the exercises, as knowledge and competency is not required. You'll get some experience from just typing out the queries.
+
+- Start off with [this backgrounder on Census data]([you read the data primer on Census data?](/tutorials/data-primer-census-acs1-demographics))
+- Download the database in [SQLite format (here's the link](/files/data/starterpack/census-acs-1year/acs-1-year-2015.sqlite)) and open it in a SQLite client, 
+  -   e.g. [DB Browser](http://sqlitebrowser.org/).
+- Look at a copy of the data on [Google Sheets](https://docs.google.com/spreadsheets/d/1F9VvxfH_Ta0XC5eO5m1a0Ymwd_9GUZxLf3PIk-6BbRw/edit#gid=1827400384). Anticipate interesting questions. Virtually all of the walkthrough's exercises can be done in a spreadsheet. 
+
+
+
+# And here's the walkthrough
+
+Each header is a new question. Some questions have multiple queries and examples
+
+
+For what it's worth, the format of this walkthrough is a lot like the [take-home midterm from last year](http://2015.padjo.org/assignments/midterm-wsj-medicare-walkthrough/), except a lot easier.
+
+
+### 1. A simple list of states
+
+
+> Make a simple list of U.S. states  with 3 columns: the name of the state, total population, median household incomes,
+
+This is a nice warmup: print 3 columns for each of the `states` records. This simple exercise also makes clear some fundamental differences in how work we work with spreadsheets versus databases.
+
+You know how to solve this challenge in a spreadsheet. [Make a copy of my Google spreadsheet](https://docs.google.com/spreadsheets/d/1F9VvxfH_Ta0XC5eO5m1a0Ymwd_9GUZxLf3PIk-6BbRw/edit#gid=1827400384). Open it in a webbrowser. Boom, you're pretty much done -- the first tab in the spreadsheet is `states` 
+
+
+Now, with a database, we can't even open it in a web browser. We have to download and install a special client -- such as [DB Browser](http://sqlitebrowser.org/). Open the database file with DB Browser. And even with the niceties that DB Browser has, we have to _work_ to just even see our data.
+
+And in the client view that we'll be spending most of our time: it's just a blank text box:
+
+<img src="images/empty-dbbrowser-sql.jpg" alt="empty-dbbrowser-sql.jpg">
+
+To get data, we have to give commands: 
+
+~~~sql
+SELECT name, total_population, median_household_income
+FROM states;
+~~~
+
+
+This query tells the database engine that we want 3 columns: `name`, `total_population`, and `median_household_income`. And we want these columns from the `states` table, because unlike a spreadsheet, there is no default table. And database engine won't assume for us, even when the database has just one table. 
+
+If you're following along on your own computer and you're using a user-friendly client, just re-type the query into the query box. Then press the "Execute button":
+
+<img src="images/dbbrowser-first-exercise-results.png" alt="dbbrowser-first-exercise-results.png">
+
+For the remainder of this walkthrough, I won't be using screenshots of running SQLite queries using a client like DB Browser. It doesn't matter what client we use, it's all about the code we write and the results we get.
+
+I'll be portraying the results as a table to keep things simple; in this example, I've chopped the list from all 50+ states to just the first few, for brevity's sake.
+
+
+|  name                 | total_population | median_household_income  |
+|-----------------------+------------------+--------------------------|
+|  Alabama              | 4858979          | 44765                    |
+|  Alaska               | 738432           | 73355                    |
+|  Arizona              | 6828065          | 51492                    |
+|  Arkansas             | 2978204          | 41995                    |
+|  California           | 39144818         | 64500                    |
+|  Colorado             | 5456574          | 63909                    |
+|  Connecticut          | 3590886          | 71346                    |
+{:.table-sql}
+
+
+OK, writing that SQL query was undoubtedly more _upfront work_ just to get data, compared to the average spreadsheet. Learning a new language is tough. Learning grammar is always a pain. It might take you some time when you're at the point where it doesn't take you 10 minutes to go from blank scree to usable code.
+
+But forget about that now. On the positive side, when we wrote the query and executed it, we got exactly the list we wanted. A row for each state, and 3 columns in the exact order.
+
+
+
+Meanwhile, with the [spreadsheet](https://docs.google.com/spreadsheets/d/1F9VvxfH_Ta0XC5eO5m1a0Ymwd_9GUZxLf3PIk-6BbRw/edit#gid=1824096163) -- just because you opened a spreadsheet doesn't mean you accomplished the task. The data is supposed to be a 3 column list, not the entire spreadsheet. 
+
+To do the work on the spreadsheet version, we would have to:
+
+1. Make a new copy of the `states` spreadsheet, assuming we want to keep using its data.
+2. Manually hide or delete every column that is not `name`, `total_population`, or `median_household_income`. 
+3. Rearrange the existing columns as necessary.
+
+
+Writing SQL will feel slower at first because...__it's a new language__. But with a little practice and familiarity, your database programming can match, if not surpass, your speed with spreadsheets.
+
+
+
+### 2. Sort states by population
+
+> List the names of each state and their total population. Sort the list in descending order of total population.
+
+The `states` table seems to have been created by inserting records in alphabetical order of names. Not a bad default, but now we want to see states listed in descending order (biggest first) of `total_population`.
+
+Doing this in a spreadsheet is pretty easy: you sort the `total_population` column. One drawback, though, is that the spreadsheet is _changed_. Sure, you can change it back by sorting it by name. But, not only is that more work, humans can be notoriously bad at undoing changes to data.
+
+Consider the SQL approach. 
+
+Again, we do have to write out a query. We have to specify each column name and the specific table. And, for sorting, there's a new SQL keyword and clause `ORDER BY (somevalue) ASC (or DESC)` to learn, memorize, and screw up in the future.
+
+Here's one way to write the query (there's not much room for creativity):
+
+~~~sql
+SELECT name, total_population
+FROM states
+ORDER BY total_population DESC;
+~~~
+
+The top rows of the truncated results:
+
+|  name                 | total_population  |
+|-----------------------+-------------------|
+|  California           | 39144818          |
+|  Texas                | 27469114          |
+|  Florida              | 20271272          |
+|  New York             | 19795791          |
+|  Illinois             | 12859995          |
+|  Pennsylvania         | 12802503          |
+|  Ohio                 | 11613423          |
+|  Georgia              | 10214860          |
+|  North Carolina       | 10042802          |
+|  Michigan             | 9922576           |
+|  New Jersey           | 8958013           |
+{:.table-sql}
+
+And again, unlike with a spreadsheet, we didn't have to do a bunch of work to hide all the unwanted column.
+
+In fact, an important though subtle aspect of how SQL handles SELECT queries is that the queries __do not alter__ the data, nor anything else about the tables.
+
+For all intents and purposes, our queries create new tables of results. We can tweak queries as much as we want without worrying that we've accidentally changed something, anywhere in our database. And the table that we've queried for results, we can feel confident that, extreme scenarios aside, its integrity and consistency will be intact.
+
+In fact, reliability and consistency are the features that make databases so invaluable and ubiquitous in all aspects of our information and transaction-based society. Ironically, these features have almost no bearing on the data work we do as journalists, and they aren't even the most interesting features when it comes to data work. Though, obviously it is nice to run queries on a database, and get fast, reliable results. But our query needs are just small potatoes to the average database.
+
+
+### 3. The 10 oldest states
+
+> List the names and median ages of the top 10 states, sorted by the median age in descending order
+
+Pretty similar to the previous query. But we add one more keyword and clause: `LIMIT`, which comes after `ORDER BY` and specifies the number of results to show.
+
+
+
+~~~sql
+SELECT 
+  name, median_age
+FROM 
+  states
+ORDER BY 
+  median_age DESC
+LIMIT 
+  10;
+~~~
+
+I didn't truncate the results; there are exactly 10 rows because we specified it via `LIMIT 10`:
+
+|  name          | median_age  |
+|----------------+-------------|
+|  Maine         | 44.6        |
+|  Vermont       | 43.1        |
+|  New Hampshire | 42.8        |
+|  West Virginia | 42.2        |
+|  Florida       | 41.8        |
+|  Pennsylvania  | 40.7        |
+|  Connecticut   | 40.6        |
+|  Puerto Rico   | 40.0        |
+|  Montana       | 39.9        |
+|  Delaware      | 39.7        |
+{:.table-sql}
+
+
+I love `LIMIT`. So simple, and so straight to the core of data work. We live in a world of increasing data but non-increasing attention spans.  We need as many tools to cut to the point as possible.
+
+On a sidenote: this is where I show how little I know about a modern spreadsheet. Is it fairly routine in a workflow to sort data, then limit it to the [top X rows](https://www.extendoffice.com/documents/excel/2649-excel-limit-number-of-rows-columns.html)? I suppose it can be as easy as hiding columns. But you always have to do the work to unhide things later.
+
+
+### 4. Congressional districts, ranked by difference in number of Hispanic vs. white residents
+
+> List the name of each Congressional district, as well as the difference between number of Hispanic and white residents. Show only the top 10 districts as ranked by this calculated difference
+
+
+OK, let's turn our attention to the `congressional_districts` table. The data columns are the same as they are in `states`. We're just dealing with different, smaller geographies. Also, there are a lot more Congressional districts than U.S. states.
+
+The difference between number of white residents and Hispanic residents is calculated by, subtracting `white` from `hispanic`. Or is it the other way around? 
+
+Let's try a warmup query that selects just the name of each district:
+
+
+
+
+We can add `hispanic` and `white` as 2 separate columns:
+
+~~~sql
+SELECT name, hispanic, white
+FROM congressional_districts 
+limit 10;
+~~~
+
+|  name                                                       | hispanic | white   |
+|-------------------------------------------------------------+----------+---------|
+|  Congressional District 1 (114th Congress), Alabama         | 21301    | 459077  |
+|  Congressional District 2 (114th Congress), Alabama         | 20532    | 427396  |
+|  Congressional District 3 (114th Congress), Alabama         | 21104    | 479091  |
+|  Congressional District 4 (114th Congress), Alabama         | 43398    | 574436  |
+|  Congressional District 5 (114th Congress), Alabama         | 35846    | 516031  |
+|  Congressional District 6 (114th Congress), Alabama         | 29320    | 538323  |
+|  Congressional District 7 (114th Congress), Alabama         | 21369    | 209722  |
+|  Congressional District (at Large) (114th Congress), Alaska | 51825    | 452472  |
+|  Congressional District 1 (114th Congress), Arizona         | 173716   | 367186  |
+|  Congressional District 2 (114th Congress), Arizona         | 198714   | 442634  |
+{:.table-sql}
+
+So how do we get a column containing the result of subtracting `hispanic` from `white`? Let's strip out what we `SELECT` in our query. Forget about `name`, `hispanic`, and `white`. 
+
+Let's select for `99 - 1`, as ridiculous as that might sound:
+
+~~~sql
+SELECT 99 - 1  
+FROM congressional_districts
+LIMIT 10;
+~~~
+
+The predictable, but somewhat strange results (notice the header vs the 10 result rows):
+
+|  99 - 1  |
+|----------|
+|  98      |
+|  98      |
+|  98      |
+|  98      |
+|  98      |
+|  98      |
+|  98      |
+|  98      |
+|  98      |
+|  98      |
+{:.table-sql}
+
+
+Let's get back to our previous query, now that we have a little assurance that a column can consist of a mathematical operation between two columns. And let's ditch the separate columns for `hispanic` and `white`: we just need the difference:
+
+
+~~~sql
+SELECT name, hispanic - white
+FROM congressional_districts 
+limit 10;
+~~~
+
+|  name                                                       | hispanic - white  |
+|-------------------------------------------------------------+-------------------|
+|  Congressional District 1 (114th Congress), Alabama         | -437776           |
+|  Congressional District 2 (114th Congress), Alabama         | -406864           |
+|  Congressional District 3 (114th Congress), Alabama         | -457987           |
+|  Congressional District 4 (114th Congress), Alabama         | -531038           |
+|  Congressional District 5 (114th Congress), Alabama         | -480185           |
+|  Congressional District 6 (114th Congress), Alabama         | -509003           |
+|  Congressional District 7 (114th Congress), Alabama         | -188353           |
+|  Congressional District (at Large) (114th Congress), Alaska | -400647           |
+|  Congressional District 1 (114th Congress), Arizona         | -193470           |
+|  Congressional District 2 (114th Congress), Arizona         | -243920           |
+{:.table-sql}
+
+
+We still haven't figured out what order to subtract `hispanic` from `white`. Nor have we sorted the results, which by default lead with the state of Alabama.
+
+There might not be a "correct" answer to how we subtract the values. Perhaps we're interested in districts where Hispanic residents have the most parity (or outnumber) white residents. Subtracting `hispanic - white` and sorting by biggest value first would answer our curiosity. 
+
+
+Because `hispanic - white` isn't a _column name_, per se, how do we sort it? Let's just roll with it for now:
+
+~~~sql
+SELECT name, hispanic - white
+FROM congressional_districts 
+ORDER BY hispanic - white DESC
+limit 10;
+~~~
+
+Apparently, that weird `ORDER BY` class is valid SQL:
+
+|  name                                                                    | hispanic - white  |
+|--------------------------------------------------------------------------+-------------------|
+|  Resident Commissioner District (at Large) (114th Congress), Puerto Rico | 3410957           |
+|  Congressional District 40 (114th Congress), California                  | 596400            |
+|  Congressional District 29 (114th Congress), Texas                       | 513683            |
+|  Congressional District 34 (114th Congress), Texas                       | 499374            |
+|  Congressional District 15 (114th Congress), Texas                       | 495643            |
+|  Congressional District 16 (114th Congress), Texas                       | 483470            |
+|  Congressional District 15 (114th Congress), New York                    | 479809            |
+|  Congressional District 27 (114th Congress), Florida                     | 452811            |
+|  Congressional District 28 (114th Congress), Texas                       | 451496            |
+|  Congressional District 44 (114th Congress), California                  | 446237            |
+{:.table-sql}
+
+That said, the syntax _should_ feel weird. So, let's introduce a new concept: __Aliasing__. 
+
+No mystery here: aliasing a column or table name means renaming it. This includes giving a friendlier name to ad-hoc calculated columns. Pay special note to how I use the `hdiff` alias in the `ORDER BY` clause, too:
+
+~~~sql
+SELECT name, (hispanic - white) AS hdiff
+FROM congressional_districts 
+ORDER BY hdiff DESC
+limit 10;
+~~~
+
+Let's reverse the subtraction and find districts with the most white residents compared to Hispanic residents. You can keep the alias of `hdiff`, but it's a good habit to properly rename things as you tweak your queries:
+
+
+~~~sql
+SELECT name, (white - hispanic) AS wdiff
+FROM congressional_districts 
+ORDER BY wdiff DESC
+limit 10;
+~~~
+
+|  name                                                             | wdiff   |
+|-------------------------------------------------------------------+---------|
+|  Congressional District (at Large) (114th Congress), Montana      | 857243  |
+|  Congressional District 3 (114th Congress), Missouri              | 691121  |
+|  Congressional District (at Large) (114th Congress), South Dakota | 680602  |
+|  Congressional District 5 (114th Congress), Kentucky              | 671852  |
+|  Congressional District 8 (114th Congress), Missouri              | 666221  |
+|  Congressional District 7 (114th Congress), Ohio                  | 663250  |
+|  Congressional District 1 (114th Congress), Iowa                  | 657752  |
+|  Congressional District 6 (114th Congress), Ohio                  | 653298  |
+|  Congressional District 4 (114th Congress), Kentucky              | 651205  |
+|  Congressional District 2 (114th Congress), Missouri              | 648838  |
+{:.table-sql}
+
+
+Another way to deal with the "which number should be subtracted from the other" is to calculate the __absolute value__ of the difference. This is a slightly different question: we no longer care which districts are more white than Hispanic, and vice versa. We just want to see the districts with the biggest differences, either way. 
+
+To get the absolute value of any column, use the `ABS()` function:
+
+
+~~~sql
+SELECT name, ABS(white - hispanic) AS diff
+FROM congressional_districts 
+ORDER BY diff DESC
+limit 10;
+~~~
+
+Now, with one query, we can see what the biggest gaps are, instead of running two queries with 2 different sorts:
+
+|  name                                                                    | diff     |
+|--------------------------------------------------------------------------+----------|
+|  Resident Commissioner District (at Large) (114th Congress), Puerto Rico | 3410957  |
+|  Congressional District (at Large) (114th Congress), Montana             | 857243   |
+|  Congressional District 3 (114th Congress), Missouri                     | 691121   |
+|  Congressional District (at Large) (114th Congress), South Dakota        | 680602   |
+|  Congressional District 5 (114th Congress), Kentucky                     | 671852   |
+|  Congressional District 8 (114th Congress), Missouri                     | 666221   |
+|  Congressional District 7 (114th Congress), Ohio                         | 663250   |
+|  Congressional District 1 (114th Congress), Iowa                         | 657752   |
+|  Congressional District 6 (114th Congress), Ohio                         | 653298   |
+|  Congressional District 4 (114th Congress), Kentucky                     | 651205   |
+{:.table-sql}
+
+But there is a loss of information. For example, we see the districts with the biggest disparity. But we don't know which way the disparity went.
+
+Nothing stopping us from using the same subtraction operation as before, and putting it in a different column. In the example below, a positive number means there were more Hispanic residents. A negative number means more white residents:
+
+
+~~~sql
+SELECT name, ABS(white - hispanic) AS diff,
+  hispanic - white AS hdiff
+FROM congressional_districts 
+ORDER BY diff DESC
+limit 10;
+~~~
+
+Only Puerto Rico has a large ratio of Hispanic-to-White residents, at least in the top 10:
+
+|  name                                                                    | diff    | hdiff    |
+|--------------------------------------------------------------------------+---------+----------|
+|  Resident Commissioner District (at Large) (114th Congress), Puerto Rico | 3410957 | 3410957  |
+|  Congressional District (at Large) (114th Congress), Montana             | 857243  | -857243  |
+|  Congressional District 3 (114th Congress), Missouri                     | 691121  | -691121  |
+|  Congressional District (at Large) (114th Congress), South Dakota        | 680602  | -680602  |
+|  Congressional District 5 (114th Congress), Kentucky                     | 671852  | -671852  |
+|  Congressional District 8 (114th Congress), Missouri                     | 666221  | -666221  |
+|  Congressional District 7 (114th Congress), Ohio                         | 663250  | -663250  |
+|  Congressional District 1 (114th Congress), Iowa                         | 657752  | -657752  |
+|  Congressional District 6 (114th Congress), Ohio                         | 653298  | -653298  |
+|  Congressional District 4 (114th Congress), Kentucky                     | 651205  | -651205  |
+{:.table-sql}
+
+
+We're almost done here, but the last query resulted in a table with the information we wanted, but with additional, distracting noise in the results; `diff` and `hdiff` look equal, and they are, other than being positive/negative inverses.
+
+We don't need `hdiff` as a number: we just need it as a string literal `H` or `W`. There's a few ways to do this. I'm going to use what seems most straightforward: the `CASE` statement.
+
+[Google Sheets has an `IF` function](https://support.google.com/docs/answer/3093364?hl=en) so that we can fill a cell with one value or another, depending on a true/false condition.
+
+SQLite has the `CASE` function, which is more versatile than the binary either/or results of a typical `IF` function. It's also incredibly more cumbersome to right.
+
+But once you know how it works, it's just a matter of looking up an example -- [here's StackOverflow to the rescue](http://stackoverflow.com/questions/4874285/if-statement-alternative-in-sqlite) -- and adapting it to your own code.
+
+Here's one way to do it: notice that whitespace, in the form of consecutive space characters, indentation, or newlines, doesn't affect the query. Use that to your advantage in writing and organizing more readable queries:
+
+
+~~~sql
+SELECT name, ABS(white - hispanic) AS diff,
+CASE  WHEN (hispanic - white) > 0 
+  THEN 'H' ELSE 'W'  END
+FROM congressional_districts 
+ORDER BY diff DESC
+limit 10;
+~~~
+
+I can clean this up with an alias of that really cumbersome `CASE` statement. At the end of its work, it's just another column full of values:
+
+
+~~~sql
+SELECT name, ABS(white - hispanic) AS diff,
+(CASE  WHEN (hispanic - white) > 0 
+  THEN 'H' ELSE 'W'  END) AS h_or_w
+FROM congressional_districts 
+ORDER BY diff DESC
+limit 10;
+~~~
+
+|  name                                                                    | diff    | h_or_w  |
+|--------------------------------------------------------------------------+---------+---------|
+|  Resident Commissioner District (at Large) (114th Congress), Puerto Rico | 3410957 | H       |
+|  Congressional District (at Large) (114th Congress), Montana             | 857243  | W       |
+|  Congressional District 3 (114th Congress), Missouri                     | 691121  | W       |
+|  Congressional District (at Large) (114th Congress), South Dakota        | 680602  | W       |
+|  Congressional District 5 (114th Congress), Kentucky                     | 671852  | W       |
+|  Congressional District 8 (114th Congress), Missouri                     | 666221  | W       |
+|  Congressional District 7 (114th Congress), Ohio                         | 663250  | W       |
+|  Congressional District 1 (114th Congress), Iowa                         | 657752  | W       |
+|  Congressional District 6 (114th Congress), Ohio                         | 653298  | W       |
+|  Congressional District 4 (114th Congress), Kentucky                     | 651205  | W       |
+
+One thing I have to point: until just now, I don't think I've ever written a successful `CASE` expression. Which goes to show how even experienced programmers can screw code up. And, that I've apparently been able to dabble in SQLite for years without needing the very useful functionality that `CASE` provides.
+
+
+
+### 4. Average number of households by state
+
+Just more calculation.
+
+> For each state, list the name, the median household income, and the average number of people per household. Show the top 10 states by most number of people per household.
+
+Back to the `states` table:
+
+~~~sql
+SELECT "name", "median_household_income",
+ROUND("total_population" * 1.0 / "total_households", 2) as "avgpplperhouse"
+FROM "states"
+ORDER BY "avgpplperhouse" DESC
+LIMIT 10;
+~~~
+
+|  name        | median_household_income | avgpplperhouse  |
+|--------------+-------------------------+-----------------|
+|  Utah        | 62912                   | 3.22            |
+|  Hawaii      | 73486                   | 3.21            |
+|  California  | 64500                   | 3.04            |
+|  Alaska      | 73355                   | 2.95            |
+|  Texas       | 55653                   | 2.92            |
+|  Puerto Rico | 18626                   | 2.84            |
+|  New Jersey  | 72222                   | 2.81            |
+|  Georgia     | 51244                   | 2.79            |
+|  Arizona     | 51492                   | 2.77            |
+|  Idaho       | 48275                   | 2.77            |
+{:.table-sql}
+
+
+### 5. The average income per person per household
+
+> List the name of each state and the per capita income, and then the ratio of median household income versus average people per home, and list the top 10 states with the highest ratio
+
+
+OK, we're kind of veering into questionable statistics, though I don't know enough statistics to explain why quantifying the amount of median income per average-people-per-home. That's fine, this is just exercise.
+
+
+It's not any more difficult than the previous queries. Just a little more calculation. And more punctuation to correctly line up.
+
+This is more a test of how well you can keep track of arithmetic, order of operations, and parentheses. So, yeah, the query is going to look ugly, but it's just arithmetic:
+
+~~~sql
+SELECT "name", "per_capita_income",
+ROUND("median_household_income" /  
+  ("total_population" * 1.0 / "total_households"), 2) 
+  AS "avg_income_per_person_in_house"
+FROM "states"
+ORDER BY "avg_income_per_person_in_house" DESC
+LIMIT 10;
+~~~
+
+What is the meaning of the big difference between per_capita_income and the crazy ratio we calculated? Good question, I [tried looking it up in the Census website](https://ask.census.gov/faq.php?id=5000&faqId=237). Per capita income is kind of just division, but there may be other factors in the calculation. Our average income per person in house most definitely involves dividing household income by anyone in the house, including children.
+
+|  name                 | per_capita_income | avg_income_per_person_in_house  |
+|-----------------------+-------------------+---------------------------------|
+|  District of Columbia | 75628             | 31702.02                        |
+|  Maryland             | 75847             | 27502.29                        |
+|  New Hampshire        | 70303             | 27348.32                        |
+|  Connecticut          | 71346             | 26697.54                        |
+|  Massachusetts        | 70628             | 26610.68                        |
+|  New Jersey           | 72222             | 25702.25                        |
+|  North Dakota         | 60557             | 25079.14                        |
+|  Alaska               | 73355             | 24853.1                         |
+|  Minnesota            | 63488             | 24833.42                        |
+|  Virginia             | 66262             | 24557.94                        |
+
+One easy way to confirm the impact of children on our calculated ratio: reverse the sort. If Utah, which has the highest birth rate in the Union, is on top -- i.e. it has the lowest household income as averaged by household members -- then yeah, we can make a safe assumption that children are the factor here.
+
+#### So quick to flip that query
+
+The previous query was admittedly painful to write. But now that it works, it is trival to flip the sort, or do other alterations, such as add new columns. For now, let's just see if Utah is on the other end of the sort:
+
+~~~sql
+SELECT "name", "per_capita_income",
+ROUND("median_household_income" /  
+  ("total_population" * 1.0 / "total_households"), 2) 
+  AS "avg_income_per_person_in_house"
+FROM "states"
+ORDER BY "avg_income_per_person_in_house" ASC
+LIMIT 10;
+~~~
+
+|  name           | per_capita_income | avg_income_per_person_in_house  |
+|-----------------+-------------------+---------------------------------|
+|  Puerto Rico    | 18626             | 6550.66                         |
+|  Mississippi    | 40593             | 14981.53                        |
+|  Arkansas       | 41995             | 16140.64                        |
+|  New Mexico     | 45382             | 16580.37                        |
+|  West Virginia  | 42019             | 16736.62                        |
+|  Alabama        | 44765             | 17010.5                         |
+|  Louisiana      | 45727             | 17014.35                        |
+|  Idaho          | 48275             | 17427.02                        |
+|  Kentucky       | 45215             | 17535.58                        |
+|  South Carolina | 47238             | 17923.74                        |
+
+What do we know: Utah isn't on the list when it's sorted the other way. Perhaps Utah's overall high standard of living and incomes more than outweighs the extra children in its denominator.
+
+
+6. Top 10 most Asian-populated Congressional Districts
+
+> List the names and percentage of Asian populations for the top 10 Congressional districts, nationwide, in order of highest percentage of Asian populations.
+> 
+Percentage of Asians of total population is just dividing `asian` over `total_population`. Because we want to sort the results by this derived value, we give the derived column an alias, e.g. `asian_pct` -- and refer to it in the `ORDER BY` clause:
+
+
+
+Simple query, though this time we'll make a few small changes to the query to see how SQLite can, with the best of intentions, kind of scre4w things up.
+
+
+~~~sql
+SELECT name, 
+      (asian / total_population) AS asian_pct
+FROM congressional_districts
+ORDER BY asian_pct DESC
+LIMIT 10;
+~~~
+
+|  name                                                       | asian_pct  |
+|-------------------------------------------------------------+------------|
+|  Congressional District 1 (114th Congress), Alabama         | 0          |
+|  Congressional District 2 (114th Congress), Alabama         | 0          |
+|  Congressional District 3 (114th Congress), Alabama         | 0          |
+|  Congressional District 4 (114th Congress), Alabama         | 0          |
+|  Congressional District 5 (114th Congress), Alabama         | 0          |
+|  Congressional District 6 (114th Congress), Alabama         | 0          |
+|  Congressional District 7 (114th Congress), Alabama         | 0          |
+|  Congressional District (at Large) (114th Congress), Alaska | 0          |
+|  Congressional District 1 (114th Congress), Arizona         | 0          |
+|  Congressional District 2 (114th Congress), Arizona         | 0          |
+{:.table-sql}
+
+Hmmm, strange. The highest percentage of Asian seems to be...0?
+
+Of course that's untrue. This is a case of how we need to be mindful of our data types -- integers versus decimals -- and also, how a query can go _very wrong_, yet the database engine happily processes our query and returns results without a warning or complaint.
+
+The reason why everything was a `0` was because the number of Asians is always smaller than the total population: the result is always going to be less than 1.
+
+To compound the confusion, SQLite's behavior can be..._inconsistent_. Clearly, it guessed that the values in the `total_population` and `asian` columns are integers. So, it returned a `0` -- the closest integer value to the result of dividing a small number by a much bigger number.
+
+I call SQLite's behavior "inconsistent", because SQLite is very lax about enforcing data types. We haven't gotten into schemas and data types, which involve telling SQLite, "Hey, this column should be treated as numbers. And that column of numbers should be treated as text", etc. Unlike other, more business-minded databases, such as PostgreSQL, SQLite will not break down if incompatible datatypes interact. This is one example of where we really, really wish SQLite would crash, rather than truck along.
+
+
+Anyway, back to the division problem. The most straightforward workaround is to multiply the numerator, `asians` by 100. The result will be a number big enough to be an integer (unless the percentage of Asians truly is 0, of course):
+
+
+
+
+~~~sql
+SELECT name, 
+      (asian * 100.0 / total_population) AS asian_pct
+FROM congressional_districts
+ORDER BY asian_pct DESC
+LIMIT 10;
+~~~
+
+There we go; as we might have expected, lots of districts in California:
+
+|  name                                                   | asian_pct         |
+|---------------------------------------------------------+-------------------|
+|  Congressional District 17 (114th Congress), California | 52.7798233663491  |
+|  Congressional District 1 (114th Congress), Hawaii      | 48.2852135176608  |
+|  Congressional District 6 (114th Congress), New York    | 40.1535399335448  |
+|  Congressional District 27 (114th Congress), California | 37.896238470676   |
+|  Congressional District 15 (114th Congress), California | 33.504534853589   |
+|  Congressional District 14 (114th Congress), California | 33.3057266115589  |
+|  Congressional District 12 (114th Congress), California | 32.2335424870079  |
+|  Congressional District 39 (114th Congress), California | 30.8399560249629  |
+|  Congressional District 19 (114th Congress), California | 26.7918545945006  |
+|  Congressional District 45 (114th Congress), California | 24.3962154105372  |
+{:.table-sql}
+
+One more fix: the number of decimal points in `asian_pct` seems...excessive. Let's use the `ROUND` function and specify `asian_pct` to be rounded to 2 decimal places:
+
+~~~sql
+SELECT name, 
+      ROUND(asian * 100.0 / total_population, 2) AS asian_pct
+FROM congressional_districts
+ORDER BY asian_pct DESC
+LIMIT 10;
+~~~
+
+It's not necessary, but I like throwing in an extra set of parentheses for the `ROUND` function, to make things slightly more readable, and to make it more obvious that `total_population` is not a value passed into the `ROUND` function:
+
+
+~~~sql
+SELECT name, 
+      ROUND((asian * 100.0 / total_population), 2) AS asian_pct
+FROM congressional_districts
+ORDER BY asian_pct DESC
+LIMIT 10;
+~~~
+
+
+|  name                                                   | asian_pct  |
+|---------------------------------------------------------+------------|
+|  Congressional District 17 (114th Congress), California | 52.78      |
+|  Congressional District 1 (114th Congress), Hawaii      | 48.29      |
+|  Congressional District 6 (114th Congress), New York    | 40.15      |
+|  Congressional District 27 (114th Congress), California | 37.9       |
+|  Congressional District 15 (114th Congress), California | 33.5       |
+|  Congressional District 14 (114th Congress), California | 33.31      |
+|  Congressional District 12 (114th Congress), California | 32.23      |
+|  Congressional District 39 (114th Congress), California | 30.84      |
+|  Congressional District 19 (114th Congress), California | 26.79      |
+|  Congressional District 45 (114th Congress), California | 24.4       |
+{:.table-sql}
+
+
+### 7. Congressional districts ranked by poverty level
+
+> List the name, median household income, and percentage of population living below the poverty line of the top 10 congressional districts, as ranked by most median household income
+
+This is straightforward: poverty percentage is the `below_poverty_line` value divided by `total_population`.
+
+
+~~~sql
+SELECT name, median_household_income,
+  ROUND(below_poverty_line * 100 / total_population, 1) AS povertypct
+FROM congressional_districts
+ORDER BY median_household_income DESC
+LIMIT 10;
+~~~
+
+Do the results -- that districts with the highest household incomes also have low proportion of poor people -- seem surprising. Not really, then again, it's not unheard of of societies where there are a lot of rich people but a lot of poor people -- ignoring the fact that the median household income measurement mitigates the chance that a district's wealth comes from a class of top 0.5% citizens. It's easier to believe that most people in Silicon Valley are just wealthy.
+
+|  name                                                   | median_household_income | povertypct  |
+|---------------------------------------------------------+-------------------------+-------------|
+|  Congressional District 18 (114th Congress), California | 120089                  | 7.0         |
+|  Congressional District 10 (114th Congress), Virginia   | 114793                  | 5.1         |
+|  Congressional District 17 (114th Congress), California | 111024                  | 6.7         |
+|  Congressional District 11 (114th Congress), Virginia   | 105031                  | 7.4         |
+|  Congressional District 3 (114th Congress), New York    | 102602                  | 5.6         |
+|  Congressional District 11 (114th Congress), New Jersey | 102205                  | 4.6         |
+|  Congressional District 7 (114th Congress), New Jersey  | 101746                  | 4.8         |
+|  Congressional District 8 (114th Congress), Virginia    | 100644                  | 7.5         |
+|  Congressional District 15 (114th Congress), California | 100634                  | 7.2         |
+|  Congressional District 14 (114th Congress), California | 98129                   | 9.4         |
+{:.table-sql}
+
+But because it's so easy to alter a SQL query, no harm in reversing the sort and seeing the poverty rates in districts with low household incomes.
+
+
+
+~~~sql
+SELECT name, median_household_income,
+  ROUND(below_poverty_line * 100.0 / total_population, 1) AS povertypct
+FROM congressional_districts
+ORDER BY median_household_income ASC
+LIMIT 10;
+~~~
+
+In retrospect, the result seems pretty predictable:
+
+
+
+|  name                                                                    | median_household_income | povertypct  |
+|--------------------------------------------------------------------------+-------------------------+-------------|
+|  Resident Commissioner District (at Large) (114th Congress), Puerto Rico | 18626                   | NULL        |
+|  Congressional District 15 (114th Congress), New York                    | 26047                   | 37.5        |
+|  Congressional District 5 (114th Congress), Kentucky                     | 31339                   | 27.9        |
+|  Congressional District 13 (114th Congress), Michigan                    | 31789                   | 31.8        |
+|  Congressional District 2 (114th Congress), Mississippi                  | 32152                   | 28.9        |
+|  Congressional District 7 (114th Congress), Alabama                      | 33928                   | 27.1        |
+|  Congressional District 6 (114th Congress), South Carolina               | 34566                   | 23.6        |
+|  Congressional District 5 (114th Congress), Florida                      | 35116                   | 23.8        |
+|  Congressional District 1 (114th Congress), North Carolina               | 35148                   | 24.4        |
+|  Congressional District 7 (114th Congress), Arizona                      | 35243                   | 32.1        |
+{:.table-sql}
+
+
+Let's try one more iteration. Instead of focusing on the top 10 richest or poorest, let's look at the data trend across all 400+ Congressional districts. Brilliant plan, but the point of learning data analysis is because, for humans, observing data across 400 rows is mind-numbing.
+
+So let's take the opportunity to create a visualization. Specifically, a scatter plot. We don't care so much about the actual values, just the correlation between median household income and poverty rate.
+
+
+Re-execute the previous query, but remove the `LIMIT` clause so that all results are returned. 
+
+~~~sql
+SELECT name, median_household_income,
+  ROUND(below_poverty_line * 100.0 / total_population, 1) AS povertypct
+FROM congressional_districts
+ORDER BY median_household_income ASC;
+~~~
+
+Databases don't have visualization as a feature. But spreadsheets do. And the result of our query looks like spreadsheet data. 
+
+I'll skip the spreadsheet steps, but here's the resulting visualization. Seems like a pretty clear connection between the median household income and the percentage of impoverished persons in a district. 
+
+<img src="images/scatter-chart-districts-income-vs-poverty.png" alt="scatter-chart-districts-income-vs-poverty.png">
+
+That said, don't rule out the possibility of _outliers_: for example, a district in which median income is low, but poverty rate is also very low. Or, a seemingly wealthy district with an abnormally high poverty rate. As we get better at SQL, there's less excuse to not put hypotheses to the test, because SQL (hopefully) reduces the work time for analyzing data.
+
+
+
+### 8. Poverty rate and percentage of white population
+
+> Similar to Query 7, but include a 4th column for the percentage of population that is white. Show the top 10 results, sorted by the white-population-pct column in descending order:
+
+~~~sql
+SELECT name, median_household_income,
+  ROUND(below_poverty_line * 100.0 / total_population, 1) AS povertypct,
+  ROUND(white * 100.0 / total_population, 1) AS whitepct
+FROM congressional_districts
+ORDER BY whitepct DESC
+LIMIT 10;
+~~~
+
+|  name                                                        | median_household_income | povertypct | whitepct  |
+|--------------------------------------------------------------+-------------------------+------------+-----------|
+|  Congressional District 5 (114th Congress), Kentucky         | 31339                   | 27.9       | 96.0      |
+|  Congressional District 6 (114th Congress), Ohio             | 43964                   | 15.9       | 94.4      |
+|  Congressional District 2 (114th Congress), Maine            | 44560                   | 16.0       | 94.0      |
+|  Congressional District 1 (114th Congress), West Virginia    | 44180                   | 16.3       | 93.5      |
+|  Congressional District (at Large) (114th Congress), Vermont | 56990                   | 9.8        | 93.4      |
+|  Congressional District 1 (114th Congress), Maine            | 59452                   | 10.1       | 93.2      |
+|  Congressional District 3 (114th Congress), West Virginia    | 35913                   | 21.5       | 93.1      |
+|  Congressional District 9 (114th Congress), Pennsylvania     | 47413                   | 14.4       | 92.7      |
+|  Congressional District 18 (114th Congress), Pennsylvania    | 62254                   | 8.4        | 92.6      |
+|  Congressional District 27 (114th Congress), New York        | 62566                   | 8.9        | 92.3      |
+{:.table-sql}
+
+
+
+
+# Conclusion
+
+Here's some abrupt goodbye text: later, the detailed lessons will be hosted on this page. The exercises so far published will probably be edited for length, and so forth. If you got through the exercises, even by just copying the available code, that's a great start! If there is one thing I'm embarrassed about in this walkthrough is that the SQL covered so far doesn't let us ask _really_ interesting questions, even as I'm already bored of this Census data.
+
+But doing things in SQL is pretty easy. As you've noticed, you can just copy my code and run it easier than you can replicate how I've edited a spreadsheet. Rather than worrying about getting things done in SQL, focus on understanding and appreciating the syntax, so that when we get to the exciting commands, you'll find them even easier to master than the basic SQL features covered here.
 

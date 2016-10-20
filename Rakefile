@@ -29,6 +29,6 @@ task :makepage, [:path] do |t, args|
     else
         full_destdir.mkpath
         full_destpath.write(PAGE_FRONTMATTER.sub(/title: Title/, "title: #{relative_destpath}"))
-        puts("Creating: #{full_destpath}")
+        puts("Creating: \n\n#{full_destpath}")
     end
 end
