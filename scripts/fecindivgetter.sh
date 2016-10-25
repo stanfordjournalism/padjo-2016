@@ -1,20 +1,56 @@
-curl -O ftp://ftp.fec.gov/FEC/2016/cm16.zip
-curl -O ftp://ftp.fec.gov/FEC/2016/cn16.zip
-curl -O ftp://ftp.fec.gov/FEC/2016/oppexp16.zip
+for thing in  webk weball cm cn ccl oth pas2 oppexp indiv; do
+  rhname="http://www.fec.gov/finance/disclosure/metadata/${thing}_header_file.csv"
+  hname="${thing}-headers.psv"
+  printf "Downloading $rhname to: $hname\n\n"
+  curl "$rhname"  \
+    | csvformat -d ',' -D '|' > "$hname"
+
+  for yr in 12 14 16;  do
+    rzname="ftp://ftp.fec.gov/FEC/20${yr}/${thing}${yr}.zip"
+    zname="${thing}-20${yr}.zip"
+    dname="${thing}-20${yr}.psv"
+    # create the first line of the main data file
+    cat "$hname" > "$dname"
+
+    printf "Downloading $rzname to: $zname\n\n"
+    curl "$rzname" -o "$zname"
+
+    printf "Unzipping $zname into $dname\n\n"
+
+    unzip -p $zname \
+    | iconv -f ISO-8859-1 -t UTF-8 \
+    | csvformat -e latin1 -d '|' -D '|' >> "$dname"
+  done
+done
 
 
-curl -O http://www.fec.gov/finance/disclosure/metadata/cm_header_file.csv
-curl -O http://www.fec.gov/finance/disclosure/metadata/cn_header_file.csv
-curl -O http://www.fec.gov/finance/disclosure/metadata/oppexp_header_file.csv
+for year in 2012 2014 2016; do
+  dname="indexps-${year}.psv"
+  echo "Downloading ${dname}"
+  curl "http://www.fec.gov/data/IndependentExpenditure.do?format=csv&election_yr=${year}" \
+      | iconv -f ISO-8859-1 -t UTF-8 \
+      | csvformat -e latin1 -d ',' -D '|' >  "$dname"
+done
 
 
-cat cm_header_file.csv <(unzip -p cm16.zip | csvformat -e 'latin1' -d '|') > committees.csv
-cat cn_header_file.csv <(unzip -p cn16.zip | csvformat -e 'latin1' -d '|') > candidates.csv
-cat oppexp_header_file.csv <(unzip -p oppexp16.zip | csvformat -d '|') > oppexp.csv
+# generate sql
+for thing in cm cn ccl oth pas2 oppexp indiv webk weball indexps; do
+  csvname="${thing}-2016.csv"
+  head -n 10000 "$csvname" | csvsql --dialect sqlite --tables "$thing"
+done
 
 
-csvsql --dialect sqlite candidates.csv
-head -n 50000 oppexp.csv | csvsql --dialect sqlite --tables oppexp
+
+
+
+
+
+
+
+
+
+
+
 
 sqlite3 fecdata.sqlite <<EOF
 CREATE TABLE oppexp (
@@ -45,3 +81,25 @@ CREATE TABLE oppexp (
   "BACK_REF_TRAN_ID" VARCHAR(20)
 );
 EOF
+
+
+
+
+
+curl -O ftp://ftp.fec.gov/FEC/2016/cm16.zip
+curl -O ftp://ftp.fec.gov/FEC/2016/cn16.zip
+curl -O ftp://ftp.fec.gov/FEC/2016/oppexp16.zip
+
+
+curl -O http://www.fec.gov/finance/disclosure/metadata/cm_header_file.csv
+curl -O http://www.fec.gov/finance/disclosure/metadata/cn_header_file.csv
+curl -O http://www.fec.gov/finance/disclosure/metadata/oppexp_header_file.csv
+
+
+cat cm_header_file.csv <(unzip -p cm16.zip | csvformat -e 'latin1' -d '|') > committees.csv
+cat cn_header_file.csv <(unzip -p cn16.zip | csvformat -e 'latin1' -d '|') > candidates.csv
+cat oppexp_header_file.csv <(unzip -p oppexp16.zip | csvformat -d '|') > oppexp.csv
+
+
+csvsql --dialect sqlite candidates.csv
+head -n 50000 oppexp.csv | csvsql --dialect sqlite --tables oppexp
