@@ -1,3 +1,13 @@
+- title: SimpleFolks for Simple SQL
+  path: /files/data/starterpack/simplefolks.sqlite
+  description: |
+    As a way to simplify learning new SQL syntax, this is a very simple, very small database of people who just go by their first names, and live in a world in which they own pets and homes.
+  size_mb: 0.01
+  table_count: 3
+  links:
+      - title: See this simple database as a Google Spredsheet
+        url: "https://docs.google.com/spreadsheets/d/12mwh5m0ryzK9fKPBtxGB9DRddzRefYVDt1AOrZJHLcE/edit#gid=0"
+
 - title: American Community Survey 1-Year Data for 2015
   path: /files/data/starterpack/census-acs-1year/acs-1-year-2015.sqlite
   description: |

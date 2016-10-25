@@ -69,13 +69,33 @@
           <div class="container">
 
             <section class="sequence sec">
-
               <p>
                 <em>This article is part of a series:</em>
                 <% if (o = page_landing_in_sequence) %>
                     <%=link_to o.title, o.url %>
                 <% end %>
                 </p>
+
+
+                <% if page_sequence_contents? %>
+                  <section class="sec contents">
+                    <h4>Full contents of series</h4>
+                    <ul class="list list-unstyled">
+                      <% page_sequence_contents.each do |cr| %>
+                         <li>
+                            <strong><%=link_to_unless cr.url == page_url, cr.title, cr.url %></strong>
+                            &ndash;
+                            <span class="description">
+                              <%=cr.description %>
+                            </span>
+                          </li>
+                      <% end %>
+                    </ul>
+                  </section>
+                <% end %>
+
+
+
 
 
               <% if (o = page_previous_in_sequence) %>

@@ -1,0 +1,382 @@
+---
+title: "SQLite Simple Folks: ORDER and LIMIT"
+description: |
+  How to specify the sorting of data and exactly how many rows to return
+sequence:
+  landing: /tutorials/sql-simplefolks-overview
+---
+
+
+# Get the data
+
+- Download the [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite). 
+- Preview it [as a Google Spreadsheet](https://docs.google.com/spreadsheets/d/12mwh5m0ryzK9fKPBtxGB9DRddzRefYVDt1AOrZJHLcE/edit#gid=0)
+
+Once you've downloaded [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite) onto your computer, open it with your SQLite client and be ready to write some queries.
+
+
+# Cut off results with LIMIT
+
+Let's start with `LIMIT`, because it's so straightforward. For virtually every `SELECT` query that we execute, the `LIMIT` clause, if we choose to use it, will be the _last_ clause. The `LIMIT` clause only requires a number, such as `7`, which we use to specify exactly how few results we want to see:
+
+
+~~~sql
+SELECT *
+FROM people
+LIMIT 3;
+~~~
+
+And that's all there's to `LIMIT`:
+
+|  name     | sex | age  |
+|-----------+-----+------|
+|  Austin   | M   | 33   |
+|  Blair    | M   | 90   |
+|  Carolina | F   | 28   |
+{:.table-sql}
+
+
+# Sorting with ORDER BY
+
+With `SELECT` and `FROM`, we already know how to arrange the data _horizontally_ -- i.e. column order. But without the ability to sort data, we're stuck with the rows being returned in the order the data was originally stored.
+
+No matter what how we choose to re-arrange the columns, the top 3 rows returned via `LIMIT` will always be the same:
+
+
+~~~sql
+SELECT sex, age, name
+FROM people
+LIMIT 3;
+~~~
+
+
+|  sex | age | name      |
+|------+-----+-----------|
+|  M   | 33  | Austin    |
+|  M   | 90  | Blair     |
+|  F   | 28  | Carolina  |
+{:.table-sql}
+
+This is where the `ORDER BY` clause comes in. The most basic usage of the `ORDER BY` clause is to follow it with the name of the column we want to sort by. Let's try `age`:
+
+
+
+~~~sql
+SELECT sex, age, name
+FROM people
+ORDER BY age
+LIMIT 3;
+~~~
+
+### Where does ORDER BY fit?
+
+How to remember where `ORDER BY` fits in the query syntax so far?
+
+- Well, we know that `LIMIT` will be the last part of virtually any statement.
+- In fact, there is no standard SQLite clause between `ORDER BY` and `LIMIT`
+- Why does `ORDER BY` come after `FROM`? Seems to make sense that we need to know what columns and tables we're dealing with before we can refer to them in `ORDER BY`.
+
+
+### DESC and ASC
+
+
+With no other specification to `ORDER BY`, it will sort the specified column in _ascending_ order by default: smallest-to-largest:
+
+|  sex | age | name      |
+|------+-----+-----------|
+|  M   | 16  | Leland    |
+|  F   | 19  | Georgina  |
+|  M   | 22  | Liam      |
+{:.table-sql}
+
+
+To get it in reverse order -- __descending__, i.e. largest-to-smallest, we add the `DESC` keyword after the column name:
+
+
+~~~sql
+SELECT sex, age, name
+FROM people
+ORDER BY age DESC
+LIMIT 3;
+~~~
+
+
+|  sex | age | name     |
+|------+-----+----------|
+|  M   | 90  | Blair    |
+|  M   | 70  | Donald   |
+|  F   | 68  | Hillary  |
+{:.table-sql}
+
+
+Even though ascending-order is the default sort order, I advise you to get in the good habit of being explicit and to always use the keyword `ASC` to specify sorting order. It's a little more typing for a bit more clarity:
+
+~~~sql
+SELECT *
+FROM people
+ORDER BY age ASC;
+~~~
+
+
+### Sorting a tie
+
+
+Let's sort by something less interesting than `age`: `sex`
+
+~~~sql
+SELECT *
+FROM people
+ORDER BY sex ASC;
+~~~
+
+As expected, females are at the top of the list because the letter `F` is before `M` alphabetically:
+
+
+
+|  name     | sex | age  |
+|-----------+-----+------|
+|  Carolina | F   | 28   |
+|  Dani     | F   | 41   |
+|  Eliza    | F   | 37   |
+|  Farida   | F   | 23   |
+|  Georgina | F   | 19   |
+|  Hillary  | F   | 68   |
+|  Phoebe   | F   | 52   |
+|  Sherry   | F   | 39   |
+|  Austin   | M   | 33   |
+|  Blair    | M   | 90   |
+|  Donald   | M   | 70   |
+|  Leland   | M   | 16   |
+|  Liam     | M   | 22   |
+|  Michael  | M   | 48   |
+|  Zed      | M   | 42   |
+{:.table-sql}
+
+How does SQLite know how to order between males and females? It appears to preserve the alphabetical-name ordering that this data comes as. But, it's a very bad idea to assume; much better to _explicitly_ specify how the rows should be sorted when `sex` is equal,
+
+### ORDER BY with multiple columns
+
+Breaking a "tie" in a sort is as easy as specifying a second column to `ORDER BY`: use a comma to specify the second (or third or nth) column to use in sorting.
+
+If we wanted the previous query to list the oldest female and male, respectively, the second sort criteria should be on `age` in `DESC` order:
+
+
+~~~sql
+SELECT *
+FROM people
+ORDER BY 
+  sex ASC, age DESC;
+~~~
+
+
+|  name     | sex | age  |
+|-----------+-----+------|
+|  Hillary  | F   | 68   |
+|  Phoebe   | F   | 52   |
+|  Dani     | F   | 41   |
+|  Sherry   | F   | 39   |
+|  Eliza    | F   | 37   |
+|  Carolina | F   | 28   |
+|  Farida   | F   | 23   |
+|  Georgina | F   | 19   |
+|  Blair    | M   | 90   |
+|  Donald   | M   | 70   |
+|  Michael  | M   | 48   |
+|  Zed      | M   | 42   |
+|  Austin   | M   | 33   |
+|  Liam     | M   | 22   |
+|  Leland   | M   | 16   |
+{:.table-sql}
+
+To reiterate being explicit about `ASC` sort order, I don't like how `sex` just floats there in the `ORDER BY` clause:
+
+~~~sql
+SELECT *
+FROM people
+ORDER BY 
+  sex, age DESC;
+~~~
+
+
+# Exercises
+
+The syntax we know so far is pretty simple. So try rewriting the queries we used in this lesson, but for the other tables, such as `homes` and `pets`, e.g.
+
+- What is the most expensive home?
+- List the pets in alphabetical order.
+- List the top 5 most expensive homes
+
+
+
+### Who has the longest name?
+
+Because I stupidly didn't include more _ties_ in the SimpleFolks database, such as people with the same ages, there's not many interesting sorts that can be done with what little syntax we know.
+
+So to make for a more interesting sorting-query, I'll throw in some unfamiliar (but simple) syntax: Sort `people` in order of _longest name_ and for ties, in order of _oldest_ `age`:
+
+#### The LENGTH function
+
+Length of name is not a column in `people`. So we use the `LENGTH` function to derive it, and treat this derived value as any other column, just like creating a new column in Excel with a formula:
+
+~~~sql
+SELECT name, LENGTH(name)
+FROM people;
+~~~
+
+|  name     | LENGTH(name)  |
+|-----------+---------------|
+|  Austin   | 6             |
+|  Blair    | 5             |
+|  Carolina | 8             |
+|  Dani     | 4             |
+|  Donald   | 6             |
+|  Eliza    | 5             |
+|  Farida   | 6             |
+|  Georgina | 8             |
+|  Hillary  | 7             |
+|  Leland   | 6             |
+|  Liam     | 4             |
+|  Michael  | 7             |
+|  Phoebe   | 6             |
+|  Sherry   | 6             |
+|  Zed      | 3             |
+{:.table-sql}
+
+
+How to sort by that derived column? If we're ignorant of __aliasing__, we can see if the `LENGTH(name)` expression can just be used in the `ORDER BY` clause -- which would reaffirm how much a derived column is like any other column:
+
+
+~~~sql
+SELECT name, LENGTH(name)
+FROM people
+ORDER BY LENGTH(name) DESC;
+~~~
+
+And...it works!
+
+|  name     | LENGTH(name)  |
+|-----------+---------------|
+|  Carolina | 8             |
+|  Georgina | 8             |
+|  Hillary  | 7             |
+|  Michael  | 7             |
+|  Austin   | 6             |
+|  Donald   | 6             |
+|  Farida   | 6             |
+|  Leland   | 6             |
+|  Phoebe   | 6             |
+|  Sherry   | 6             |
+|  Blair    | 5             |
+|  Eliza    | 5             |
+|  Dani     | 4             |
+|  Liam     | 4             |
+|  Zed      | 3             |
+{:.table-sql}
+
+Let's add the `age` column in `SELECT`, and also in the `SORT BY` clause, since we want to break ties by oldest age:
+
+~~~sql
+SELECT name, LENGTH(name), age
+FROM people
+ORDER BY LENGTH(name) DESC, age DESC;
+~~~
+
+
+|  name     | LENGTH(name) | age  |
+|-----------+--------------+------|
+|  Carolina | 8            | 28   |
+|  Georgina | 8            | 19   |
+|  Hillary  | 7            | 68   |
+|  Michael  | 7            | 48   |
+|  Donald   | 6            | 70   |
+|  Phoebe   | 6            | 52   |
+|  Sherry   | 6            | 39   |
+|  Austin   | 6            | 33   |
+|  Farida   | 6            | 23   |
+|  Leland   | 6            | 16   |
+|  Blair    | 5            | 90   |
+|  Eliza    | 5            | 37   |
+|  Dani     | 4            | 41   |
+|  Liam     | 4            | 22   |
+|  Zed      | 3            | 42   |
+{:.table-sql}
+
+
+#### Seeing is not necessary
+
+Here's a bit of a mind-twist: we are sorting by `age` and `LENGTH(name)`, but what happens if we don't include either in the `SELECT` clause (but keep them in `ORDER BY`)? 
+
+Because at a minimum, we only cared to find the longest names/oldest people -- we weren't required to list the length of the name, or include the age:
+
+
+~~~sql
+SELECT name
+FROM people
+ORDER BY LENGTH(name) DESC, age DESC;
+~~~
+
+The result is different in terms of columns, but the exact ordering is the same: SQLite does its work on the respective columns without needing to include them for our display:
+
+|  name      |
+|------------|
+|  Carolina  |
+|  Georgina  |
+|  Hillary   |
+|  Michael   |
+|  Donald    |
+|  Phoebe    |
+|  Sherry    |
+|  Austin    |
+|  Farida    |
+|  Leland    |
+|  Blair     |
+|  Eliza     |
+|  Dani      |
+|  Liam      |
+|  Zed       |
+{:.table-sql}
+
+
+#### A quick word about aliases
+
+Word of warning: repeating an expression in the `SELECT` and the `ORDER BY` clause (not to mention the many other clauses we have yet to deal with) is __bad practice__. So I'll acquaint you with the proper practice of __aliasing__, which we'll cover in more detail in its respective chapter.
+
+
+Instead of this:
+
+~~~sql
+SELECT name, LENGTH(name)
+FROM people
+ORDER BY LENGTH(name) DESC, age DESC;
+~~~
+
+Give an __alias__, or a _nickname_ to the `LENGTH(name)` expression, which we can then use in `ORDER BY`. Plus, this __alias__ is used in the header instead of the ugly raw expression code of `LENGTH(name)`:
+
+
+
+
+~~~sql
+SELECT name, LENGTH(name) AS namepower
+FROM people
+ORDER BY namepower DESC, age DESC;
+~~~
+
+
+|  name     | namepower  |
+|-----------+------------|
+|  Carolina | 8          |
+|  Georgina | 8          |
+|  Hillary  | 7          |
+|  Michael  | 7          |
+|  Donald   | 6          |
+|  Phoebe   | 6          |
+|  Sherry   | 6          |
+|  Austin   | 6          |
+|  Farida   | 6          |
+|  Leland   | 6          |
+|  Blair    | 5          |
+|  Eliza    | 5          |
+|  Dani     | 4          |
+|  Liam     | 4          |
+|  Zed      | 3          |
+{:.table-sql}

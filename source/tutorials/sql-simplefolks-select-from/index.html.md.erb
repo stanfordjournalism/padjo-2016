@@ -1,0 +1,651 @@
+---
+title: "SQLite Simple Folks: SELECT and FROM"
+description: |
+  How to select data from tables, including the exact columns and their ordering.
+sequence:
+  landing: /tutorials/sql-simplefolks-overview
+---
+
+
+# Get the data
+
+- Download the [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite). 
+- Preview it [as a Google Spreadsheet](https://docs.google.com/spreadsheets/d/12mwh5m0ryzK9fKPBtxGB9DRddzRefYVDt1AOrZJHLcE/edit#gid=0)
+
+Once you've downloaded [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite) onto your computer, open it with your SQLite client and be ready to write some queries.
+
+
+
+
+# SELECT statements
+
+`SELECT` is the keyword for denoting an entire type of SQL _statement_. In fact, 99% of the SQL statements we write will begin with `SELECT`.
+
+
+
+## SELECT alone
+
+This is a perfectly valid if boring `SELECT` statement:
+
+~~~sql
+SELECT 'helloworld';
+~~~
+
+|  'helloworld'  |
+|----------------|
+|  helloworld    |
+{:.table-sql}
+
+Here's a variation, except we're selecting two separate __string text literals__, i.e. words quoted in single-quotes; each quoted value is separated by a __comma__:
+
+~~~sql
+SELECT 'hello', 'world';
+~~~
+
+The result is a table of two columns:
+
+
+|  'hello' | 'world'  |
+|----------+----------|
+|  hello   | world    |
+{:.table-sql}
+
+
+Not much to think about yet. The fact that we can `SELECT` (and return) arbitrary values independent of a data table is a useful concept when it comes to understanding syntax. But it doesn't have much real-world value.
+
+
+## Selecting FROM a table
+
+Almost always, we want to select rows from the tables in our database.
+
+Let's start with the __people__table. To keep things simple, I'll use the __star__ after `SELECT`, which is a shorthand way of saying, _"just give me all of the columns in this table"_
+
+~~~sql
+SELECT *
+FROM people;
+~~~
+
+
+The result is essentially the exact contents that can be found by browsing through the __people__ table in a client:
+
+
+|  name     | sex | age  |
+|-----------+-----+------|
+|  Austin   | M   | 33   |
+|  Blair    | M   | 90   |
+|  Carolina | F   | 28   |
+|  Dani     | F   | 41   |
+|  Donald   | M   | 70   |
+|  Eliza    | F   | 37   |
+|  Farida   | F   | 23   |
+|  Georgina | F   | 19   |
+|  Hillary  | F   | 68   |
+|  Leland   | M   | 16   |
+|  Liam     | M   | 22   |
+|  Michael  | M   | 48   |
+|  Phoebe   | F   | 52   |
+|  Sherry   | F   | 39   |
+|  Zed      | M   | 42   |
+{:.table-sql}
+
+
+What happens if we replace `people` with `pets`, one of the other tables in the database?
+
+~~~sql
+SELECT *
+FROM pets;
+~~~
+
+
+Then we just get a list of pets:
+
+
+|  name           | type  | owner_name  |
+|-----------------+-------+-------------|
+|  Maru           | cat   | Austin      |
+|  Icey           | dog   | Blair       |
+|  Maxie          | dog   | Blair       |
+|  Rex            | dog   | Carolina    |
+|  Harambe        | bird  | Dani        |
+|  Syd            | dog   | Dani        |
+|  Artemis        | cat   | Dani        |
+|  Mr. Muggles    | cat   | Donald      |
+|  Meowser        | cat   | Donald      |
+|  Donald         | cat   | Donald      |
+|  Hodor          | bird  | Eliza       |
+|  Bumpkin        | horse | Georgina    |
+|  Secretariat    | horse | Hillary     |
+|  Socks          | dog   | Hillary     |
+|  Sir Barks-Alot | dog   | Liam        |
+|  Harry Potter   | horse | Leland      |
+|  Xerses         | horse | Michael     |
+|  Zeus           | cat   | Michael     |
+|  Rocket         | cat   | Phoebe      |
+|  Kermit         | dog   | Sherry      |
+|  Hector         | dog   | Sherry      |
+|  Essy           | dog   | Sherry      |
+|  Samwise        | dog   | Sherry      |
+|  Jenkins        | horse | Zed         |
+{:.table-sql}
+
+
+#### One table at a time
+
+Until we get to __joins__, we won't have to worry about selecting data from more than one table at time.
+
+
+
+## Being selective about columns
+
+The `*` operator is nice, especially when we're deep in a barebones SQL client that doesn't make it as easy to browse table/data structure as we're used to with spreadsheets.
+
+To get a list of all the columns and all the rows in any table, this is the basic pattern:
+
+~~~sql
+SELECT * FROM mytable;
+~~~
+
+However, the problem with this is that it returns _all the columns and rows_. In a database, we generally do _not_ want this; and in a spreadsheet, all that data is forced on us, which is why spreadsheets are horrendous when dealing with big datasets.
+
+
+
+### Ask for exactly what we want 
+
+Instead of using `SELECT *`, we can specify columns by names.
+
+
+To get all 3 columns in __people__, same as the `*` operator, we list the name of each column, separated by __commas__:
+
+~~~sql
+SELECT name, sex, age
+FROM people;
+~~~
+
+### Reorder columns as we like
+
+
+By explicitly listing the columns, we can also specify their order:
+
+~~~sql
+SELECT age, sex, name
+FROM people;
+~~~
+
+
+|  age | sex | name      |
+|------+-----+-----------|
+|  33  | M   | Austin    |
+|  90  | M   | Blair     |
+|  28  | F   | Carolina  |
+|  41  | F   | Dani      |
+|  70  | M   | Donald    |
+|  37  | F   | Eliza     |
+|  23  | F   | Farida    |
+|  19  | F   | Georgina  |
+|  68  | F   | Hillary   |
+|  16  | M   | Leland    |
+|  22  | M   | Liam      |
+|  48  | M   | Michael   |
+|  52  | F   | Phoebe    |
+|  39  | F   | Sherry    |
+|  42  | M   | Zed       |
+{:.table-sql}
+
+
+And we can even do something nonsensical by asking for the columns more than once:
+
+
+~~~sql
+SELECT name, age, age, sex, name
+FROM people;
+~~~
+
+What's the point? Nothing _yet_, just take time to admire the consistency of the logic.
+
+|  name     | age | age | sex | name      |
+|-----------+-----+-----+-----+-----------|
+|  Austin   | 33  | 33  | M   | Austin    |
+|  Blair    | 90  | 90  | M   | Blair     |
+|  Carolina | 28  | 28  | F   | Carolina  |
+|  Dani     | 41  | 41  | F   | Dani      |
+|  Donald   | 70  | 70  | M   | Donald    |
+|  Eliza    | 37  | 37  | F   | Eliza     |
+|  Farida   | 23  | 23  | F   | Farida    |
+|  Georgina | 19  | 19  | F   | Georgina  |
+|  Hillary  | 68  | 68  | F   | Hillary   |
+|  Leland   | 16  | 16  | M   | Leland    |
+|  Liam     | 22  | 22  | M   | Liam      |
+|  Michael  | 48  | 48  | M   | Michael   |
+|  Phoebe   | 52  | 52  | F   | Phoebe    |
+|  Sherry   | 39  | 39  | F   | Sherry    |
+|  Zed      | 42  | 42  | M   | Zed       |
+{:.table-sql}
+
+
+
+
+
+### Ask only for what we need
+
+If we can add new columns to the results, then it makes sense that we can omit columns. To get just `name` and `sex`, just list `name` and `sex` after the `SELECT` clause:
+
+
+
+~~~sql
+SELECT name, sex
+FROM people;
+~~~
+
+
+|  name     | sex  |
+|-----------+------|
+|  Austin   | M    |
+|  Blair    | M    |
+|  Carolina | F    |
+|  Dani     | F    |
+|  Donald   | M    |
+|  Eliza    | F    |
+|  Farida   | F    |
+|  Georgina | F    |
+|  Hillary  | F    |
+|  Leland   | M    |
+|  Liam     | M    |
+|  Michael  | M    |
+|  Phoebe   | F    |
+|  Sherry   | F    |
+|  Zed      | M    |
+{:.table-sql}
+
+
+
+##  The difference between column names and string literals
+
+Remember `SELECT 'hello world';` from the beginning of this lesson? Is it possible to mix string literal values and column names? Sure:
+
+
+~~~sql
+SELECT 'helloworld', name
+FROM people;
+~~~
+
+One thing to note is that how `SELECT`, when selecting `FROM` a table, will display results for every row that exists in the table:
+
+
+|  'helloworld' | name      |
+|---------------+-----------|
+|  helloworld   | Austin    |
+|  helloworld   | Blair     |
+|  helloworld   | Carolina  |
+|  helloworld   | Dani      |
+|  helloworld   | Donald    |
+|  helloworld   | Eliza     |
+|  helloworld   | Farida    |
+|  helloworld   | Georgina  |
+|  helloworld   | Hillary   |
+|  helloworld   | Leland    |
+|  helloworld   | Liam      |
+|  helloworld   | Michael   |
+|  helloworld   | Phoebe    |
+|  helloworld   | Sherry    |
+|  helloworld   | Zed       |
+{:.table-sql}
+
+
+Something more elaborate:
+
+~~~sql
+SELECT 'The person named', name, 'is aged: ', age
+FROM people;
+~~~
+
+Weird, but should be expected:
+
+
+|  'The person named' | name     | 'is aged: ' | age  |
+|---------------------+----------+-------------+------|
+|  The person named   | Austin   | is aged:    | 33   |
+|  The person named   | Blair    | is aged:    | 90   |
+|  The person named   | Carolina | is aged:    | 28   |
+|  The person named   | Dani     | is aged:    | 41   |
+|  The person named   | Donald   | is aged:    | 70   |
+|  The person named   | Eliza    | is aged:    | 37   |
+|  The person named   | Farida   | is aged:    | 23   |
+|  The person named   | Georgina | is aged:    | 19   |
+|  The person named   | Hillary  | is aged:    | 68   |
+|  The person named   | Leland   | is aged:    | 16   |
+|  The person named   | Liam     | is aged:    | 22   |
+|  The person named   | Michael  | is aged:    | 48   |
+|  The person named   | Phoebe   | is aged:    | 52   |
+|  The person named   | Sherry   | is aged:    | 39   |
+|  The person named   | Zed      | is aged:    | 42   |
+{:.table-sql}
+
+### Concatenate strings with `||`
+
+Just some more syntax: we see that the __comma__ is a way to specify columns in the result.
+
+To combine column values (or string literals) into a single column, use double pipes: `||`
+
+
+
+~~~sql
+SELECT sex || name
+FROM people;
+~~~
+
+
+|  sex || name  |
+|---------------|
+|  MAustin      |
+|  MBlair       |
+|  FCarolina    |
+|  FDani        |
+|  MDonald      |
+|  FEliza       |
+|  FFarida      |
+|  FGeorgina    |
+|  FHillary     |
+|  MLeland      |
+|  MLiam        |
+|  MMichael     |
+|  FPhoebe      |
+|  FSherry      |
+|  MZed         |
+{:.table-sql}
+
+To specify a space between those columns, add the quoted-string-literal of a space, i.e. `' '`, and more pipes:
+
+
+~~~sql
+SELECT sex || ' ' || name
+FROM people;
+~~~
+
+
+|  sex || ' ' || name  |
+|----------------------|
+|  M Austin            |
+|  M Blair             |
+|  F Carolina          |
+|  F Dani              |
+|  M Donald            |
+|  F Eliza             |
+|  F Farida            |
+|  F Georgina          |
+|  F Hillary           |
+|  M Leland            |
+|  M Liam              |
+|  M Michael           |
+|  F Phoebe            |
+|  F Sherry            |
+|  M Zed               |
+{:.table-sql}
+
+
+And to make a complete, single sentence, instead of rows of column-separated values:
+
+
+
+~~~sql
+SELECT 'The person named ' || name || ' is aged: ' || age
+FROM people;
+~~~
+
+
+~~~sql
+SELECT 'The person named ' || name || ' is aged: ' || age
+FROM people;
+~~~
+
+
+|  'The person named ' || name || ' is aged: ' || age  |
+|------------------------------------------------------|
+|  The person named Austin is aged: 33                 |
+|  The person named Blair is aged: 90                  |
+|  The person named Carolina is aged: 28               |
+|  The person named Dani is aged: 41                   |
+|  The person named Donald is aged: 70                 |
+|  The person named Eliza is aged: 37                  |
+|  The person named Farida is aged: 23                 |
+|  The person named Georgina is aged: 19               |
+|  The person named Hillary is aged: 68                |
+|  The person named Leland is aged: 16                 |
+|  The person named Liam is aged: 22                   |
+|  The person named Michael is aged: 48                |
+|  The person named Phoebe is aged: 52                 |
+|  The person named Sherry is aged: 39                 |
+|  The person named Zed is aged: 42                    |
+{:.table-sql}
+
+
+
+
+# Error-time
+
+Let's look at all the kinds of errors we can make with what little syntax we've learned so far.
+
+
+## Syntax errors
+
+These are errors in _language_, independent of the actual data and analysis.
+
+
+### SELECT does not stand alone
+
+A `SELECT` statement cannot simply consist of `SELECT`
+
+~~~sql
+SELECT;
+~~~
+
+
+The message: 
+
+      Error: near ";": syntax error
+
+
+
+### We must SELECT something
+
+I constantly make this error:
+
+~~~sql
+SELECT FROM people;
+~~~
+
+      Error: near "FROM": syntax error
+
+Without column names or the `*` operator, SQLite doesn't know how to interpret `SELECT FROM people;`. There's no default behavior, i.e. *"If user forgets to specify column names, just include all columns"*. Instead, SQLite considers `SELECT FROM` to be nonsensical.
+
+### Don't forget commas to separate columns
+
+Without commas, SQLite can't interpret the `SELECT` clause as asking for `name`, `sex`, and `age`.
+
+~~~sql
+SELECT name sex age
+FROM people;
+~~~
+
+
+      Error: near "age": syntax error
+
+
+
+### Don't accidentally alias a column
+
+The following query asks for only two columns and omits the comma. However, it does _not_ result in an error:
+
+
+~~~sql
+SELECT name sex
+FROM people;
+~~~
+
+
+(results excerpted)
+
+|  sex       |
+|------------|
+|  Austin    |
+|  Blair     |
+|  Carolina  |
+|  Dani      |
+| ...        |
+|  Zed       |
+{:.table-sql}
+
+
+When two column names are listed with no space in between, SQLite interprets that as shorthand for this:
+
+~~~sql
+SELECT name AS sex
+FROM people;
+~~~
+
+That's why in the above results, the header for the list of names is not `name`, but `sex`. And that's why there's only a single column.
+
+We cover aliases later. My advice is to __always use the AS syntax__; silent errors -- i.e. things that are perfectly fine SQLite syntax but create results that are _errors for humans_ -- are the worst kinds of errors.
+
+
+## Naming errors
+
+These errors cause the SQLite engine to bark at us. But they aren't SQLite syntax errors; the queries are valid, it's just they can't find the column/tables we're trying to query:
+
+
+### Typo in the table name
+
+~~~sql
+SELECT * from peeple;
+~~~
+
+
+Notice how the error message doesn't say `syntax error`:
+
+        Error: no such table: peeple
+
+
+### Typo in the column name
+
+~~~sql
+SELECT sexx from people;
+~~~
+
+        Error: no such column: sexx
+
+
+## Errors of intent
+
+The following class of bad queries result in _no_ error messages, because the queries themselves are valid SQL. The errors are errors to _humans_, and they arise solely from human carelessness.
+
+These are easily the worst kind of errors, because when a computer raises an error message, the computer is always right.
+
+### Accidentally single-quoting a column name
+
+~~~sql
+SELECT 'hello', 'name'
+FROM people;
+~~~
+
+Because we quoted `name`, SQLite has no choice but to think that we are looking to select the literal string value of `'name'` == same as `'hello'`:
+
+|  'hello' | 'name'  |
+|----------+---------|
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+|  hello   | name    |
+{:.table-sql}
+
+
+### Double-quotes for reference values
+
+I won't be a stickler on this because I'm fairly lazy about it myself. But the syntax for explicitly labeling things as column and table names is to wrap them in __double quotes__:
+
+~~~sql
+SELECT "name", "sex"
+FROM "people";
+~~~
+
+This makes it fairly clear what _words_ refer to SQL keywords such as `SELECT` and `FROM`, and which words are specific to the data, e.g. the `"people"` table.
+
+Because the simplefolks database is so simple, all the column and table names can generally be left unquoted. If I had column names with non-alpha-numeric characters, such as `first name` and `last name`, those column names would have to be __double-quoted__:
+
+
+Good:
+
+~~~sql
+SELECT "first name", "last name"
+FROM people;
+~~~
+
+Bad:
+
+~~~sql
+SELECT first name, last name
+FROM people;
+~~~
+
+
+### Capitalization
+
+One more style thing: the SQLite interpreter is smart enough to know that `PEOPLE` refers to the table `people`, `SeX` to the column name of `sex`, and `sELeCT` is the same as the SQLite keyword of `SELECT`:
+
+~~~sql
+sELeCT nAmE, seX
+from PEoPLE;
+~~~
+
+However, it's not the computer you should worry about, it's the humans who have to read your code. My general guidelines:
+
+- Capitalize all SQL syntax and function names, e.g. `SELECT`, `FROM`, `COUNT`
+- Leave undercased table/column names as is
+- For table/column names that are uppercased, might want to consider double-quoting them.
+
+
+### Whitespace
+
+OK, one more thing: Whitespace is not meaningful when it comes to spacing around syntax. One space is the same as ten spaces (or newlines) These queries are all equivalent:
+
+~~~sql
+SELECT * FROM people;
+
+SELECT      *  FROM   people;
+
+
+SELECT
+*     FROM
+   people;
+~~~
+
+I like using the following indentation and newline rules (unless I'm lazy)
+
+- SQL keywords on their own line
+- things that follow keywords, such as column names after `SELECT`, go on their own line and are indented
+- keep line width less than 80 or so characters
+
+
+~~~sql
+SELECT
+  name, sex, age, 'hello world', name, sex, age, name, sex,
+  age, name, sex 'byebye world'
+FROM
+  people;
+~~~
+
+
+
+
+
+
+
