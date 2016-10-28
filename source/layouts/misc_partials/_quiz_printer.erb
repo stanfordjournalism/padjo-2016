@@ -1,0 +1,43 @@
+<div>
+    This quiz has <%= quiz.questions.count %> questions.
+</div>
+
+
+<section class="instructions sec">
+    <h1>Instructions</h1>
+
+    <%= markdownify quiz.instructions %>
+</section>
+
+
+
+<section class="questions">
+    <h1>Questions</h1>
+    <% quiz.questions.each_with_index do |q, q_num| %>
+
+        <div class="question sec">
+            <h3 class="num">
+                Question <%=q_num + 1%>
+            </h3>
+            <div class="prompt">
+                <%=markdownify q.prompt %>
+            </div>
+
+            <% if q.choices %>
+                <div class="choices">
+                    <!-- <div class="row"> -->
+                        <% q.choices.each_pair do |c_label, c_text| %>
+                            <!-- <div class="col-xs-6"> -->
+                                <div class="choice">
+                                    <div class="label"><%=c_label%>.</div>
+                                    <div class="text"><%=markdownify c_text %></div>
+                                </div>
+                            <!-- </div> -->
+
+                        <% end %>
+                    <!-- </div> -->
+                </div>
+            <% end %>
+        </div>
+    <% end %>
+</section>

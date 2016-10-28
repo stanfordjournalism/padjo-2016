@@ -49,6 +49,8 @@ table.table-sm{
 
 table.table-data{
   font-family: $font-family-monospace;
+  @extend .table-bordered;
+  @extend .table-sm;
 }
 
 table.table-sql{

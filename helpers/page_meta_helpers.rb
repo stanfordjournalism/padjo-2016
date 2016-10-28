@@ -82,4 +82,17 @@ module PageMetaHelpers
   def page_landing_in_sequence
       contentresource(page_sequence[:landing]) if page_sequence? and page_sequence[:landing].present?
   end
+
+  def page_sequence_contents?
+    page_sequence? && page_sequence[:contents].present?
+  end
+
+  def page_sequence_contents
+      if page_sequence_contents?
+        page_sequence[:contents].map{|rel_url| contentresource(rel_url) }
+      else
+        return []
+      end
+  end
+
 end

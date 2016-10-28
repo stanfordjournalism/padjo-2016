@@ -146,6 +146,7 @@
     - title: Example Google spreadsheet
       url: https://docs.google.com/spreadsheets/d/1Ag5DBIviYiuRrt2yr3nXmbPFV-FOg5fDH5SM3ZEDnpw
 
+
 - title: Social Security Administration Baby Names, 1980 through 2015
   path: /files/data/starterpack/ssa-babynames/ssa-babynames-nationwide-since-1980.sqlite
   description: |
@@ -157,6 +158,18 @@
       url: https://www.ssa.gov/oact/babynames/limits.html
     - title: Direct download for national data
       url: https://www.ssa.gov/oact/babynames/names.zip
+
+- title: Social Security Administration Baby Names 2015 for All States
+  path: /files/data/starterpack/ssa-babynames/ssa-babynames-for-2015.sqlite
+  description: |
+    Baby names as recorded for Social Security Number applications, counted by sex, for each state and nationwide, for 2015. Similar to the nationwide 1980 to 2015 data, but just for 2015. However, you can use it to compare name popularity across states.
+  size_mb: 11.4
+  table_count: 1
+  links:
+    - title: Social Security Administration landing page for baby name data
+      url: https://www.ssa.gov/oact/babynames/limits.html
+    - title: Direct download for state-specific data
+      url: https://www.ssa.gov/oact/babynames/state/namesbystate.zip
 
 
 

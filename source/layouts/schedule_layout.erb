@@ -27,6 +27,11 @@
                     <div class="item">
                         <h6 class="title"><%=link_to a.contextual_title, a.url %></h6>
                         <div class="description">
+                            <div class="date">
+                            <%= a.due_date.strftime('%A') %>,
+                            <%=a.friendly_short_deadline%>
+                            </div>
+
                             <%=a.description %>
                         </div>
                     </div>

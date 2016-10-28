@@ -1,0 +1,1 @@
+http://time.com/money/4379283/9-things-trump-spending-report/

@@ -1,6 +1,441 @@
 ---
-title: tutorials/sql-simplefolks-functions-aliases
-stub: true
+title: "SQLite Simple Folks: Calculating Functions and Using Aliases"
 description: |
-    lorem ipsum title title title
+  With SQL, just as in spreadsheets, we can write formulas transform data and create (and name) new columns. 
+sequence:
+  landing: /tutorials/sql-simplefolks-overview
 ---
+
+# Get the data
+
+- Download the [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite). 
+- Preview it [as a Google Spreadsheet](https://docs.google.com/spreadsheets/d/12mwh5m0ryzK9fKPBtxGB9DRddzRefYVDt1AOrZJHLcE/edit#gid=0)
+
+Once you've downloaded [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite) onto your computer, open it with your SQLite client and be ready to write some queries.
+
+# Aliasing column names
+
+Aliasing a column name means giving it a different label, other than its original name, that you plan to use for the rest of the query. Presumably, this new label will be more convenient to type and easier to understand.
+
+Here's a demonstration of the syntax with the `people` table, but making the names more _annoying_ to deal with:
+
+~~~sql
+SELECT name AS first_name,
+       sex AS overlysimplistic_binary_choice,
+       age AS years_spent_on_this_earth
+FROM people;
+~~~
+
+In this example, the effect is cosmetic, though having a programmatic way to rewrite headers before exporting data is a _really_ nice convenience:
+
+|  first_name | overlysimplistic_binary_choice | years_spent_on_this_earth  |
+|-------------+--------------------------------+----------------------------|
+|  Austin     | M                              | 33                         |
+|  Blair      | M                              | 90                         |
+|  Carolina   | F                              | 28                         |
+|  Dani       | F                              | 41                         |
+|  Donald     | M                              | 70                         |
+|  Eliza      | F                              | 37                         |
+|  Farida     | F                              | 23                         |
+|  Georgina   | F                              | 19                         |
+|  Hillary    | F                              | 68                         |
+|  Leland     | M                              | 16                         |
+|  Liam       | M                              | 22                         |
+|  Michael    | M                              | 48                         |
+|  Phoebe     | F                              | 52                         |
+|  Sherry     | F                              | 39                         |
+|  Zed        | M                              | 42                         |
+{:.table-sql}
+
+Here's the same kind of query, except much more terse. This time, I'm showing how the alibis I set are used in the rest of the query.
+
+This query renames each column to the minimal name possible, and also calculates a value for the `LENGTH(name)`, which I alias as `ln`.
+
+Then, I use the reference to `ln` in the `WHERE` and `ORDER BY` clauses, allowing me to filter the results list (only show names with 5 or more characters), and to order the results so that the longest names are on top:
+
+
+~~~sql
+SELECT name AS n,
+       sex AS s,
+       age AS a,
+       LENGTH(name) as ln       
+FROM people
+WHERE 
+  ln > 5
+ORDER BY 
+  ln DESC, 
+  n ASC;
+~~~
+
+Hopefully, one look at the headers should be enough to show the downfalls of being _too terse_ with column names:
+
+|  n        | s | a  | ln  |
+|-----------+---+----+-----|
+|  Carolina | F | 28 | 8   |
+|  Georgina | F | 19 | 8   |
+|  Hillary  | F | 68 | 7   |
+|  Michael  | M | 48 | 7   |
+|  Austin   | M | 33 | 6   |
+|  Donald   | M | 70 | 6   |
+|  Farida   | F | 23 | 6   |
+|  Leland   | M | 16 | 6   |
+|  Phoebe   | F | 52 | 6   |
+|  Sherry   | F | 39 | 6   |
+{:.table-sql}
+
+
+## The real world and its data is dirty
+
+
+The simplefolks sqlite data file was created to be dull and simple. It's boring, but at least it's not like real-world data where we constantly have to look up (in manuals) what a column or table name means, before trying to write them out and making typos aplenty.
+
+
+Take for example the Florida Death Row Roster, which you can [download as SQLite here](http://2016.padjo.org/tutorials/sqlite-data-starterpacks/#toc-florida-death-row-roster). Or see it on [Google Spreadsheets](https://docs.google.com/spreadsheets/d/12AFPLsTqILHGGL4TFbGCd_3PQ6KhDqZWtIQKaZ3D1Sg/edit#gid=0)
+
+### Florida's messy death row roster
+
+They've not only put race and gender into a single column, the name of the column is: `Race/ Gender`, which, I actually changed to `Race/Gender` before importing to SQLite to make my life just slightly easier.
+
+Let's pretend we only want to analyze race and gender; first, we have to select the column:
+
+~~~sql
+SELECT Race/Gender
+FROM inmates
+LIMIT 5;
+~~~
+
+Hopefully by now, you can guess that `Race/Gender` is going to be poorly interpreted by SQLite:
+
+      Error: no such column: Race
+
+SQLite interprets those non-alphanumeric characters after `Race` to mean that there's a `Race` column, which there isn't. There's only `Race/Gender`.
+
+But, we can deal with messy column names by **double-quoting** the name (not single-quoting):
+
+
+~~~sql
+SELECT "Race/Gender"
+FROM inmates
+LIMIT 5;
+~~~
+
+|  Race/Gender  |
+|---------------|
+|  BM           |
+|  BM           |
+|  WM           |
+|  BM           |
+|  BM           |
+{:.table-sql}
+
+To include the name of the inmate, we have to again double-quote its column name `Inmate Name`, but at least we can alias it, and `Race/Gender`, if we export it into other data software:
+
+~~~sql
+SELECT  
+  "Inmate Name" AS "inmate_name",
+  "Race/Gender" AS race_and_gender
+FROM inmates
+LIMIT 5;
+~~~
+
+|  inmate_name     | race_and_gender  |
+|------------------+------------------|
+|  Hall, Freddie   | BM               |
+|  Kilgore, Dean   | BM               |
+|  Rose, James     | WM               |
+|  Phillips, Harry | BM               |
+|  Meeks, Douglas  | BM               |
+{:.table-sql}
+
+### Creating race and gender out of "Race/Gender"
+
+This is beyond the scope of the current lesson, but if you've done pivot tables, you know that it'd be helpful to have _separate_ columns for `race` and `gender`, so that we could count how blacks are on death row without doing a conditional expression like this:
+
+
+~~~sql
+WHERE
+  "Race/Gender" = 'BM' OR "Race/Gender" = "BF"
+~~~
+
+Using a spreadsheet, we could fix this up by creating two new columns, naming them `race` and `gender`, and then filling them with the respective formulas to read the left and right characters, for race and gender:
+
+
+      race=LEFT(RG2, 1)
+
+      gender=RIGHT(RG2, 1)
+
+It's almost as easy in SQLite, except with `SELECT` and aliasing, we don't have to even create new columns. We generate them on the fly.
+
+SQLite doesn't have the nifty `LEFT` and `RIGHT` functions, but it does have `SUBSTR`, which let's us choose any `n` character from a given column or text string:
+
+~~~
+SELECT  
+  "Inmate Name" AS "inmate_name",
+  SUBSTR("Race/Gender", 1, 1) AS race,
+  SUBSTR("Race/Gender", 2, 1) AS gender
+FROM inmates
+LIMIT 5;
+~~~
+
+
+|  inmate_name     | race | gender  |
+|------------------+------+---------|
+|  Hall, Freddie   | B    | M       |
+|  Kilgore, Dean   | B    | M       |
+|  Rose, James     | W    | M       |
+|  Phillips, Harry | B    | M       |
+|  Meeks, Douglas  | B    | M       |
+{:.table-sql}
+
+And of course, this becomes even more useful when we get to actual aggregation functions, such as counting by values in a column a la Pivot Table:
+
+Even if you don't understand `GROUP BY`, look at how I'm able to dictate exactly how the data comes out, with even the labels I prefer:
+
+~~~
+SELECT  
+  COUNT(DISTINCT "Inmate Name") as inmate_count,
+  SUBSTR("Race/Gender", 1, 1) AS race,
+  SUBSTR("Race/Gender", 2, 1) AS gender
+FROM inmates
+GROUP BY race, gender
+ORDER BY inmate_count DESC;
+~~~
+
+Note that the data I've created for this lesson is out of date by a month or so, but the totals match up pretty closely with Florida's [October counts for white and black males, 221 and 149, respectively](http://www.dc.state.fl.us/activeinmates/deathrowroster.asp).
+
+|  inmate_count | race | gender  |
+|---------------+------+---------|
+|  220          | W    | M       |
+|  151          | B    | M       |
+|  12           | H    | M       |
+|  2            | B    | F       |
+|  1            | H    | F       |
+|  1            | W    | F       |
+{:.table-sql}
+
+
+# Functions in SQLite
+
+This section will be brief. [SQLite documentation is straightforward enough](https://www.sqlite.org/lang_corefunc.html), so I'll cover the most useful functions.
+
+Otherwise, there's not much to using functions for transforming data. It's just another bit of syntax, and it's focused around the `SELECT` clause. By aliasing columns, you can do a lot of the ugly data transforming work in the first part of the `SELECT` clause. The rest of the query simply uses the nice aliases you've created.
+
+## Doing math in SQL
+
+Calculating a math equation in SQL is just as easy as telling SQLite to print `Hello, world` as a string value:
+
+
+~~~sql
+SELECT 1 + 1,
+  100 - 1;
+~~~
+
+|  1 + 1 | 100 - 1  |
+|--------+----------|
+|  2     | 99       |
+{:.table-sql}
+
+This is a nonsense query with nonsense results, but let's alias those headers anyway:
+
+
+~~~sql
+SELECT 1 + 1 AS two,
+  100 - 1 AS bottles_of_beer_on_the_wall;
+~~~
+
+|  two | bottles_of_beer_on_the_wall  |
+|------+------------------------------|
+|  2   | 99                           |
+{:.table-sql}
+
+
+
+## String functions
+
+The functions are helpful for cleaning up literal string values.
+
+### LENGTH
+
+OK, this doesn't really clean up anything. It returns an integer that represents the number of characters in a string.
+
+To find the pets with the 3 longest names:
+
+~~~sql
+SELECT name, LENGTH(name) AS xn
+FROM pets
+ORDER BY
+  xn DESC
+LIMIT 3;
+~~~
+
+|  name           | xn  |
+|-----------------+-----|
+|  Sir Barks-Alot | 14  |
+|  Harry Potter   | 12  |
+|  Mr. Muggles    | 11  |
+{:.table-sql}
+
+
+Let's combine math and functions: which pet/owner has the longest combination of names?
+
+
+~~~sql
+SELECT name, owner_name, 
+  LENGTH(name) + LENGTH(owner_name) AS xn
+FROM pets
+ORDER BY
+  xn DESC
+LIMIT 3;
+~~~
+
+|  name           | owner_name | xn  |
+|-----------------+------------+-----|
+|  Secretariat    | Hillary    | 18  |
+|  Sir Barks-Alot | Liam       | 18  |
+|  Harry Potter   | Leland     | 18  |
+{:.table-sql}
+
+
+### REPLACE
+
+A lot of important data cleaning can be with simple replacement, or just deletion of characters and strings. In the `homes` table, maybe I don't like the word `country` as an `area`. Maybe I prefer `rural` instead:
+
+
+~~~sql
+SELECT owner_name, value, 
+  REPLACE(area, 'country', 'rural') AS xarea
+FROM homes
+WHERE value < 100000;
+~~~
+
+It's important note note that _nothing_ in the `homes` table gets altered. `country` is still `country` in the `area` column. My use of `REPLACE` effectively creates a virtual-column that has no effect on the database itself:
+
+
+|  owner_name | value | xarea    |
+|-------------+-------+----------|
+|  Blair      | 95000 | suburbs  |
+|  Dani       | 67000 | rural    |
+|  Georgina   | 82000 | rural    |
+|  Leland     | 42000 | rural    |
+|  Michael    | 82000 | rural    |
+|  Phoebe     | 77000 | urban    |
+{:.table-sql}
+
+Keep in mind that you can chain functions, or rather, call a function, and then call a function hat acts on the result of the first function:
+
+
+For example, if I want to convert the `sex` values of `M` and `F` to `Male` and `Female` respectively, it requires two `REPLACE` actions. But I don't want to call two queries.
+
+- So I write a REPLACE function to convert `M` to `Male`
+- And I write a second `REPLACE` function to transform the result of the first function -- everything is either `Male` or `F`.
+
+Here it is standalone:
+
+~~~sql
+REPLACE(
+    REPLACE(sex, 'M', 'Male'),
+ 'F', 'Female')
+~~~
+
+And here it is in a query; again, no data destroyed:
+
+~~~sql
+SELECT name, age, REPLACE(REPLACE(sex, 'M', 'Male'),
+                      'F', 'Female') AS fx
+
+FROM people                      
+WHERE age > 50;
+~~~
+
+|  name    | age | fx      |
+|----------+-----+---------|
+|  Blair   | 90  | Male    |
+|  Donald  | 70  | Male    |
+|  Hillary | 68  | Female  |
+|  Phoebe  | 52  | Female  |
+{:.table-sql}
+
+### SUBSTR
+
+SQLite's tools aren't unfortunately flexible enough to deal with all the ways data can be mangled. But `SUBSTR`, short for "substring" I assume, will handle a lot of wrangling problems for you.
+
+Normalizing date formats, for example. Without getting into the `DATESTR` function, which is its own rabbit hole, imagine you're given a column of date strings in U.S. format, i.e. MM/DD/YYYY
+
+      11/05/2015
+
+And you need it in the more standard ISO format, i.e. YYYY-MM-DD:
+
+Pretending that we just have to transform `11/05/2015` and not an entire table, here's a SQL query to break it up into month, day, year columns:
+
+~~~
+SELECT 
+  /* starting from char 1, get next 2 chars */
+  SUBSTR('11/05/2015', 1, 2)  AS mth,
+
+  /* starting from char 4, get next 2 chars */ 
+  SUBSTR('11/05/2015', 4, 2)  AS day,
+
+  /* starting from char 7, get next 4 chars */ 
+  SUBSTR('11/05/2015', 7, 4)  AS year;
+~~~
+
+|  mth | day | year  |
+|------+-----+-------|
+|  11  | 05  | 2015  |
+{:.table-sql}
+
+
+To create one single column with the standard date, remember to use `||` as the concatenation operator, no aliasing (until the end) needed:
+
+~~~sql
+SELECT 
+  (
+    SUBSTR('11/05/2015', 7, 4)  
+    || '-' 
+    || SUBSTR('11/05/2015', 1, 2) 
+    || '-' 
+    ||  SUBSTR('11/05/2015', 4, 2) 
+  ) the_date_woohoo;
+~~~
+
+
+|  the_date_woohoo  |
+|-------------------|
+|  2015-11-05       |
+{:.table-sql}
+
+
+Another way to use `SUBSTR`: extract the part of a text value that you need for a bigger query.
+
+For example: From the `people` table, list everyone whose name ends with a vowel.
+
+Tip: Use SUBSTR to get the last character of a name (use a negative number as the second argument)
+
+
+~~~sql
+SELECT name, sex, age,
+    SUBSTR(name, -1) AS last_letter
+FROM people
+WHERE last_letter IN('a', 'e', 'i', 'o', 'u');
+~~~
+
+
+|  name     | sex | age | last_letter  |
+|-----------+-----+-----+--------------|
+|  Carolina | F   | 28  | a            |
+|  Dani     | F   | 41  | i            |
+|  Eliza    | F   | 37  | a            |
+|  Farida   | F   | 23  | a            |
+|  Georgina | F   | 19  | a            |
+|  Phoebe   | F   | 52  | e            |
+{:.table-sql}
+
+### UPPER and LOWER
+
+This is pretty self-explanatory. If you're unsure if `LIKE` will do a case-insensitive search, then use `UPPER` or `LOWER` to change a text string before attempting an equality match:
+
+
+~~~sql
+SELECT * FROM people
+WHERE UPPER(name) = 'DONALD';
+~~~

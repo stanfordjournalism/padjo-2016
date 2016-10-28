@@ -1,6 +1,432 @@
 ---
-title: tutorials/sql-simplefolks-conditional-logic
-stub: true
+title: "SQLite Simple Folks: More Conditional Logic with AND and OR and NOT"
 description: |
-    lorem ipsum title title title
+  Why filter data with a single true/false test when we can have combinations?
+sequence:
+  landing: /tutorials/sql-simplefolks-overview
 ---
+
+
+# Get the data
+
+- Download the [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite). 
+- Preview it [as a Google Spreadsheet](https://docs.google.com/spreadsheets/d/12mwh5m0ryzK9fKPBtxGB9DRddzRefYVDt1AOrZJHLcE/edit#gid=0)
+
+Once you've downloaded [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite) onto your computer, open it with your SQLite client and be ready to write some queries.
+
+
+
+# WHERE with multiple conditions 
+
+Let's start off by finding all females in the `people` table:
+
+~~~sql
+SELECT *
+FROM people
+WHERE sex = 'F';
+~~~
+
+|  name     | sex | age  |
+|-----------+-----+------|
+|  Carolina | F   | 28   |
+|  Dani     | F   | 41   |
+|  Eliza    | F   | 37   |
+|  Farida   | F   | 23   |
+|  Georgina | F   | 19   |
+|  Hillary  | F   | 68   |
+|  Phoebe   | F   | 52   |
+|  Sherry   | F   | 39   |
+{:.table-sql}
+
+When we want to make our filter _more restrictive_, we can add another test with `AND`. The following query looks for females over the age of 40:
+
+~~~sql
+SELECT *
+FROM people
+WHERE sex = 'F'
+  AND age > 40;
+~~~
+
+
+|  name    | sex | age  |
+|----------+-----+------|
+|  Dani    | F   | 41   |
+|  Hillary | F   | 68   |
+|  Phoebe  | F   | 52   |
+{:.table-sql}
+
+
+## Use AND to add additional requirements to a WHERE clause
+
+The effect of `AND` is to add additional _requirements_ to what the `WHERE` clause tests.
+
+This code:
+
+~~~sql
+WHERE sex = 'F'
+  AND age > 40
+~~~
+
+Should be read as:
+
+> All records must have 'F' in the `sex` column and an `age` value greater than 40
+
+We should expect the results from `WHERE sex = 'F'` to be at least equal to, if not greater than `WHERE sex = 'F' AND age > 40`, because it is likely that there are more `people` who are female, than `people` who are female and over-40.
+
+
+### Mutually exclusive expressions with AND
+
+One of the most common mistakes -- but not a syntax error -- is `AND`ing a couple of boolean expressions to create a logical fallacy.
+
+Let's try it in a basic `SELECT`:
+
+~~~sql
+SELECT 1=2 AND 2=4,
+       1=1 AND 2=2,
+       1=1 AND 1=2;
+~~~
+
+|  1=2 AND 2=4 | 1=1 AND 2=2 | 1=1 AND 1=2  |
+|--------------+-------------+--------------|
+|  0           | 1           | 0            |
+{:.table-sql}
+
+
+The first test is false because both `1=2` and `2=4` are false. But what's less obvious is that in the third test, even though `1=1` is true, the combined statement is _false_ because both conditions need to be _true_ for the overall expression to evaluate to true.
+
+Remember how this query worked:
+
+~~~sql
+SELECT *
+FROM people
+WHERE name IN('Donald', 'Dani');
+~~~
+
+
+|  name   | sex | age  |
+|---------+-----+------|
+|  Dani   | F   | 41   |
+|  Donald | M   | 70   |
+{:.table-sql}
+
+
+Why does this similar-looking query return _nothing_?
+
+~~~sql
+SELECT *
+FROM people
+WHERE name = 'Donald'
+  AND name = 'Dani';
+~~~
+
+If the non-results of the above query don't make sense, it may be how your brain reads the word `AND`. It's a word that has inclusive connotations, like: 
+
+> I would like to go to prom with Donald *and* Dani
+
+
+However, that's not how this SQL statement is arranged. The `AND` should be read like this:
+
+> I would go to prom with you if your name was Donald *and* Dani
+
+If your name is Donald, but _not also_ Dani at the same time, or vice versa, or neither Donald nor Dani, then I'm not interested in going to prom with you. Or anyone, when you think about it.
+
+
+## Use OR to add additional ways for records to be included
+
+On the other side of `AND` is `OR`. 
+
+To get all `people` named `Dani` OR `Donald`:
+
+
+~~~sql
+SELECT *
+FROM people
+WHERE name = 'Donald'
+  OR name = 'Dani'; 
+~~~
+
+
+|  name   | sex | age  |
+|---------+-----+------|
+|  Dani   | F   | 41   |
+|  Donald | M   | 70   |
+{:.table-sql}
+
+
+To go back to testing expressions with `SELECT`, recall what `AND` looked like:
+
+
+~~~sql
+SELECT 1=2 AND 2=4,
+       1=1 AND 2=2,
+       1=1 AND 1=2,
+       1=1 AND 2=2 AND 1=2;
+~~~
+
+Remember: if any of the boolean expressions that are part of the `AND` party are __false__, then the entire expression is __false__:
+
+|  1=2 AND 2=4 | 1=1 AND 2=2 | 1=1 AND 1=2 | 1=1 AND 2=2 AND 1=2  |
+|--------------+-------------+-------------+----------------------|
+|  0           | 1           | 0           | 0                    |
+
+
+
+Now replace `AND` with `OR`:
+
+~~~sql
+SELECT 1=2 OR 2=4,
+       1=1 OR 2=2,
+       1=1 OR 1=2,
+       1=1 OR 2=2 OR 1=2;
+~~~
+
+If _any_ of the expressions joined by `OR` are __true__, then the entire expression is __true__:
+
+
+|  1=2 OR 2=4 | 1=1 OR 2=2 | 1=1 OR 1=2 | 1=1 OR 2=2 OR 1=2  |
+|-------------+------------+------------+--------------------|
+|  0          | 1          | 1          | 1                  |
+
+
+
+### Being too permissive with OR
+
+So it's easy to eliminate all possible results, logically, with `AND`. And it's just as possible to include more than we want with `OR`.
+
+
+From the `homes` table, let's select all rows in which `value` is greater than `150000`:
+
+~~~sql
+SELECT *
+FROM homes
+WHERE value > 150000;
+~~~
+
+|  owner_name | area    | value   |
+|-------------+---------+---------|
+|  Carolina   | suburbs | 220000  |
+|  Carolina   | urban   | 190000  |
+|  Donald     | urban   | 450000  |
+|  Donald     | urban   | 260000  |
+|  Donald     | urban   | 660000  |
+|  Eliza      | urban   | 210000  |
+|  Farida     | suburbs | 180000  |
+|  Hillary    | country | 380000  |
+|  Hillary    | urban   | 400000  |
+|  Liam       | suburbs | 160000  |
+|  Michael    | suburbs | 160000  |
+|  Sherry     | urban   | 210000  |
+|  Zed        | country | 177000  |
+{:.table-sql}
+
+
+If we want to _restrict_ the results, we might think of asking for homes with a value greater than 150000 and less than 400000. Using `AND`, we get:
+
+~~~sql
+SELECT *
+FROM homes
+WHERE value > 150000 
+  AND value < 400000;
+~~~
+
+|  owner_name | area    | value   |
+|-------------+---------+---------|
+|  Carolina   | suburbs | 220000  |
+|  Carolina   | urban   | 190000  |
+|  Donald     | urban   | 260000  |
+|  Eliza      | urban   | 210000  |
+|  Farida     | suburbs | 180000  |
+|  Hillary    | country | 380000  |
+|  Liam       | suburbs | 160000  |
+|  Michael    | suburbs | 160000  |
+|  Sherry     | urban   | 210000  |
+|  Zed        | country | 177000  |
+{:.table-sql}
+
+It's pretty easy to throw in `OR` there:
+
+~~~sql
+SELECT COUNT(*)
+FROM homes
+WHERE value > 150000 
+  OR value < 400000;
+~~~
+
+To translate it into English, we want all homes which:
+
+- Have a value greater than $150K, which includes th $600K mansions
+- Or, have a value less than $400, which includes everything between $150K and $400K, and under $400K.
+
+Basically, _every_ record in _homes_.
+
+
+## Combining `AND` and `OR`
+
+Things don't have to be either-or with `AND` and `OR`:
+
+To find all people between the ages of `40` and `60`, or, are men under the ages of 40:
+
+~~~sql
+SELECT *
+FROM people
+WHERE 
+  age >= 30 AND age <= 60
+  OR 
+  sex = 'M' AND age < 40;
+~~~
+
+|  name    | sex | age  |
+|----------+-----+------|
+|  Austin  | M   | 33   |
+|  Dani    | F   | 41   |
+|  Eliza   | F   | 37   |
+|  Leland  | M   | 16   |
+|  Liam    | M   | 22   |
+|  Michael | M   | 48   |
+|  Phoebe  | F   | 52   |
+|  Sherry  | F   | 39   |
+|  Zed     | M   | 42   |
+{:.table-sql}
+
+You can memorize the order of operations, but I prefer using parentheses to make it more obvious to the casual reader:
+
+
+~~~sql
+SELECT *
+FROM people
+WHERE 
+  (age >= 30 AND age <= 60)
+  OR 
+  (sex = 'M' AND age < 40);
+~~~
+
+Because consider the same boolean tests, but much different precedence and ordering here:
+
+
+~~~sql
+SELECT *
+FROM people
+WHERE 
+  age >= 30 
+  AND (age <= 60 OR sex = 'M') 
+  AND age < 40;
+~~~
+
+
+## Negations with NOT:
+
+`NOT` can be applied after `AND` or `OR`.
+
+To find all women _not_ under the age of 35:
+
+~~~sql
+SELECT *
+FROM people
+WHERE 
+  sex = 'F'
+  AND NOT age < 35;
+~~~
+
+Of course, that's equivalent to:
+
+~~~sql
+  sex = 'F'
+  AND age > 35;
+~~~
+
+Here's a more complicated query:
+
+All men who are not younger than 45 nor have a name longer than 5 characters:
+
+~~~sql
+SELECT *
+FROM people
+WHERE 
+  sex = 'M'
+  AND
+  NOT (age >= 45 OR LENGTH(name) > 5); 
+~~~
+
+|  name | sex | age  |
+|-------+-----+------|
+|  Liam | M   | 22   |
+|  Zed  | M   | 42   |
+{:.table-sql}
+
+Negatives are hard; this is just an exercise to show you how messy you can make it. But let's try unraveling the logic, starting with the most inner condition:
+
+~~~sql
+SELECT * FROM people
+WHERE  
+  age >= 45 OR LENGTH(name) > 5;
+~~~
+
+i.e. people at least 45, or have a name longer than 5 characters:
+
+|  name     | sex | age  |
+|-----------+-----+------|
+|  Austin   | M   | 33   |
+|  Blair    | M   | 90   |
+|  Carolina | F   | 28   |
+|  Donald   | M   | 70   |
+|  Farida   | F   | 23   |
+|  Georgina | F   | 19   |
+|  Hillary  | F   | 68   |
+|  Leland   | M   | 16   |
+|  Michael  | M   | 48   |
+|  Phoebe   | F   | 52   |
+|  Sherry   | F   | 39   |
+{:.table-sql}
+
+Let's throw in the `NOT`, which finds all the folks for whom that `OR`-joint condition did not evaluate to __True__ -- there's not many possible people since `people` contains 15 total records;
+
+~~~sql
+SELECT *
+FROM people
+WHERE 
+  NOT (age >= 45 OR LENGTH(name) > 5);
+~~~
+
+
+|  name  | sex | age  |
+|--------+-----+------|
+|  Dani  | F   | 41   |
+|  Eliza | F   | 37   |
+|  Liam  | M   | 22   |
+|  Zed   | M   | 42   |
+{:.table-sql}
+
+The conditional-expression joined with `AND` basically requires that the surviving records be males. Thus, two records after all is filtered:
+
+
+~~~sql
+SELECT *
+FROM people
+WHERE 
+  sex = 'M'
+  AND
+  NOT (age >= 45 OR LENGTH(name) > 5);
+~~~
+
+
+
+|  name | sex | age  |
+|-------+-----+------|
+|  Liam | M   | 22   |
+|  Zed  | M   | 42   |
+{:.table-sql}
+
+
+# Conclusions
+
+There wasn't a whole lot of here, just examples of how queries can be as complicated as we need them to be using `AND` and `OR` to connect boolean expressions. 
+
+The trick is understanding that the overall concepts haven't gotten much more complicated. Just as all the math you need to understand this:
+
+      10 + 10 + 10 = 30
+
+Is enough to understand this:
+
+      1 + 1 + 1 + 1 + 1 + 5 + 5 + 5 + 10 + 5 + 5 = 30
+
+

@@ -13,9 +13,256 @@ sequence:
     - /tutorials/sql-simplefolks-conditional-logic
     - /tutorials/sql-simplefolks-functions-aliases
     - /tutorials/sql-simplefolks-group-by-aggregates
-    - /tutorials/sql-simplefolks-having-aggregates
-    - /tutorials/sql-simplefolks-subqueries
-    - /tutorials/sql-simplefolks-inner-joins
-    - /tutorials/sql-simplefolks-left-joins
-    - /tutorials/sql-simplefolks-self-joins
+#    - /tutorials/sql-simplefolks-having-aggregates
+#    - /tutorials/sql-simplefolks-subqueries
+#    - /tutorials/sql-simplefolks-inner-joins
+#    - /tutorials/sql-simplefolks-left-joins
+#    - /tutorials/sql-simplefolks-self-joins
 ---
+
+
+# Keeping things simple
+
+I complain a lot about how boring public datasets can be. However, the bigger danger in your average public dataset is how much research it takes -- including direct contact with government officials -- to figure out all the gotchas and the limitations, nevermind the culture and workflow which makes the accuracy and integrity of data hard to discern.
+
+To [use an example outside of government, read "Distrust Your Data", by Jacob Harris](https://source.opennews.org/en-US/learning/distrust-your-data/), where a pornography company can't even count up its own page/video data, nevemrind its inadverdent slamming of Kansas.
+
+## Keeping things boring
+
+So as another alternative to the various writeups and half-finished tutorials I'm presenting a set of tutorials/exercises in which the data is about as boring and meaningless as it gets: literally, things I made up in my head.
+
+But because I made it up, I'm able to not bring in all of the annoying data-cleaning-issues that have virtually _nothing_ to do with day-to-day SQL learning.
+
+### Names are hard
+
+For example, the [White House visitor log](https://www.whitehouse.gov/briefing-room/disclosures/visitor-records) seems straightforward enough -- it's just a giant list of names, how hard is to crunch in SQL to find who is visiting who?. Until you realize that there are way more than one person  in American named [Bill Ayers](http://hotair.com/archives/2009/10/30/no-bill-ayers-didnt-visit-the-white-house/) or [Michael Jordan](http://www.nbcnews.com/id/33556933/ns/politics-white_house/t/obama-names-white-house-visitors/) who also visited the White House. Or that the [big players in the White House just do their work in Caribou Coffee](http://www.nytimes.com/2010/06/25/us/politics/25caribou.html?_r=0).
+
+
+### Deal with the boring, painful stuff later
+
+This badly named [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite) contains the simplest, inane kind of data I could think of: imaginary people, with imaginary homes and pets. But also, really, really simple:
+
+1. Everyone has just a first name that doesn't change.
+2. Everyone just goes by their first name, not some number like a SSN or IP address.
+3. People own pets and homes, sometimes more than one. But homes and pets don't have multiple owner
+
+There's nothing interesting in this database, but the code and strategy is all the same.
+
+
+# The simplefolks SQLite database
+
+
+For all of these lessons, we'll be using the painfully boring, small, and simple dataset that I've hand created:
+
+- Download the [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite). 
+- Preview it [as a Google Spreadsheet](https://docs.google.com/spreadsheets/d/12mwh5m0ryzK9fKPBtxGB9DRddzRefYVDt1AOrZJHLcE/edit#gid=0)
+
+
+## What simplefolks.sqlite contains
+
+The `simplefolks.sqlite` is SQLite3 database file that contains 3 tables, with 3 columns each. Each table and column isn't even bother worth elaborating beyond the labels:
+
+- __people__:
+    - `name`: Everyone has just first name. And it is unique.
+    - `age`:  Just the age in years, as an integer)
+    - `sex`:  Erroneously simplified to `M` and `F`
+- __homes__:
+    - `owner_name`: The first name of the person who owns the home.
+    - `area`: A word for describing where the home exists, e.g. `urban`, `suburbs`, `country`
+    - `value`: The value of the home, as an integer, in an unknown currency
+- __pets__:
+    - `name`: The name of the pet.
+    - `type`: e.g. `dog`, `cat`, `bird`
+    - `owner_name`: The first name of the person who owns the pet.
+
+## What the simplefolks.sqlite raw data looks like
+
+You can peruse it [as a Google Spreadsheet](https://docs.google.com/spreadsheets/d/12mwh5m0ryzK9fKPBtxGB9DRddzRefYVDt1AOrZJHLcE/edit#gid=0). But the data is so basic, it's just easier dump every record and column into a HTML table, via the laziest SQL queries ever:
+
+
+### people table
+
+A list of people. Here's how to see all the data at once in SQL:
+
+
+~~~sql
+SELECT * FROM people;
+~~~
+
+|  name     | sex | age  |
+|-----------+-----+------|
+|  Austin   | M   | 33   |
+|  Blair    | M   | 90   |
+|  Carolina | F   | 28   |
+|  Dani     | F   | 41   |
+|  Donald   | M   | 70   |
+|  Eliza    | F   | 37   |
+|  Farida   | F   | 23   |
+|  Georgina | F   | 19   |
+|  Hillary  | F   | 68   |
+|  Leland   | M   | 16   |
+|  Liam     | M   | 22   |
+|  Michael  | M   | 48   |
+|  Phoebe   | F   | 52   |
+|  Sherry   | F   | 39   |
+|  Zed      | M   | 42   |
+{:.table-sql}
+
+
+### homes table
+
+A list of homes owned by the folks in `people`. Some people have more than one home:
+
+
+
+~~~sql
+SELECT * FROM homes;
+~~~
+
+|  owner_name | area    | value   |
+|-------------+---------+---------|
+|  Austin     | urban   | 145000  |
+|  Blair      | suburbs | 95000   |
+|  Carolina   | suburbs | 220000  |
+|  Carolina   | urban   | 190000  |
+|  Dani       | country | 67000   |
+|  Donald     | urban   | 450000  |
+|  Donald     | urban   | 260000  |
+|  Donald     | urban   | 660000  |
+|  Eliza      | urban   | 210000  |
+|  Farida     | suburbs | 180000  |
+|  Georgina   | country | 82000   |
+|  Hillary    | country | 380000  |
+|  Hillary    | urban   | 400000  |
+|  Liam       | suburbs | 160000  |
+|  Leland     | country | 42000   |
+|  Michael    | suburbs | 160000  |
+|  Michael    | country | 82000   |
+|  Phoebe     | urban   | 77000   |
+|  Sherry     | urban   | 210000  |
+|  Zed        | country | 177000  |
+{:.table-sql}
+
+### pets table
+
+Animals owned by `people`. Some people are lucky enough to have more than one pet:
+
+
+~~~sql
+SELECT * FROM pets;
+~~~
+
+|  name           | type  | owner_name  |
+|-----------------+-------+-------------|
+|  Maru           | cat   | Austin      |
+|  Icey           | dog   | Blair       |
+|  Maxie          | dog   | Blair       |
+|  Rex            | dog   | Carolina    |
+|  Harambe        | bird  | Dani        |
+|  Syd            | dog   | Dani        |
+|  Artemis        | cat   | Dani        |
+|  Mr. Muggles    | cat   | Donald      |
+|  Meowser        | cat   | Donald      |
+|  Donald         | cat   | Donald      |
+|  Hodor          | bird  | Eliza       |
+|  Bumpkin        | horse | Georgina    |
+|  Secretariat    | horse | Hillary     |
+|  Socks          | dog   | Hillary     |
+|  Sir Barks-Alot | dog   | Liam        |
+|  Harry Potter   | horse | Leland      |
+|  Xerses         | horse | Michael     |
+|  Zeus           | cat   | Michael     |
+|  Rocket         | cat   | Phoebe      |
+|  Kermit         | dog   | Sherry      |
+|  Hector         | dog   | Sherry      |
+|  Essy           | dog   | Sherry      |
+|  Samwise        | dog   | Sherry      |
+|  Jenkins        | horse | Zed         |
+{:.table-sql}
+
+
+# Lessons and People Data
+
+
+## SELECT and FROM
+
+<%= link_to 'Lesson', '/tutorials/sql-simplefolks-select-from' %>
+
+#### Exercises
+
+###### Select all the data from the `people`
+
+###### Select just pet name and owner_name from `pets`
+
+
+## ORDER and LIMIT
+
+<%= link_to 'lesson', '/tutorials/sql-simplefolks-order-limit' %>
+
+#### Exercises
+
+###### List the oldest person in `people`
+
+###### List the 3 most expensive homes in `homes`
+
+## WHERE and LIKE
+
+
+<%= link_to 'lesson', '/tutorials/sql-simplefolks-where' %>
+
+
+#### Exercises
+
+##### List all the dogs in alphabetical order of their owners' names
+
+##### List the 3 most expensive homes in the country
+
+##### List all pets whose names start with a `P` or end with an `E`
+
+
+
+## More practice with conditional logic
+
+<%= link_to 'lesson', '/tutorials/sql-simplefolks-conditional-logic' %>
+
+
+#### Exercises
+
+##### List all people in alphabetical order of name, who are older than 30 but younger than 60
+
+##### List all pets whose names start with a `P` or end with an `E`
+
+##### List all people whose names start with a vowel
+
+
+
+## Functions and Aliasing column names
+
+<%= link_to 'lesson', '/tutorials/sql-simplefolks-functions-aliases' %>
+
+
+#### Exercises
+
+##### List all people in alphabetical order of name, who are older than 30 but younger than 60
+
+##### List all pets whose names start with a `P` or end with an `E`
+
+##### List all people whose names start with a vowel
+
+
+## GROUP BY and Aggregate functions
+
+<%= link_to 'lesson', '/tutorials/sql-simplefolks-group-by-aggregates' %>
+
+##### List the count of males and females in `people`
+
+##### List the count of types of pets in `pets`
+
+##### Find the average home value in `homes`
+
+##### Who owns the most number of `homes` and `pets`?
+
+##### Who owns the highest cumulative value of `homes`?
+
+##### Group `people` by their first initial and count, then list the initials in descending order of most popular initial.
+

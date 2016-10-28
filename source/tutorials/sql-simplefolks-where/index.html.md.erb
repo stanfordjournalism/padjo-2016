@@ -1,6 +1,537 @@
 ---
-title: tutorials/sql-simplefolks-where
-stub: true
+title: "SQLite Simple Folks: WHERE and LIKE"
 description: |
-    lorem ipsum title title title
+  How to filter data based on true/false conditions, including fuzzy-text matching
+sequence:
+  landing: /tutorials/sql-simplefolks-overview
 ---
+
+
+# Get the data
+
+- Download the [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite). 
+- Preview it [as a Google Spreadsheet](https://docs.google.com/spreadsheets/d/12mwh5m0ryzK9fKPBtxGB9DRddzRefYVDt1AOrZJHLcE/edit#gid=0)
+
+Once you've downloaded [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite) onto your computer, open it with your SQLite client and be ready to write some queries.
+
+
+
+# How to hack better filters with `LIMIT` and `ORDER BY`
+
+In all honesty, knowing `LIMIT` and `ORDER BY` puts us in striking range of most of the interesting things we want to know from data, i.e. given a list of people/businesses/politicians, find the 5 or 10 or 100 richest/poorest/oldest/happiest/most despicable.
+
+To refresh our memory of the `people` table, here's how to find the youngest person among all the `people`:
+
+
+~~~sql
+SELECT name, age, sex
+FROM people
+ORDER by age ASC
+LIMIT 1;
+~~~
+
+
+|  name     | age | sex  |
+|-----------+-----+------|
+|  Leland   | 16  | M    |
+{:.table-sql}
+
+Being able to just sort by columns is so powerful that, when we need to filter the data in not-so-trivial way, we can frequently improvise a hack by just being clever about the data. 
+
+In the above query, we not only found the youngest person, but the youngest _male_. But how do we find the youngest _female_, that is, without manually searching the database or even changing the `LIMIT 1` clause?
+
+Well, we know that females are represented as `F` in the `sex` column. If we first sort `people` by `sex` in ascending order, the records at the top of the results will all be females.
+
+Thus, making `age ASC` be the second `ORDER BY` criteria will put the record belonging to the youngest female at the top:
+
+~~~sql
+SELECT name, age, sex
+FROM people
+ORDER BY 
+  sex ASC, age ASC
+LIMIT 1;
+~~~
+
+
+|  name     | age | sex  |
+|-----------+-----+------|
+|  Georgina | 19  | F    |
+{:.table-sql}
+
+
+# Filtering with the WHERE clause
+
+Being clever and making use of what little you have is good exercise. But there's a point where learning new syntax is much more efficient than thinking up hacks (especially hacks that won't apply to more complex data).
+
+In the previous example, it should have felt very _convoluted_ to create a complex sort to make female-associated records rise to the top, on account of the letter `F` being alphabetical priority over `M` for "males".
+
+It feels far more direct for our query to ask *just give me the records that have a sex of 'M', THEN do the sort*
+
+That's where `WHERE` comes in. Ignore `LIMIT` and `ORDER` for now; we use `WHERE` after we've selected data from a table and we want to _filter_ it.
+
+Here's how to retrieve _only_ `people` who are listed as male:
+
+~~~sql
+SELECT *
+FROM people
+WHERE sex = 'M';
+~~~
+
+
+|  name    | sex | age  |
+|----------+-----+------|
+|  Austin  | M   | 33   |
+|  Blair   | M   | 90   |
+|  Donald  | M   | 70   |
+|  Leland  | M   | 16   |
+|  Liam    | M   | 22   |
+|  Michael | M   | 48   |
+|  Zed     | M   | 42   |
+{:.table-sql}
+
+
+How the `WHERE` clause works is that we give it a true/false test, in this case `sex = 'M'`, and it runs that test on every record in the data, e.g. imagine it asking each row in `people`: *Do you have a 'M' in your `sex` column?*. For the rows in which this test is __true__, they move along to the next part of the SQL processing, such as `ORDER BY` and `LIMIT`. For the rows that evaluate as __false__, they're ignored as far as results are concerned.
+
+(though it's worth emphasizing that _nothing_ gets deleted -- `SELECT` statements don't delete rows no matter what filtering is used)
+
+
+Re-running the above query, but adding on `ORDER BY` and `LIMIT` to find the youngest man:
+
+~~~sql
+SELECT *
+FROM people
+WHERE sex = 'M'
+ORDER BY age ASC
+LIMIT 1;
+~~~
+
+
+To find the youngest woman, we just change that __conditional expression__ (or _test_, as I sometimes call it) to this:
+
+~~~sql
+WHERE sex = 'F'
+~~~
+
+And now, no more "clever", convoluted sorting that takes advantage of how the English language works:
+
+~~~sql
+SELECT *
+FROM people
+WHERE sex = 'F'
+ORDER BY age ASC
+LIMIT 1;
+~~~
+
+
+## Comparison operators
+
+Let's do a quick rundown of all the ways we can express a true/fall test.
+
+### Not equal 
+
+To negate an expression that checks for equality, put an __exclamation mark__ before the equals sign. The following query would list all `people` whose sex are not _female_, which, in a more complex dataset, would be more than just _males_:
+
+### Greater/less than 
+
+SQL has the standard comparison operators learned in arithmetic school.
+
+To find all `people` older than `60`:
+
+~~~sql
+SELECT *
+FROM people
+WHERE age > 60;
+~~~
+
+To find all `homes` (remember there are other tables) with a `value` less than $100,000:
+
+~~~sql
+SELECT *
+FROM homes
+WHERE value < 100000;
+~~~
+
+|  owner_name | area    | value  |
+|-------------+---------+--------|
+|  Blair      | suburbs | 95000  |
+|  Dani       | country | 67000  |
+|  Georgina   | country | 82000  |
+|  Leland     | country | 42000  |
+|  Michael    | country | 82000  |
+|  Phoebe     | urban   | 77000  |
+{:.table-sql}
+
+
+### Greater/less than or equal to
+
+Append an __equals sign__ to the `>` and `<` operators to express a condition like, "all years up to and including 1999".
+
+To select all `homes` with a value of _at least_ $400,000, i.e. greater than or equal to $400,000:
+
+|  owner_name | area  | value   |
+|-------------+-------+---------|
+|  Donald     | urban | 450000  |
+|  Donald     | urban | 660000  |
+|  Hillary    | urban | 400000  |
+{:.table-sql}
+
+
+### Comparing string literals
+
+Comparison operators aren't just for math. String literals can be compared alphabetically. For example, the following query would be just fine. I add a `ORDER BY name` so  we can better see which names have been cut off:
+
+~~~
+SELECT * 
+FROM people
+WHERE name < 'Dani'
+ORDER BY name;
+~~~
+
+Note how even how the record for `Dani` has been excluded because `Dani` is _less than_ `Dani`, it is _equal to it_:
+
+|  name     | sex | age  |
+|-----------+-----+------|
+|  Austin   | M   | 33   |
+|  Blair    | M   | 90   |
+|  Carolina | F   | 28   |
+{:.table-sql}
+
+
+
+Meanwhile, every name after `Dani` alphetically, starting with `Donald`, is also excluded.
+
+
+Let's break it down to a single expression: is `Dani` less than `Donald`?
+
+      'Dani' < 'Donald'
+
+This evaluates to __true__ because `Donald` comes after `Dani` in the alphabet, just like this numerical comparison also evaluates to __true__ -- `101` comes after `99`:
+
+       99 < 101
+
+
+### 1 and 0 and true and false in SQLite
+
+But don't take my word, test this with what you know about SQL:
+
+~~~sql
+SELECT 
+  'Dani' < 'Donald', 
+  99 < 101;
+~~~
+
+
+|  'Dani' < 'Donald' | 99 < 101  |
+|--------------------+-----------|
+|  1                 | 1         |
+{:.table-sql}
+
+The result of `1` is considered to be __true__. For those of you coming from another programming language, SQLite does not have a special type for __true__ and __false__; just `1` and `0` respectively.
+
+Just to confirm, let's select for something obviously __false__:
+
+~~~sql
+SELECT
+  1 = 1
+  1 = 2;
+~~~
+
+
+| 1 = 1 | 1 = 2 |
+|-------|-------|
+|     1 |     0 |
+{:.table-sql}
+
+
+
+## When the WHERE conditional is always true or false
+
+Let's revisit the query for finding the youngest person in `people`, ignoring `sex` (and the `WHERE` condition):
+
+~~~sql
+SELECT *
+FROM people
+ORDER BY age ASC
+LIMIT 1;
+~~~
+
+The result is `Leland`: 
+
+|  name   | sex | age  |
+|---------+-----+------|
+|  Leland | M   | 16   |
+{:.table-sql}
+
+
+Now let's add a `WHERE` clause, but with an incredibly dumb conditional expression. If we can write a query as dumb as `SELECT 1 = 1;` -- and SQLite will _still_ run it, then what's stopping us from putting `1 = 2` in the `WHERE` condition?
+
+Nothing. That's perfectly valid SQL. 
+
+
+Now try to picture what happens: the `WHERE` clause evaluates this _always false_ test for every row selected. Since every row gets a __false__, every row is _excluded_ from the results:
+
+
+~~~sql
+SELECT *
+FROM people
+WHERE 1 = 0
+ORDER BY age ASC
+LIMIT 1;
+~~~
+
+You should get an _empty_ result set, but not __a SQL error__ -- _huge_ difference.
+
+
+OK, let's try for something always __true__:
+
+~~~sql
+SELECT *
+FROM people
+WHERE 1 = 1
+ORDER BY age ASC
+LIMIT 1;
+~~~
+
+What did you expect?
+
+|  name   | sex | age  |
+|---------+-----+------|
+|  Leland | M   | 16   |
+{:.table-sql}
+
+If you run the query sans the `LIMIT` clause, the result will include every record because for every record, `1 = 1` is __true__.
+
+Hence, this query with `WHERE`:
+
+~~~sql
+SELECT *
+FROM people
+WHERE 1 = 1
+ORDER BY age ASC
+LIMIT 1;
+~~~
+
+Is equivalent to:
+
+
+~~~sql
+SELECT *
+FROM people
+ORDER BY age ASC
+LIMIT 1;
+~~~
+
+Which means that `WHERE 1 = 1` is basically a no-op, i.e. a useless appendage of SQL code.
+
+
+# Fuzzy matching with LIKE
+
+Often times, with real-world data and names, we don't know quite exactly how a name might be spelled. Someone could go by `Jon` in one database, and `Jonathan` in another.
+
+In other programming languages and software packages, the concept of a __wildcard__ is well-known.
+
+A Google search for the double-quoted string of `"dan boone"` will only return [results with literally, `"dan boone"`](https://www.google.com/search?q=%22dan%20boone%22). Not `"danny boone"`. However, use the asterisk for a wildcard, and Google will know to return results for `"daniel boone"` as well as `"dan boone"` and everything in between:
+
+[https://www.google.com/search?q="dan*%20boone"](https://www.google.com/search?q="dan*%20boone")
+
+SQLite has the same functionality. But instead of using `WHERE`, we use `LIKE`. And instead of using the asterisk `*` for "zero or more of any character", we use the percentage sign, `%`.
+
+`LIKE` is used the same spot as a comparison operator such as `=` or `>` would be used. 
+
+Let's pretend we don't know about the wildcard and try to find all people with names beginning with `d`. Here's a start:
+
+
+~~~sql
+SELECT * 
+FROM people 
+WHERE name LIKE 'D';
+~~~
+
+The result _should_  be empty.
+
+Now, try a wildcard:
+
+~~~sql
+SELECT * 
+FROM people 
+WHERE name LIKE 'D%';
+~~~
+
+|  name   | sex | age  |
+|---------+-----+------|
+|  Dani   | F   | 41   |
+|  Donald | M   | 70   |
+{:.table-sql}
+
+
+We can even put the wildcard on the opposite side of the searched-for value, e.g. to find all people with names that end in `d`:
+
+~~~sql
+SELECT * 
+FROM people 
+WHERE name LIKE '%d';
+~~~
+
+|  name   | sex | age  |
+|---------+-----+------|
+|  Donald | M   | 70   |
+|  Leland | M   | 16   |
+|  Zed    | M   | 42   |
+{:.table-sql}
+
+Note: for reasons that won't make sense until you, for some reason, learn database optimization, searching for what a value _ends_ with will often be extremely _suboptimal_, because of how database values are indexed. It's usually better to search from left-to-right, but that doesn't affect us in this with the simple database at hand.
+
+
+## The IN keyword
+
+`LIKE` is great, but it can be a bit too permissive with its wildcard. Sometimes we don't want a "fuzzy" match, but a match against exact values.
+
+Instead of finding rows in which a person's `name` begins with `D`, what if we already know we want `Dani` and `Donald`? Then we can call `IN`:
+
+(I _especially_ recommend capitalizing `IN` so that it looks obviously like a SQL keyword)
+
+~~~sql
+SELECT * FROM people
+WHERE
+  name IN('Dani', 'Donald');
+~~~
+
+### NOT IN for negation
+
+To _exclude_ known values, put `NOT` in front of `IN`:
+
+~~~sql
+SELECT * FROM people
+WHERE
+  name NOT IN('Dani', 'Donald');
+~~~
+
+### BETWEEN for ranges
+
+`BETWEEN` is another expression. Instead of using parentheses, we pass in two numbers, with they keyword `AND` in between:
+
+
+~~~sql
+SELECT * FROM people
+WHERE 
+  age BETWEEN 30 AND 60;
+~~~
+
+|  name    | sex | age  |
+|----------+-----+------|
+|  Austin  | M   | 33   |
+|  Dani    | F   | 41   |
+|  Eliza   | F   | 37   |
+|  Michael | M   | 48   |
+|  Phoebe  | F   | 52   |
+|  Sherry  | F   | 39   |
+|  Zed     | M   | 42   |
+{:.table-sql}
+
+
+
+# A bunch of things about string literals
+
+Now that we've learned `LIKE`, it's worth pointing out how SQLite, by default, does not treat an uppercased-word __equal__ to its lowercased version. The following query will return __False__:
+
+~~~sql
+SELECT 'DAN' = 'dan';
+~~~
+
+Which means that the following queries will return _nothing_ from the `people` table:
+
+~~~sql
+SELECT * 
+FROM people 
+WHERE name = 'dani';
+
+
+SELECT * 
+FROM people 
+WHERE name IN ('dani', 'donald');
+~~~
+
+
+The general exception is `LIKE`, which by default, will be __case-insensitive_, even without a wildcard:
+
+~~~sql
+SELECT * 
+FROM people 
+WHERE name LIKE 'dani';
+~~~
+
+The following queries will get the same results:
+
+~~~sql
+SELECT * 
+FROM people 
+WHERE name LIKE 'd%';
+
+SELECT * 
+FROM people 
+WHERE name LIKE 'D%';
+~~~
+
+
+## Minding string literals
+
+When we single-quote a value, SQLite will treat it as literal as possible. This can be annoying at first, especially when we're so used to Googling for `daniel boone` instead of `Daniel Boone`. But exactness is an inherent side-effect and feature of SQLite.
+
+That said, the world is quite horrible at spelling, nevermind capitalizing proper nouns. When a database could contain `Dani` or `DANI`, I take no chances and just use `LIKE`:
+
+
+~~~sql
+SELECT * 
+FROM people 
+WHERE name LIKE 'dani';
+~~~
+
+
+### Sorting string literals
+
+If `dani` isn't equal to `Dani`, then it seems logical that lowercase letters are either greater or less than uppercase letters, because they can't be _equal:_
+
+~~~sql
+SELECT 'a' = 'A',
+  'a' < 'A',
+  'a' > 'A',
+  'a' > 'ZZTOP';
+~~~
+
+Because lowercase-a comes later in the ASCII character set than uppercase-A, when it comes to sorting, `a` will be considered greater than letters `A` through `Z`:
+
+|  'a' = 'A' | 'a' < 'A' | 'a' > 'A' | 'a' > 'ZZTOP'  |
+|------------+-----------+-----------+----------------|
+|  0         | 0         | 1         | 1              |
+{:.table-sql}
+
+
+### Sorting numbers that are strings
+
+Special care must be taken when dealing with numbers that are single-quoted:
+
+
+~~~sql
+SELECT
+  9 > 10, 
+  '9' > '100000010';
+~~~
+
+In the first value, `9` is being compared to `10`, as a number. `9` is less than `10`, obviously.
+
+But in the second comparison, `9`, as a text character, is being compared to `1`, because `100000010` is treated like any other _word_. `9` beats `1` and thus `100000010`, just like `d` comes after `allegory`, because `d` is after `a`.
+
+
+
+# Conclusion
+
+A whole chapter could be devoted to string literals, numbers, and data types in general. I only bring them up here so that you're at least aware of where mistakes can be made.
+
+[In the next lesson](/tutorials/simplefolks-conditional-logic), we look at more forms of Boolean logic, to make more complex `WHERE` filters.
+
+
+
+
+
+
+

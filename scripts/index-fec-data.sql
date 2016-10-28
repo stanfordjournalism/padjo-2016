@@ -33,7 +33,7 @@ CREATE INDEX pas2_idx_NAME ON pas2(NAME);
 CREATE INDEX pas2_idx_TRANSACTION_DT ON pas2(TRANSACTION_DT);
 
 
-CREATE INDEX oppexp_idx_CMTE_ID_and_dateON oppexp(CMTE_ID, TRANSACTION_DT);
+CREATE INDEX oppexp_idx_CMTE_ID_and_date ON oppexp(CMTE_ID, TRANSACTION_DT);
 CREATE INDEX oppexp_idx_TRANSACTION_DT ON oppexp(TRANSACTION_DT);
 CREATE INDEX oppexp_idx_recipient_name ON oppexp(name);
 
@@ -45,3 +45,8 @@ CREATE INDEX indiv_idx_employer ON indiv(employer);
 create index indiv_idx_occupation ON indiv(occupation);
 
 
+CREATE INDEX indexps_idx_can_id_sup_opp ON indexps(can_id, sup_opp);
+CREATE INDEX indexps_idx_can_nam_sup_opp ON indexps(can_nam, sup_opp);
+CREATE INDEX indexps_idx_spe_id ON indexps(spe_id);
+CREATE INDEX indexps_idx_rec_dat ON indexps(rec_dat);
+CREATE INDEX indexps_idx_exp_dat ON indexps(exp_dat);

@@ -1,0 +1,1103 @@
+---
+title: tutorials/sql-subqueries-names
+stub: true
+description: |
+    lorem ipsum title title title
+---
+
+This is where things get Inception-like. I use the term __subquery__ to describe the action of doing a query inside another query. Like the movie Inception, itself, things can get complicated. But the bottom line is that it's just a human-friendly shortcut for doing something we could do manually and in separate steps.
+
+
+# Basic syntax of a subquery
+
+There are two common ways to use a subquery:
+
+
+
+**Scenario 1:** When the __main query__ treats the results of a __subquery__ as just another table to query from:
+
+~~~sql
+SELECT x_num, y_num
+FROM 
+  (SELECT * 
+   FROM mytable 
+   LIMIT 5) AS xtable;
+~~~
+
+**Scenario 2:** Calling a subquery that results in a __scalar value__ -- i.e. a singular value, rather than a result consisting of multiple rows and/or columns -- and then using that scalar value in the main query.
+
+
+~~~sql
+SELECT x_num FROM mytable
+WHERE 
+  x_num > (SELECT AVG(y_num) FROM mytable);
+~~~
+
+
+# Thinking about subqueries and people
+
+If you haven't downloaded the simplefolks database, do it now (direct link to the file)
+
+
+|   name   | sex | age |
+|----------|-----|-----|
+| Austin   | M   |  33 |
+| Blair    | M   |  90 |
+| Carolina | F   |  28 |
+| Dani     | F   |  41 |
+| Donald   | M   |  70 |
+| Eliza    | F   |  37 |
+| Farida   | F   |  23 |
+| Georgina | F   |  19 |
+| Hillary  | F   |  68 |
+| Leland   | M   |  16 |
+| Liam     | M   |  22 |
+| Michael  | M   |  48 |
+| Phoebe   | F   |  52 |
+| Sherry   | F   |  39 |
+| Zed      | M   |  42 |
+{:.table-sql}
+
+
+
+Two questions:
+
+1. How many people are older than the average age?
+2. Of the 5 oldest people, how many are female?
+
+~~~sql
+SELECT AVG(age) FROM people;
+~~~
+
+|  AVG(age)          |
+|--------------------|
+|  41.8666666666667  |
+{:.table-sql}
+
+
+
+
+~~~sql
+SELECT COUNT(*)
+FROM people
+WHERE  age > 41.8666666666667;
+~~~
+
+
+
+|  COUNT(*)  |
+|------------|
+|  6         |
+{:.table-sql}
+
+
+# Of the 5 oldest people, how many are female?
+
+Get the 5 oldest people:
+
+~~~sql
+SELECT sex 
+FROM people 
+ORDER BY age DESC 
+LIMIT 5;
+~~~
+
+
+SELECT COUNT(*)
+FROM oldest5people
+WHERE sex = 'F'
+
+
+SELECT COUNT(*) AS femcount
+FROM 
+  (SELECT sex 
+    FROM people 
+    ORDER BY age 
+    DESC LIMIT 5) AS temptable
+WHERE sex='F';
+
+
+Of the top 5 oldest people, how many are female?
+
+~~~sql
+SELECT COUNT(*) AS femcount
+FROM 
+  (SELECT sex 
+    FROM people 
+    ORDER BY age 
+    DESC LIMIT 5) AS temptable
+WHERE sex='F';
+~~~
+
+|  femcount  |
+|------------|
+|  2         |
+{:.table-sql}
+
+
+
+How many `people` are female?
+
+~~~sql
+SELECT COUNT(*) AS femcount
+FROM people
+WHERE sex='F';
+~~~
+
+
+|  femcount  |
+|------------|
+|  8         |
+{:.table-sql}
+
+
+Who are the oldest 5 people?
+
+~~~sql
+SELECT *
+FROM people
+ORDER BY age DESC
+LIMIT 5;
+~~~
+
+|  name    | sex | age  |
+|----------+-----+------|
+|  Blair   | M   | 90   |
+|  Donald  | M   | 70   |
+|  Hillary | F   | 68   |
+|  Phoebe  | F   | 52   |
+|  Michael | M   | 48   |
+{:.table-sql}
+
+Now look at that table and eyeball it. If I asked you, "How many females are among the 5 oldest people", you could easily say, `2`.
+
+But how do we make a SQL query to say this?
+
+
+Not knowing anything else, you might try this: add a `WHERE` condition to filter for `sex='F'` only:
+
+
+~~~sql
+SELECT *
+FROM people
+WHERE sex = 'F'
+ORDER BY age DESC
+LIMIT 5;
+~~~
+
+But what you get instead are the 5 oldest females, which is a much different answer:
+
+|  name    | sex | age  |
+|----------+-----+------|
+|  Hillary | F   | 68   |
+|  Phoebe  | F   | 52   |
+|  Dani    | F   | 41   |
+|  Sherry  | F   | 39   |
+|  Eliza   | F   | 37   |
+{:.table-sql}
+
+The  problem with the `WHERE` clause is that it comes _before_ the part of the query in which we order by `age` and get the top 5 oldest &ndash;
+
+~~~sql
+SELECT ... FROM ...
+
+WHERE sex = 'F'
+
+ORDER BY age DESC
+
+LIMIT 5;
+~~~
+
+Here's what happens to `people` table after the `WHERE` takes effect:
+
+|  name     | sex | age  |
+|-----------+-----+------|
+|  Carolina | F   | 28   |
+|  Dani     | F   | 41   |
+|  Eliza    | F   | 37   |
+|  Farida   | F   | 23   |
+|  Georgina | F   | 19   |
+|  Hillary  | F   | 68   |
+|  Phoebe   | F   | 52   |
+|  Sherry   | F   | 39   |
+{:.table-sql}
+
+By the time the `ORDER` and `LIMIT` take effect, the table has been filtered to females only:
+
+|  name    | sex | age  |
+|----------+-----+------|
+|  Hillary | F   | 68   |
+|  Phoebe  | F   | 52   |
+|  Dani    | F   | 41   |
+|  Sherry  | F   | 39   |
+|  Eliza   | F   | 37   |
+{:.table-sql}
+
+
+We need to do the operations in reverse:
+
+1. Get the five oldest `people`, regardless of `sex`
+2. Filter the five oldest `people` for those with `sex='F'`
+
+
+
+# Good ol' import and export
+
+So basically, we need a way to target just the results of the "Find the five oldest people" query; more specifically take the results and apply that `WHERE` condition of `sex='F'` 
+
+|  name    | sex | age  |
+|----------+-----+------|
+|  Blair   | M   | 90   |
+|  Donald  | M   | 70   |
+|  Hillary | F   | 68   |
+|  Phoebe  | F   | 52   |
+|  Michael | M   | 48   |
+{:.table-sql}
+
+Before we get into the subquery concept, how would we do this with what we know so far? We've observed that every result from a SQL query results in another table. So we could just export the results of this query, re-import it into our database and call it `oldest5people`
+
+And then this would be the query:
+
+~~~sql
+SELECT *
+FROM oldest5people
+WHERE sex = 'F';
+~~~
+
+
+Which would result in:
+
+|  name    | sex | age  |
+|----------+-----+------|
+|  Hillary | F   | 68   |
+|  Phoebe  | F   | 52   |
+{:.table-sql}
+
+
+
+# Enter the subquery
+
+But exporting/importing is so tiresome. And it is hugely prone to human error.
+
+So let's think more computationally.
+
+IF it is true that the  `oldestpeople` table is the _direct result_ of this query:
+
+~~~sql
+SELECT *
+FROM people
+ORDER BY age DESC
+LIMIT 5;
+~~~
+
+Why can't we just select directly from that query?
+
+First way to find out is to see how much we can stretch the SQL syntax. Let's start off with good old "Hello world"
+
+
+~~~sql
+SELECT 'Hello world';
+~~~
+
+Which gets us:
+
+|  'Hello world'  |
+|-----------------|
+|  Hello world    |
+{:.table-sql}
+
+
+Let's try selecting from _that_:
+
+~~~sql
+SELECT * FROM
+  SELECT 'Hello world';
+~~~
+
+This results in an error. But maybe it's because SQLite really doesn't like `SELECT` coming _after_ the clause `FROM`. SO let's wrap up that __subquery__ in parentheses, so that it's clearer that the `FROM` clause is meant to pull from the results of the __subquery__:
+
+~~~sql
+SELECT * FROM
+  (SELECT 'Hello world');
+~~~
+
+And that's a subquery. It's a query inside of a query.
+
+That subquery can have all the syntax and code as a normal query. 
+
+Let's select multiple columns:
+
+~~~sql
+SELECT * FROM
+  (SELECT 1, 2, 1 + 2);
+~~~
+
+Should be no surprise here:
+
+|  1 | 2 | 1 + 2  |
+|----+---+--------|
+|  1 | 2 | 3      |
+{:.table-sql}
+
+Let's add some aliases (i.e. column headers) to the subquery:
+
+~~~sql
+SELECT * FROM
+  (SELECT 1 AS apples, 
+      2 AS oranges, 
+      1 + 2 AS bananas);
+~~~
+
+|  apples | oranges | bananas  |
+|---------+---------+----------|
+|  1      | 2       | 3        |
+{:.table-sql}
+
+Let's alter the top query so that it's not selecting all of the resulting columns:
+
+~~~sql
+SELECT bananas, oranges FROM
+  (SELECT 1 AS apples, 
+      2 AS oranges, 
+      1 + 2 AS bananas);
+~~~
+
+|  bananas | oranges  |
+|----------+----------|
+|  3       | 2        |
+{:.table-sql}
+
+
+Now, let's try to __break it__:
+
+
+~~~sql
+SELECT kiwis FROM
+  (SELECT 1 AS apples, 
+      2 AS oranges, 
+      1 + 2 AS bananas);
+~~~
+
+The predictable error message:
+
+      Error: near line 4: no such column: kiwis
+
+Remember that the subquery, for all intents and purposes, is a _virtual_ table to the top-level query. In other words, the top-level query only see s a table with whatever columns are found in the result table: `apples`, `oranges`, and `bananas`. Thus, selecting for `kiwis` in the top-level query results in an error, just like selecting for a non-existent column in a normal table.
+
+## Remember to alias your subquery results
+
+Because SQLite is forgiving, it doesn't require that the subquery results have a _name_, like a typical table. We just have to wrap it up in parentheses:
+
+~~~sql
+SELECT *
+FROM
+  (SELECT 42, 99);
+~~~
+
+But for real-world queries, we almost always want to give that subquery a name, so that we can access its results in places besides the top-level SELECT query. To give it a name, we just _alias_ it:
+
+
+~~~sql
+SELECT *
+FROM
+  (SELECT 42, 99) AS dummytable;
+~~~
+
+It may seem like filler for now, but only because we've only done queries that talk to single tables. That will change very quickly...
+
+
+
+
+
+
+
+Let's add s
+
+
+But let's alter the _top-level_ query. Let's have it choose just one column from the subquery results instead of using the `*` selector. Note that because the subquery results in a table in which the column names are `'hello` and `'world'`, we
+
+~~~sql
+SELECT "'world'" FROM
+  (SELECT 'hello', 'world');
+~~~
+
+
+
+
+|  'Hello world'  |
+|-----------------|
+|  Hello world    |
+{:.table-sql}
+
+### Remember to alias
+
+SQLite is forgiving, and the above query works without error. However, we rarely will be
+
+
+
+
+
+Let's use the syntax for __aliasing__ and wrap up the `SELECT 'Hello world'` in parentheses.
+
+First, let's do the __alias__ on the simple query:
+
+~~~sql
+SELECT 'Hello world' AS xyz;
+~~~
+
+
+|  xyz          |
+|---------------|
+|  Hello world  |
+{:.table-sql}
+
+
+Now, we try to `SELECT` from that, but we wrap the __subquery in parentheses__:
+
+
+~~~sql
+SELECT * FROM
+  (SELECT 'Hello world');
+~~~
+
+And what do you know?
+
+|  xyz          |
+|---------------|
+|  Hello world  |
+{:.table-sql}
+
+
+
+
+
+
+
+
+
+The 2 oldest women
+
+~~~sql
+SELECT * 
+FROM people
+where sex='F'
+ORDER BY age DESC;
+~~~
+
+Of the 5 oldest people, how many are female?
+
+
+How many females are there:
+
+~~~sql
+SELECT COUNT(*) AS femcount
+FROM people
+WHERE sex='F'; 
+~~~
+
+Who are the 5 oldest people?
+
+~~~sql
+SELECT * 
+FROM people
+ORDER BY age DESC
+LIMIT 5;
+~~~
+
+How many of the 5 oldest people are female?
+
+~~~sql
+SELECT COUNT(*) AS femcount
+FROM people
+WHERE sex='F'
+ORDER BY age DESC;
+~~~
+
+
+
+
+
+
+
+
+Of the five oldest people, how many are female?
+
+-----------
+
+# The longest last names
+
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) AS namelen
+FROM 
+  surnames
+ORDER BY 
+  namelen DESC
+LIMIT 10;
+~~~
+
+
+|  name            | count | namelen  |
+|------------------+-------+----------|
+|  RIEMENSCHNEIDER | 898   | 15       |
+|  BALASUBRAMANIAN | 606   | 15       |
+|  PANAGIOTOPOULOS | 322   | 15       |
+|  ANAGNOSTOPOULOS | 307   | 15       |
+|  VANDENLANGENBER | 300   | 15       |
+|  SCHWARTZENBERGE | 290   | 15       |
+|  STUCKENSCHNEIDE | 239   | 15       |
+|  SCHIMMELPFENNIG | 208   | 15       |
+|  VANMIDDLESWORTH | 194   | 15       |
+|  SCHNECKENBURGER | 189   | 15       |
+{:.table-sql}
+
+
+Let's see racial distribution:
+
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctwhite, pctblack, pctapi, pcthispanic
+FROM surnames
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+
+|  name            | count | namelen | pctwhite | pctblack | pctapi | pcthispanic  |
+|------------------+-------+---------+----------+----------+--------+--------------|
+|  RIEMENSCHNEIDER | 898   | 15      | 98.78    | 0.0      | 0.0    | NULL         |
+|  BALASUBRAMANIAN | 606   | 15      | 1.16     | NULL     | 95.54  | NULL         |
+|  PANAGIOTOPOULOS | 322   | 15      | 90.06    | NULL     | NULL   | NULL         |
+|  ANAGNOSTOPOULOS | 307   | 15      | 93.81    | 0.0      | 0.0    | 1.95         |
+|  VANDENLANGENBER | 300   | 15      | 97.67    | NULL     | 0.0    | 0.0          |
+|  SCHWARTZENBERGE | 290   | 15      | 95.17    | NULL     | NULL   | 2.76         |
+|  STUCKENSCHNEIDE | 239   | 15      | 95.4     | 0.0      | NULL   | 2.51         |
+|  SCHIMMELPFENNIG | 208   | 15      | 99.04    | 0.0      | 0.0    | NULL         |
+|  VANMIDDLESWORTH | 194   | 15      | 99.0     | 0.0      | 0.0    | 0.0          |
+|  SCHNECKENBURGER | 189   | 15      | 99.47    | NULL     | 0.0    | NULL         |
+{:.table-sql}
+
+
+# The longest last names with significance
+
+For all last names with at least 10,000
+order by length of name
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctwhite, pctblack, pctapi, pcthispanic
+FROM surnames
+WHERE count > 10000
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+
+# Find longest last names that are mostly asian
+
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+FROM surnames
+WHERE count > 10000
+  AND pctapi > 50
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+
+
+|  name    | count  | namelen | pctapi  |
+|----------+--------+---------+---------|
+|  HUSSAIN | 11070  | 7       | 67.59   |
+|  RAHMAN  | 10719  | 6       | 68.22   |
+|  SHARMA  | 14870  | 6       | 85.65   |
+|  CHEUNG  | 16067  | 6       | 95.93   |
+|  TRUONG  | 27808  | 6       | 96.48   |
+|  NGUYEN  | 310125 | 6       | 95.93   |
+|  GUPTA   | 10376  | 5       | 90.35   |
+|  MALIK   | 10376  | 5       | 52.72   |
+|  ZHENG   | 10670  | 5       | 98.36   |
+|  LUONG   | 11214  | 5       | 96.05   |
+{:.table-sql}
+
+The 2 top names aren't particularly Asian, interms of `pctapi`. They appear at top because they meet the requirement of `WHERE count > 10000 AND pctapi > 50`
+
+How would I change this query?
+
+
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+FROM surnames
+WHERE count > 10000
+  AND pctapi > 90
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+
+|  name   | count  | namelen | pctapi  |
+|---------+--------+---------+---------|
+|  CHEUNG | 16067  | 6       | 95.93   |
+|  TRUONG | 27808  | 6       | 96.48   |
+|  NGUYEN | 310125 | 6       | 95.93   |
+|  GUPTA  | 10376  | 5       | 90.35   |
+|  ZHENG  | 10670  | 5       | 98.36   |
+|  LUONG  | 11214  | 5       | 96.05   |
+|  TRINH  | 11507  | 5       | 95.63   |
+|  DESAI  | 13057  | 5       | 91.72   |
+|  HWANG  | 13610  | 5       | 96.63   |
+|  LIANG  | 14095  | 5       | 96.35   |
+{:.table-sql}
+
+
+
+
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+FROM surnames
+WHERE pctapi > 90
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+
+|  name            | count | namelen | pctapi  |
+|------------------+-------+---------+---------|
+|  BALASUBRAMANIAN | 606   | 15      | 95.54   |
+|  BALASUBRAMANIAM | 153   | 15      | 91.5    |
+|  GOPALAKRISHNAN  | 369   | 14      | 96.48   |
+|  CHANDRASEKARAN  | 330   | 14      | 97.58   |
+|  KRISHNAMOORTHY  | 320   | 14      | 96.25   |
+|  SOUMPHOLPHAKDY  | 159   | 14      | 96.86   |
+|  KRISHNAMURTHY   | 748   | 13      | 96.12   |
+|  RADHAKRISHNAN   | 506   | 13      | 96.44   |
+|  BHATTACHARYYA   | 447   | 13      | 90.83   |
+|  PARTHASARATHY   | 425   | 13      | 94.12   |
+{:.table-sql}
+
+
+
+# Long names, mostly asian, and somewhat popular
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+FROM surnames
+WHERE namelen > 9 
+  AND pctapi > 90
+  AND count > 10000
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+No results
+
+Tweak it:
+
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+FROM surnames
+WHERE namelen > 9 
+  AND pctapi > 90
+  AND count > 10000
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+
+|  name         | count | namelen | pctapi  |
+|---------------+-------+---------+---------|
+|  RAMACHANDRAN | 1098  | 12      | 94.99   |
+|  SUBRAMANIAN  | 1820  | 11      | 94.78   |
+|  PANGILINAN   | 1421  | 10      | 90.71   |
+|  SRIVASTAVA   | 1533  | 10      | 90.87   |
+|  SRINIVASAN   | 2361  | 10      | 92.8    |
+{:.table-sql}
+
+
+----------------------
+
+From the top 100 most asian names of names that have 10000 or more, find the 10 longest names.
+
+
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+FROM surnames
+WHERE count > 10000
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+
+|  name          | count | namelen | pctapi  |
+|----------------+-------+---------+---------|
+|  HOLLINGSWORTH | 23294 | 13      | 0.3     |
+|  WESTMORELAND  | 10066 | 12      | 0.27    |
+|  CHRISTIANSON  | 11866 | 12      | 0.5     |
+|  HIGGINBOTHAM  | 14404 | 12      | 0.39    |
+|  CHRISTIANSEN  | 18676 | 12      | 0.53    |
+|  CHRISTENSON   | 10530 | 11      | 0.63    |
+|  HERSHBERGER   | 10693 | 11      | 0.14    |
+|  BAUMGARTNER   | 11078 | 11      | 0.45    |
+|  BUTTERFIELD   | 11224 | 11      | 0.62    |
+|  SHACKELFORD   | 11367 | 11      | 0.29    |
+{:.table-sql}
+
+
+
+Let's switch it up so that `pctapi` is used as a tiebreaker:
+
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+FROM surnames
+WHERE count > 10000
+ORDER BY namelen DESC, 
+  pctapi DESC
+LIMIT 10;
+~~~
+
+
+Still not very Asianish.
+
+|  name          | count | namelen | pctapi  |
+|----------------+-------+---------+---------|
+|  HOLLINGSWORTH | 23294 | 13      | 0.3     |
+|  CHRISTIANSEN  | 18676 | 12      | 0.53    |
+|  CHRISTIANSON  | 11866 | 12      | 0.5     |
+|  HIGGINBOTHAM  | 14404 | 12      | 0.39    |
+|  WESTMORELAND  | 10066 | 12      | 0.27    |
+|  DELOSSANTOS   | 13802 | 11      | 15.31   |
+|  QUINTANILLA   | 15849 | 11      | 1.93    |
+|  CHRISTOPHER   | 28493 | 11      | 0.95    |
+|  CHRISTENSON   | 10530 | 11      | 0.63    |
+|  BUTTERFIELD   | 11224 | 11      | 0.62    |
+{:.table-sql}
+
+Let's change up the sort order:
+
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+FROM surnames
+WHERE count > 10000
+ORDER BY 
+  pctapi DESC, namelen DESC
+LIMIT 10;
+~~~
+
+
+|  name   | count | namelen | pctapi  |
+|---------+-------+---------+---------|
+|  XU     | 12228 | 2       | 98.47   |
+|  ZHAO   | 10324 | 4       | 98.38   |
+|  ZHENG  | 10670 | 5       | 98.36   |
+|  ZHANG  | 33202 | 5       | 98.16   |
+|  ZHOU   | 11586 | 4       | 97.96   |
+|  ZHU    | 10508 | 3       | 97.89   |
+|  HUANG  | 44715 | 5       | 96.83   |
+|  HWANG  | 13610 | 5       | 96.63   |
+|  TRUONG | 27808 | 6       | 96.48   |
+|  CHOI   | 36390 | 4       | 96.46   |
+{:.table-sql}
+
+
+What if we could just get a list of the names with more than 10000, find the top 100 names by asianness, and then find the longest name?
+
+Start simple:
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+FROM surnames
+WHERE count > 10000
+ORDER BY 
+  pctapi DESC
+LIMIT 100;
+~~~
+
+|  name | count | namelen | pctapi |
+|-------|-------|---------|--------|
+| XU    | 12228 | 2       | 98.47  |
+| ZHAO  | 10324 | 4       | 98.38  |
+| ZHENG | 10670 | 5       | 98.36  |
+| ZHANG | 33202 | 5       | 98.16  |
+| ZHOU  | 11586 | 4       | 97.96  |
+| ZHU   | 10508 | 3       | 97.89  |
+| ...   | ...   | ...     | ...    |
+| ENG   | 10102 | 3       | 78.26  |
+| CHIN  | 25673 | 4       | 77.95  |
+| LAU   | 25624 | 3       | 76.56  |
+| SINGH | 72642 | 5       | 74.44  |
+| KHAN  | 46713 | 4       | 70.5   |
+{:.table-sql}
+
+We could export this into a table named top100asiannames, and then do this:
+
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+FROM top100asiannames
+ORDER BY namelen
+LIMIT 10;
+~~~
+
+
+But making new tables is a real pain. This is what subqueries are for:
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+FROM 
+    (SELECT name, count,
+          LENGTH(name) as namelen,
+          pctapi
+        FROM surnames
+        WHERE count > 10000
+        ORDER BY 
+          pctapi DESC
+        LIMIT 100
+    ) AS top100asiannames
+
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+
+Mental substitution:
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+FROM 
+    (blah blah blah) AS top100asiannames
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+Look at the query that makes up `top100asiannames`. Because the query only selects 4 columns, the outer query only has access to those columns. Meaning, we can change this:
+
+~~~sql
+SELECT name, count,
+  LENGTH(name) as namelen,
+  pctapi
+  ...
+~~~
+
+To simply:
+
+~~~sql
+SELECT * ...
+~~~
+
+All together:
+
+~~~sql
+SELECT *
+FROM 
+    (SELECT name, count,
+          LENGTH(name) as namelen,
+          pctapi
+        FROM surnames
+        WHERE count > 10000
+        ORDER BY 
+          pctapi DESC
+        LIMIT 100
+    ) AS t2
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+
+### The scarcity of Asian names
+
+That's a mouthful of SQL. But now it's so easy to change up the query. How does our analysis change when 
+
+
+Revamp this so that we're looking at top 200 most Asian names:
+
+
+~~~sql
+SELECT *
+FROM 
+    (SELECT name, count,
+          LENGTH(name) as namelen,
+          pctapi
+        FROM surnames
+        WHERE count > 10000
+        ORDER BY 
+          pctapi DESC
+        LIMIT 200
+    ) AS t2
+
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+And it looks like there's a huge fall off:
+
+|  name        | count  | namelen | pctapi  |
+|--------------+--------+---------+---------|
+|  DELOSSANTOS | 13802  | 11      | 15.31   |
+|  VILLANUEVA  | 44570  | 10      | 12.52   |
+|  FRANCISCO   | 17976  | 9       | 18.43   |
+|  SEBASTIAN   | 10878  | 9       | 11.42   |
+|  FERNANDES   | 14385  | 9       | 9.27    |
+|  FERNANDEZ   | 139302 | 9       | 5.17    |
+|  FELICIANO   | 17112  | 9       | 5.04    |
+|  BAUTISTA    | 37847  | 8       | 22.04   |
+|  DELACRUZ    | 49158  | 8       | 18.24   |
+|  MERCHANT    | 13421  | 8       | 11.12   |
+{:.table-sql}
+
+
+There's so few Asian names that have at least 10,000 people.
+
+We can confirm this by doing the same query with Hispanic:
+
+
+~~~sql
+SELECT *
+FROM 
+    (SELECT name, count,
+          LENGTH(name) as namelen,
+          pcthispanic
+        FROM surnames
+        WHERE count > 10000
+        ORDER BY 
+          pcthispanic DESC
+        LIMIT 200
+    ) AS t2
+
+ORDER BY namelen DESC
+LIMIT 10;
+~~~
+
+
+|  name        | count | namelen | pcthispanic  |
+|--------------+-------+---------+--------------|
+|  COVARRUBIAS | 12543 | 11      | 95.36        |
+|  CASTELLANOS | 20985 | 11      | 93.93        |
+|  QUINTANILLA | 15849 | 11      | 91.84        |
+|  DELGADILLO  | 11107 | 10      | 95.43        |
+|  VILLALOBOS  | 27107 | 10      | 94.03        |
+|  VILLASENOR  | 10190 | 10      | 93.48        |
+|  VILLARREAL  | 50351 | 10      | 92.53        |
+|  BARRIENTOS  | 12690 | 10      | 92.34        |
+|  VELAZQUEZ   | 40030 | 9       | 94.89        |
+|  CERVANTES   | 57685 | 9       | 94.49        |
+{:.table-sql}
+
+
+
+-----
+
+
+# Most popular letter to begin with a name
+
+
+
+~~~sql
+SELECT 
+  SUBSTR(name, 1, 1) AS first_letter,
+  SUM(count) AS total_count 
+FROM surnames
+GROUP BY first_letter
+ORDER BY total_count DESC
+LIMIT 5;
+~~~
+
+
+|  first_letter | total_count  |
+|---------------+--------------|
+|  M            | 23264240     |
+|  S            | 23196818     |
+|  B            | 21285846     |
+|  C            | 18630332     |
+|  H            | 17598920     |
+{:.table-sql}
+
+
+We need a percentage. Get the total number of people:
+
+~~~sql
+SELECT SUM(count) FROM surnames;
+~~~
+
+
+|  SUM(count)  |
+|--------------|
+|  242121073   |
+{:.table-sql}
+
+Then we could __hard-code__ that value:
+
+
+~~~sql
+SELECT 
+  SUBSTR(name, 1, 1) AS first_letter,
+  SUM(count) AS total_count 
+FROM surnames
+GROUP BY first_letter
+ORDER BY total_count DESC
+LIMIT 5;
+~~~
+
+
+
+
+Add a total pct:
+
+~~~sql
+SELECT 
+  SUBSTR(name, 1, 1) AS first_letter,
+  100.0 * SUM(count) /  (SELECT SUM(count) FROM surnames) AS total_pct
+FROM surnames
+GROUP BY first_letter
+ORDER BY total_pct DESC
+LIMIT 10;
+~~~
+
+|  first_letter | total_pct         |
+|---------------+-------------------|
+|  M            | 9.60851515803418  |
+|  S            | 9.5806687590551   |
+|  B            | 8.79140577738973  |
+|  C            | 7.69463465908232  |
+|  H            | 7.26864447688946  |
+|  W            | 5.86179956339447  |
+|  R            | 5.76310637777489  |
+|  G            | 5.43952322563844  |
+|  P            | 4.93176857844175  |
+|  L            | 4.84865313644137  |
+{:.table-sql}
+

@@ -1,0 +1,135 @@
+
+
+# What do you mean by "devastating"?
+
+## When artificial intelligence fails us
+
+<img src="images/google-who-is-the-president-of-the-united-states.png" alt="google-who-is-the-president-of-the-united-states.png">
+
+Who is the king of the United States?
+
+<img src="images/google-who-is-the-king-of-the-united-states.png" alt="google-who-is-the-king-of-the-united-states.png">
+
+
+Devastating? 
+
+<img src="images/google-most-devestating-earthquake-in-united-states.png" alt="google-most-devestating-earthquake-in-united-states.png">
+
+Biggest?
+
+<img src="images/google-biggest-earthquakes-2015.png" alt="google-biggest-earthquakes-2015.png">
+
+Wolfram?
+
+<img src="images/wolfram-biggest-2015-quakes.jpg" alt="wolfram-biggest-2015-quakes.jpg">
+
+<img src="images/wolfram-devast-2015-quakes.jpg" alt="wolfram-devast-2015-quakes.jpg">
+
+------------------------
+
+# The earthquake data
+
+
+
+
+
+# Finding the biggest earthquakes in the lower 48 states
+
+
+
+~~~sql
+SELECT mag, id, time, place, longitude, latitude
+FROM quakes
+ORDER by mag DESC
+LIMIT 5;
+~~~
+
+
+https://earthquake.usgs.gov/earthquakes/states/10_largest_us.php
+
+It didn't hit the United States:
+
+https://en.wikipedia.org/wiki/1999_Hector_Mine_earthquake
+
+https://en.wikipedia.org/wiki/List_of_earthquakes_in_the_United_States
+
+
+## What were the biggest U.S. earthquakes in 2015?
+
+
+~~~sql
+SELECT mag, id, time, place, longitude, latitude
+FROM quakes
+WHERE SUBSTR(time, 1, 4) = '2015'
+ORDER by mag DESC
+LIMIT 5;
+~~~
+
+
+~~~sql
+SELECT mag, id, time, place, longitude, latitude
+FROM quakes
+WHERE SUBSTR(time, 1, 4) = '2015'
+ORDER by mag DESC
+LIMIT 1;
+~~~
+
+
+
+
+## Using aggregate functions to find biggest earthquakes per year
+
+
+How do we find the biggest earthquake for each year?
+
+Start by thinking of the simplest way: re-run the query above, over and over, for each year:
+
+~~~sql
+SELECT mag, id, time, place, longitude, latitude
+FROM quakes
+WHERE SUBSTR(time, 1, 4) = '2014'
+ORDER by mag DESC
+LIMIT 1;
+~~~
+
+If you're not a programmer, this is not at all a bad idea. If it was your job to compile this list for the years 1995 to 2015, you could do this copy-paste, and even export each result into a spreadsheet, in less than 5 minutes.
+
+But you should also think that it doesn't feel *graceful*. There must be an easier way, right?
+
+### Finding just the biggest magnitude using MAX
+
+The answer is a little complicated, depending on how closely you want to stick to best practices. Let's pretend that we really do want to stick to best practice. And let's make our task simpler:
+
+_Find the biggest magnitudes_. That is, just get the number, not any of the other details about the earthquake.
+
+We can use SQLite's `MAX` aggregate function for this:
+
+~~~sql
+SELECT MAX(AG)
+
+~~~
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

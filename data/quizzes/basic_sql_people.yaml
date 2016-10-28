@@ -1,0 +1,491 @@
+instructions: |
+
+  All of the SQL questions assume you have a database that includes a table named `people`.
+
+  The `people` table looks exactly like this:
+
+
+  |   name   | sex | age |
+  |----------|-----|-----|
+  | Austin   | M   |  33 |
+  | Blair    | M   |  90 |
+  | Carolina | F   |  28 |
+  | Dani     | F   |  41 |
+  | Donald   | M   |  70 |
+  | Eliza    | F   |  37 |
+  | Farida   | F   |  23 |
+  | Georgina | F   |  19 |
+  | Hillary  | F   |  68 |
+  | Leland   | M   |  16 |
+  | Liam     | M   |  22 |
+  | Michael  | M   |  48 |
+  | Phoebe   | F   |  52 |
+  | Sherry   | F   |  39 |
+  | Zed      | M   |  42 |
+  {:.table-sql}
+
+
+questions:
+
+  - prompt: |
+      What is the result of this query:
+
+      ~~~sql
+      SELECT 'Hello, world';
+      ~~~
+
+    choices:
+      A: |
+        |  'Hello'  |
+        |-----------|
+        |   world   |
+        {:.table-sql}
+
+      B: |
+
+          |  'Hello, world'  |
+          |------------------|
+          |  Hello, world    |
+          {:.table-sql}
+
+      C: |
+
+
+        | Hello | world |
+        |-------|-------|
+        | Hello | world |
+        {:.table-sql}
+
+      D: |
+
+
+          |  'Hello, world'  |
+          |------------------|
+          |  HELLO, WORLD    |
+          {:.table-sql}
+
+      E: |
+
+
+          |  'Hello, world'  |
+          |------------------|
+          |   Hello world    |
+          {:.table-sql}
+
+
+  - prompt: |
+      Which of these queries contains a syntax error? (Remember that SQL keywords and names of tables and columns are not case-sensitive)
+    choices:
+      A: |
+          ~~~sql
+          SELECT * FROM people;
+          ~~~
+
+      B: |
+          ~~~sql
+          Select * from PEOPLE;
+          ~~~
+
+      C: |
+          ~~~sql
+          SELECT 'HELLO' FROM people;
+          ~~~
+
+      D: |
+          ~~~sql
+          FROM people SELECT *;
+          ~~~
+
+      E: |
+          ~~~sql
+          select 'hello', 'world' from people;
+          ~~~
+
+
+  - prompt: |
+      To get only the first five rows from `people`, with the columns in the default order, which one of the only following queries will work?
+
+    choices:
+      A: |
+          ~~~sql
+          SELECT 5 FROM people;
+          ~~~
+
+      B: |
+          ~~~sql
+          FROM people SELECT *, LIMIT 5;
+          ~~~
+
+      C: |
+          ~~~sql
+          SELECT FROM people LIMIT 5;
+          ~~~
+
+      D: |
+          ~~~sql
+          SELECT * FROM people LIMIT 5;
+          ~~~
+
+      E: |
+          ~~~sql
+          SELECT * LIMIT 5 FROM people;
+          ~~~
+
+
+
+  - prompt: |
+      The following query will result in an error:
+
+      ~~~sql
+      SELECT name, gender, name
+      FROM PEOPLE
+      LIMIT 2;
+      ~~~
+
+      What error message will result?
+
+    choices:
+        A: "`No such table: PEOPLE`"
+        B: "`Called name column too many times`"
+        C: "`No such column: gender`"
+        D: "`Failed to include column: sex`"
+        E: "`Cannot call LIMIT without calling ORDER first`"
+
+
+
+
+  - prompt: |
+      We want to query the `people` table and get all of its rows and columns, except with the rows sorted in order of oldest person first. Which of the following queries will do the job?
+
+    choices:
+      A: |
+          ~~~sql
+          SELECT * FROM people ORDER BY name DESC;
+          ~~~
+
+      B: |
+          ~~~sql
+          FROM SELECT ORDER BY age DESC;
+          ~~~
+
+      C: |
+          ~~~sql
+          SELECT * FROM people ORDER BY age DESC;
+          ~~~
+
+      D: |
+          ~~~sql
+          SELECT age FROM people ORDER BY age DESC;
+          ~~~
+
+      E: |
+          ~~~sql
+          SELECT * FROM people ORDER BY age DESC LIMIT 9;
+          ~~~
+
+
+
+
+
+
+
+
+  - prompt: |
+      Which query would result in exactly this:
+
+      | name   |
+      |--------|
+      | Austin |
+      {:.table-sql}
+
+    choices:
+       A: |
+          ~~~sql
+          SELECT * FROM people;
+          ~~~
+
+       B: |
+          ~~~sql
+          SELECT * FROM people LIMIT 1;
+          ~~~
+
+       C: |
+          ~~~sql
+          SELECT name, sex FROM people LIMIT 1;
+          ~~~
+
+       D: |
+          ~~~sql
+          SELECT name FROM people;
+          ~~~
+
+       E: |
+          ~~~sql
+          SELECT name FROM people LIMIT 1;
+          ~~~
+
+
+  - prompt: |
+
+      Which query would result in exactly this result:
+
+
+      | name   | first_letter |
+      |--------|--------------|
+      | Austin |     A        |
+      {:.table-sql}
+
+
+    choices:
+      A: |
+        ~~~sql
+        SELECT * FROM people LIMIT 1;
+        ~~~
+
+      B: |
+        ~~~sql
+        SELECT name, first_letter FROM people LIMIT 1;
+        ~~~
+
+      C: |
+        ~~~sql
+        SELECT name, SUBSTR(name, 1, 1) AS first_letter FROM people LIMIT 1;
+        ~~~
+
+      D: |
+        ~~~sql
+        SELECT name, SUBSTR(name, 1, 1) FROM people LIMIT 1;
+        ~~~
+
+      E: |
+        ~~~sql
+        SELECT SUBSTR(name, 1, 1), name  FROM people LIMIT 1;
+        ~~~
+
+
+  - prompt: |
+      Given the following query with incomplete `WHERE` clause:
+
+      ~~~sql
+      SELECT name, age
+      FROM people
+      WHERE __________
+      LIMIT 2
+      ~~~
+
+
+      And the desired result of:
+
+
+      | name   | age    |
+      |--------|--------|
+      | Blair  |  90    |
+      | Dani   |  41    |
+      {:.table-sql}
+
+
+      Which of the following conditional statements should be used?
+
+    choices:
+      'A': |
+        `age > 40`
+      'B': |
+        `age < 40`
+      'C': |
+        `name > 40`
+      'D': |
+        `age > 50`
+      'E': |
+        `age < 100`
+
+
+  - prompt: |
+      Given the following query with incomplete `WHERE` clause:
+
+
+      ~~~sql
+      SELECT
+        name, age, sex
+      FROM
+        people
+
+      WHERE __________
+
+      LIMIT 3;
+      ~~~
+
+      And the desired result of:
+
+
+      | name     | age    | sex |
+      |----------|--------|-----|
+      | Hillary  |  68    | F   |
+      | Phoebe   |  52    | F   |
+      {:.table-sql}
+
+
+
+      Which of the following conditional statements should be used?
+
+    choices:
+      'A': |
+        `age > 50 `
+      'B': |
+        `sex = 'F'`
+      'C': |
+        `age > 50 AND sex='F'`
+      'D': |
+        `age > 50 OR sex='F'`
+      'E': |
+        `age > 52 AND age = 68`
+
+
+  - prompt: |
+      Given this incomplete query:
+
+
+      ~~~sql
+      SELECT *
+      FROM people
+      WHERE sex = 'M'
+      ______
+      ~~~
+
+      And the desired result of:
+
+      | name     | sex | age |
+      |----------|-----|-----|
+      | Zed      | M   |  42 |
+      | Michael  | M   |  48 |
+      {:.table-sql}
+
+
+      Which of the following SQL lines will complete the query and get the desired result?
+
+
+    choices:
+      'A': |
+        `LIMIT 2;`
+      'B': |
+        `ORDER BY age DESC LIMIT 2;`
+      'C': |
+        `ORDER BY name;`
+      'D': |
+        `ORDER BY name DESC LIMIT 2;`
+      'E': |
+        `LIMIT 2 ORDER BY name DESC;`
+
+
+
+
+  - prompt: |
+      We want to do a simple count of the __people__ table. This is what the desired result will look like:
+
+      |  COUNT(*)  |
+      |------------|
+      |  15        |
+      {:.table-sql}
+
+
+      Which of the following queries will get the desired result?
+
+    choices:
+      A: "`SELECT COUNT FROM people;`"
+      B: "`SELECT COUNT(*) FROM people;`"
+      C: "`SELECT ROWCOUNT FROM people;`"
+      D: "`COUNT people;`"
+      E: "`SELECT *, COUNT FROM people;`"
+
+
+  - prompt: |
+
+      Let's get a count of the people table by `sex`, listed in order of highest row count per sex.
+
+      We want the _exact_ results, headers, and column arrangement here:
+
+
+      |  sex | sexcount  |
+      |------+-----------|
+      |  F   | 8         |
+      |  M   | 7         |
+      {:.table-sql}
+
+
+      Which of the following queries will return the _exact_ desired result?
+
+
+    choices:
+
+      A: |
+        ~~~sql
+        SELECT
+          sex, COUNT(*) AS sexcount
+        FROM people;
+        ~~~
+
+      B: |
+        ~~~sql
+        SELECT
+          sex, sexcount
+        FROM people
+        GROUP BY sex
+        ORDER BY sexcount DESC;
+        ~~~
+
+
+      C: |
+        ~~~sql
+        SELECT sex,
+          COUNT(*) AS sexcount
+        FROM people
+        GROUP BY sex
+        ORDER BY sexcount DESC;
+        ~~~
+
+
+      D: |
+
+        ~~~sql
+        SELECT sex,
+          COUNT(*) AS sexcount
+        FROM people
+        ORDER BY sexcount DESC;
+        ~~~
+
+
+      E: |
+
+        ~~~sql
+        SELECT sex,
+          COUNT(*) AS sexcount
+        FROM people
+        GROUP BY sex
+        ORDER BY sex DESC;
+        ~~~
+
+
+  - prompt: |
+      We want to create a simple list showing _just_ the `sex` of the 5 oldest people in the __people__ table.
+
+      Write the query out as a short answer.
+
+      Hints:
+
+      1. No aggregation, or even `WHERE` clause required.
+      2. Do not include any unnecessary columns or rows.
+      3. These are the keywords you'll need: `FROM`, `LIMIT`, `ORDER`, `SELECT`, `BY`, `DESC`
+      4. ...Not in that order.
+
+      When your query is executed, this what the exact result should be:
+
+      |  sex  |
+      |-------|
+      |  M    |
+      |  M    |
+      |  F    |
+      |  F    |
+      |  M    |
+      {:.table-sql}
+
+
+

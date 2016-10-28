@@ -1,6 +1,395 @@
 ---
-title: tutorials/sql-simplefolks-group-by-aggregates
-stub: true
+title: "SQLite Simple Folks: GROUP BY and Aggregate Functions"
 description: |
-    lorem ipsum title title title
+  How to look for the averages, highs, lows, and outliers within groups of data. And, how to even just count what's in a large dataset.
+sequence:
+  landing: /tutorials/sql-simplefolks-overview
 ---
+
+
+# Get the data
+
+- Download the [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite). 
+- Preview it [as a Google Spreadsheet](https://docs.google.com/spreadsheets/d/12mwh5m0ryzK9fKPBtxGB9DRddzRefYVDt1AOrZJHLcE/edit#gid=0)
+
+Once you've downloaded [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite) onto your computer, open it with your SQLite client and be ready to write some queries.
+
+
+
+# Aggregate functions
+
+I may break this up into a separate lesson, but before we get into the `GROUP BY`s, let's take a look at SQLite's aggregate function, which are also documented on [SQLite's homepage](https://www.sqlite.org/lang_aggfunc.html).
+
+The SQLite aggregate functions are fairly similar to what you'd find on pivot tables: you can find averages, sums, counts, max and min, and...that's about it.
+
+Like other core functions, aggregate functions can be called in the `SELECT` query. We'll start there.
+
+## Counting rows
+
+To get a count of how many rows are in a table:
+
+
+~~~sql
+SELECT COUNT(*) FROM people;
+~~~
+
+The result is a value, inside a single row (ignoring the header) and single column.
+
+|  COUNT(*)  |
+|------------|
+|  15        |
+{:.table-sql}
+
+
+What does that `*` mean inside the parentheses? It's just a convention to follow. Here's how [SQLite's documentation describes it](https://www.sqlite.org/lang_aggfunc.html), though it doesn't make things much clearer:
+
+> The count(*) function (with no arguments) returns the total number of rows in the group.
+
+
+I think of aggregate functions as summarizing -- *collapsing* individual data rows to find a bigger picture. With this simplefolks data, there's only 15 rows so it's no big deal, but think of how necessity and value in [reducing the hundreds of thousands of SFPD crime incident reports](/tutorials/sqlite-data-starterpacks#toc-sfpd-incidents-2012-through-2015) to get a bigger picture of crime trends.
+
+## Averaging with `AVG`
+
+Unlike `COUNT`, which basically just wants to be invoked as `COUNT(*)`, we need to be more particular with `AVG`.
+
+Does it make sense, for example, to get an average of `people.name`?
+
+~~~sql
+SELECT AVG(name) FROM people;
+~~~
+
+Surprisingly, an error wasn't thrown. But the result is non-sensical:
+
+
+|  AVG(name)  |
+|-------------|
+|  0.0        |
+{:.table-sql}
+
+
+The only numerical column in `people` is `age`. So, let's calculate the average age across all of `people`:
+
+~~~sql
+SELECT AVG(age) AS averageage
+FROM people;
+~~~
+
+|  averageage        |
+|--------------------|
+|  41.8666666666667  |
+{:.table-sql}
+
+Let's clean that up with `ROUND`:
+
+~~~sql
+SELECT ROUND(AVG(age), 1) AS averageage
+FROM people;
+~~~
+
+|  averageage  |
+|--------------|
+|  41.9        |
+{:.table-sql}
+
+
+## Be careful with selection when aggregating
+
+You might have noticed that for each of the previous queries in which I used `COUNT` and `AVG` to aggregate the data, I selected only a single column, e.g. `AVG(age)`.
+
+What happens if select other columns, such as `name`? Does more data get returned, rather than a single scalar value?
+
+Let's try it:
+
+~~~sql
+SELECT name, ROUND(AVG(age), 1)
+FROM people;
+~~~
+
+This was completely unexpected to me:
+
+
+|  name | ROUND(AVG(age), 1)  |
+|-------+---------------------|
+|  Zed  | 41.9                |
+{:.table-sql}
+
+
+The record for `Zed` is the very last record in `people, because the data was loaded in alphabetically. But what is the meaning of this result? 
+
+Is Zed's average age 41.9? What does that even mean? Here his record by itself:
+
+|  name | sex | age  |
+|-------+-----+------|
+|  Zed  | M   | 42   |
+
+Is it a coincidence that Zed's listed age is extremely close to `41.9`? Or is that why he was selected in the results?
+
+
+Let's try the same query but add `COUNT` as well, and `sex` and `age`, unaggregated:
+
+~~~sql
+SELECT name, sex, age, 
+  COUNT(*),
+  ROUND(AVG(age), 1)
+FROM people;
+~~~
+
+Again, bizarre:
+
+|  name | sex | age | COUNT(*) | ROUND(AVG(age), 1)  |
+|-------+-----+-----+----------+---------------------|
+|  Zed  | M   | 42  | 15       | 41.9                |
+{:.table-sql}
+
+
+### Don't chase the mystery
+
+Rather than spend time figuring out why the results are what they are, it's just far easier to dismiss the results as nonsensical. That is, the query doesn't make sense. And despite SQLite just going along with it and returning what *seems* to be results, the best advice is to __ignore it__. Instead, focus on _not_ writing queries that SELECT every single column whether it makes sense or not.
+
+
+Also, as we'll see in the next chunk of syntax to learn, things will become complicated enough that adding non-useful columns to a result set can lead to disaster, or at least, disastrous confusion.
+
+# Using GROUP BY
+
+Let's revisit the query we ran to count up the rows in `people`:
+
+~~~sql
+SELECT COUNT(*) from people;
+~~~
+
+The result was a top line number, a number that summarizes the entire dataset:
+
+|  COUNT(*)  |
+|------------|
+|  15        |
+{:.table-sql}
+
+But there's more detail even in this simple data. For example, each person had gender recorded in the `sex` column. How do we get a count by `sex`?
+
+## Make facets with GROUP BY
+
+
+Enter the `GROUP BY` clause. Like `ORDER BY`, we give it a series of columns to use. In this case, `GROUP BY` will group by the given columns.
+
+Easier to show than explain. To get a group count of people per sex, we want to `GROUP BY sex`:
+
+~~~sql
+SELECT sex, COUNT(*) 
+FROM people
+GROUP BY sex;
+~~~
+
+Note the two things that changed about the query:
+
+1. I added a `sex` column
+2. I added the `GROUP BY` clause:
+
+|  sex | COUNT(*)  |
+|------+-----------|
+|  F   | 8         |
+|  M   | 7         |
+{:.table-sql}
+
+### Select the same columns that you GROUP BY
+
+
+What would have happened if I left out the `SELECT sex`? The query would still work. The results would not have much context:
+
+~~~sql
+SELECT COUNT(*) 
+FROM people
+GROUP BY sex;
+~~~
+
+|  COUNT(*)  |
+|------------|
+|  8         |
+|  7         |
+{:.table-sql}
+
+### Grouping by things that don't have a group
+
+What happens if we group by something that isn't really groupable by...such as `name`? Every person in `people` has a unique name. What kind of groupings could possibly be made?
+
+
+Can't hurt to try out. Let's throw in a few aggregates across `age`:
+
+~~~sql
+SELECT
+    name, COUNT(*),
+    AVG(age), MAX(age), MIN(age)
+FROM people
+GROUP BY name;
+~~~
+
+Because there is exactly one name per person, each group is just a group of one, which is a lot of effort for nothing:
+
+|  name     | COUNT(*) | AVG(age) | MAX(age) | MIN(age)  |
+|-----------+----------+----------+----------+-----------|
+|  Austin   | 1        | 33.0     | 33       | 33        |
+|  Blair    | 1        | 90.0     | 90       | 90        |
+|  Carolina | 1        | 28.0     | 28       | 28        |
+|  Dani     | 1        | 41.0     | 41       | 41        |
+|  Donald   | 1        | 70.0     | 70       | 70        |
+|  Eliza    | 1        | 37.0     | 37       | 37        |
+|  Farida   | 1        | 23.0     | 23       | 23        |
+|  Georgina | 1        | 19.0     | 19       | 19        |
+|  Hillary  | 1        | 68.0     | 68       | 68        |
+|  Leland   | 1        | 16.0     | 16       | 16        |
+|  Liam     | 1        | 22.0     | 22       | 22        |
+|  Michael  | 1        | 48.0     | 48       | 48        |
+|  Phoebe   | 1        | 52.0     | 52       | 52        |
+|  Sherry   | 1        | 39.0     | 39       | 39        |
+|  Zed      | 1        | 42.0     | 42       | 42        |
+{:.table-sql}
+
+
+### Yes, we can group by derived columns
+
+But if we have a dataset in which we can extract common features from each record, then it's fun to attempt a `GROUP BY`. There's not a lot to `GROUP BY` in the raw `people` data. So let's derive a value: we'll GROUP the data by last initial of name.
+
+Yep, we can group by aliased columns:
+
+~~~sql
+SELECT
+    SUBSTR(name, -1) AS last_letter,
+    COUNT(*) AS ncount,
+    AVG(age), MAX(age), MIN(age)
+FROM people
+GROUP BY last_letter
+ORDER BY ncount DESC;
+~~~
+
+A lot of pointless insights, but it's a proper `GROUP BY`:
+
+|  last_letter | ncount | AVG(age)         | MAX(age) | MIN(age)  |
+|--------------+--------+------------------+----------+-----------|
+|  a           | 4      | 26.75            | 37       | 19        |
+|  d           | 3      | 42.6666666666667 | 70       | 16        |
+|  y           | 2      | 53.5             | 68       | 39        |
+|  e           | 1      | 52.0             | 52       | 52        |
+|  i           | 1      | 41.0             | 41       | 41        |
+|  l           | 1      | 48.0             | 48       | 48        |
+|  m           | 1      | 22.0             | 22       | 22        |
+|  n           | 1      | 33.0             | 33       | 33        |
+|  r           | 1      | 90.0             | 90       | 90        |
+{:.table-sql}
+
+
+
+Let's look at the `homes` table. Let's do a simple `SUM` to get the total value of homes owned:
+
+~~~sql
+SELECT SUM(value)
+FROM homes;
+~~~
+
+
+|  SUM(value)  |
+|--------------|
+|  4247000     |
+{:.table-sql}
+
+
+Now, let's break it up to get sum of `value` by `area`. This requires a `GROUP BY`:
+
+~~~sql
+SELECT 
+  area,
+  COUNT(*) AS properties,
+  SUM(value) AS totalvalue
+FROM homes
+GROUP BY area;
+~~~
+
+|   area  | properties | totalvalue |
+|---------|------------|------------|
+| country |          6 |     830000 |
+| suburbs |          5 |     815000 |
+| urban   |          9 |    2602000 |
+{:.table-sql}
+
+Unlike `people`, the `owner_name` column is not necessarily unique; i.e. an owner can own more than one home. Let's GROUP by `owner_name` and get a sorted count of `totalvalues` and `properties`:
+
+
+
+~~~sql
+SELECT 
+  owner_name,
+  COUNT(*) AS properties,
+  SUM(value) AS totalvalue
+FROM homes
+GROUP BY owner_name
+ORDER BY totalvalue DESC;
+~~~
+
+|  owner_name | properties | totalvalue  |
+|-------------+------------+-------------|
+|  Donald     | 3          | 1370000     |
+|  Hillary    | 2          | 780000      |
+|  Carolina   | 2          | 410000      |
+|  Michael    | 2          | 242000      |
+|  Eliza      | 1          | 210000      |
+|  Sherry     | 1          | 210000      |
+|  Farida     | 1          | 180000      |
+|  Zed        | 1          | 177000      |
+|  Liam       | 1          | 160000      |
+|  Austin     | 1          | 145000      |
+|  Blair      | 1          | 95000       |
+|  Georgina   | 1          | 82000       |
+|  Phoebe     | 1          | 77000       |
+|  Dani       | 1          | 67000       |
+|  Leland     | 1          | 42000       |
+{:.table-sql}
+
+
+# Know what you SELECT
+
+OK, now that we've covered `GROUP BY`, it's easier to take this stance:
+
+When aggregating, __never__ include a column for selection unless:
+
+1. You are aggregating by that column, e.g. `AVG(age)`
+2. The column is being used in a `GROUP BY` clause
+
+Here's a good example:
+
+~~~sql
+SELECT sex, MIN(age), MAX(age)
+FROM people
+GROUP BY sex;
+~~~
+
+And this is bad:
+
+~~~sql
+SELECT name, 
+  SUBSTR(name, 1, 1) AS first_letter, 
+  COUNT(*) AS n
+FROM people
+GROUP BY first_letter
+ORDER BY n DESC;
+~~~
+
+It won't throw an error, but the `name` column is useless to the point of harmful confusion:
+
+|  name     | first_letter | n  |
+|-----------+--------------+----|
+|  Donald   | D            | 2  |
+|  Liam     | L            | 2  |
+|  Austin   | A            | 1  |
+|  Blair    | B            | 1  |
+|  Carolina | C            | 1  |
+|  Eliza    | E            | 1  |
+|  Farida   | F            | 1  |
+|  Georgina | G            | 1  |
+|  Hillary  | H            | 1  |
+|  Michael  | M            | 1  |
+|  Phoebe   | P            | 1  |
+|  Sherry   | S            | 1  |
+|  Zed      | Z            | 1  |
+{:.table-sql}
+
+
+
+Future tip: in PostgreSQL, which we will be using very soon, the database engine will throw an error when non-aggregated columns are included. 
