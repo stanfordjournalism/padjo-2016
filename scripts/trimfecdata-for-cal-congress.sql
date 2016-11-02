@@ -1,3 +1,5 @@
+-- OLD?
+
 DELETE FROM indiv
 WHERE CMTE_ID
     NOT IN (

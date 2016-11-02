@@ -1,9 +1,297 @@
 ---
-title: tutorials/sql-simplefolks-inner-joins
-stub: true
+title: "SQLite Simple Folks: Inner Joins"
 description: |
-  The main reason to learn SQL
+  Analyzing data across multiple tables -- basically, the reason we learn SQL.
+sequence:
+  landing: /tutorials/sql-simplefolks-overview
 ---
 
+
+# Get the data
+
+- Download the [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite). 
+- Preview it [as a Google Spreadsheet](https://docs.google.com/spreadsheets/d/12mwh5m0ryzK9fKPBtxGB9DRddzRefYVDt1AOrZJHLcE/edit#gid=0)
+
+Once you've downloaded [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite) onto your computer, open it with your SQLite client and be ready to write some queries.
+
+# Why we JOIN
+
+The main purpose of a JOIN is to put the rows of two (or more) tables, side by side. That's it.
+
+In the simplefolks database, we've been querying tables that are obviously related -- `homes` and `pets` owned by `people`. But we've never been able to work with the tables _together_ -- an obvious consequence of not knowing how to access 2+ tables at once in a single query.
+
+The JOIN clause changes that limitation. 
+
+Here's how to join each row in `people` to its corresponding row in `homes`: 
+
+~~~sql
+SELECT people.name,
+  homes.area, homes.value
+FROM people
+INNER JOIN homes
+  ON homes.owner_name = people.name;
+~~~
+
+
+If you've been observant, you should be objecting -- _big deal, we could get that same table result without a JOIN_:
+
+~~~sql
+SELECT * FROM homes;
+~~~
+
+Yes, the table results are essentially identical. This is an artifact of how boringly the tables were designed, such that the owner's name is already part of `homes` and `pets`.
+
+But here's something we couldn't do before with `homes` and `people`:
+
+~~~sql
+SELECT people.name, people.age, people.sex,
+  homes.area, homes.value
+FROM people
+INNER JOIN homes
+  ON homes.owner_name = people.name;
+~~~
+
+
+
+|  name     | age | sex | area    | value   |
+|-----------+-----+-----+---------+---------|
+|  Austin   | 33  | M   | urban   | 145000  |
+|  Blair    | 90  | M   | suburbs | 95000   |
+|  Carolina | 28  | F   | suburbs | 220000  |
+|  Carolina | 28  | F   | urban   | 190000  |
+|  Dani     | 41  | F   | country | 67000   |
+|  Donald   | 70  | M   | urban   | 260000  |
+|  Donald   | 70  | M   | urban   | 450000  |
+|  Donald   | 70  | M   | urban   | 660000  |
+|  Eliza    | 37  | F   | urban   | 210000  |
+|  Farida   | 23  | F   | suburbs | 180000  |
+|  Georgina | 19  | F   | country | 82000   |
+|  Hillary  | 68  | F   | country | 380000  |
+|  Hillary  | 68  | F   | urban   | 400000  |
+|  Leland   | 16  | M   | country | 42000   |
+|  Liam     | 22  | M   | suburbs | 160000  |
+|  Michael  | 48  | M   | country | 82000   |
+|  Michael  | 48  | M   | suburbs | 160000  |
+|  Phoebe   | 52  | F   | urban   | 77000   |
+|  Sherry   | 39  | F   | urban   | 210000  |
+|  Zed      | 42  | M   | country | 177000  |
+{:.table-sql}
+
+To which your response may be -- *so...?* -- but blame that on my uncreative design of the simple data. The main point is: we can work with 2 tables, and we can join them together. One can imagine a hypothetical situation in which it's important to have the age of the owner listed conveniently with the home:
+
+
+
+~~~sql
+SELECT people.name, people.age, homes.area
+FROM people
+INNER JOIN homes
+  ON homes.owner_name = people.name;
+~~~
+
+|  name     | age | area     |
+|-----------+-----+----------|
+|  Austin   | 33  | urban    |
+|  Blair    | 90  | suburbs  |
+|  Carolina | 28  | suburbs  |
+|  Carolina | 28  | urban    |
+|  Dani     | 41  | country  |
+|  Donald   | 70  | urban    |
+|  Donald   | 70  | urban    |
+|  Donald   | 70  | urban    |
+|  Eliza    | 37  | urban    |
+|  Farida   | 23  | suburbs  |
+|  Georgina | 19  | country  |
+|  Hillary  | 68  | country  |
+|  Hillary  | 68  | urban    |
+|  Leland   | 16  | country  |
+|  Liam     | 22  | suburbs  |
+|  Michael  | 48  | country  |
+|  Michael  | 48  | suburbs  |
+|  Phoebe   | 52  | urban    |
+|  Sherry   | 39  | urban    |
+|  Zed      | 42  | country  |
+{:.table-sql}
+
+
+# The JOIN Syntax
+
+
+
+
+
+
+
+
+
+# Joining tables
+
+
+As we'll see in later lessons, there are several kinds of joins. Though the default and most common join is called an `INNER JOIN`. We use this join when we want to match records between two tables based on some condition.
+
+In the simplefolks.sqlite data, we've been working with a table of `people`, with their `homes` and `pets` in separate tables. Now with join statements, we can match people to their `pets` and `homes`.
+
+## The concepts and components of a join
+
+JOINing allows us to refer to and include data from more than one table.
+
+Let's start with `pets`. And to keep things simple, let's start with `pets` owned by `Dani`. Because `pets` has a field named `owner_name`, we don't even have to deal with `people` to get a list of pets owned by `Dani`:
+
+
+~~~sql
+SELECT *
+FROM pets 
+WHERE owner_name = 'Dani';
+~~~
+
+|  name    | type | owner_name  |
+|----------+------+-------------|
+|  Harambe | bird | Dani        |
+|  Syd     | dog  | Dani        |
+|  Artemis | cat  | Dani        |
+{:.table-sql}
+
+
+So that's seemingly straightforward. But what if for some reason we wanted the list of each pet, along with info about the owner (e.g. the owner's sex and age)?
+
+First, remember how we get that info for `Dani` from `people`:
+
+~~~sql
+SELECT *
+FROM people 
+WHERE name = 'Dani';
+~~~
+
+|  name | sex | age  |
+|-------+-----+------|
+|  Dani | F   | 41   |
+{:.table-sql}
+
+Effectively, we want a table that for *every pet* owned by `Dani`, has Dani's biographical information. Something like:
+
+
+| owner_name | sex | age | pet_name | type |
+|------------|-----|-----|----------|------|
+| Dani       | F   |  41 | Artemis  | cat  |
+| Dani       | F   |  41 | Harambe  | bird |
+| Dani       | F   |  41 | Syd      | dog  |
+{:.table-sql}
+
+Notice there's a bit of weirdness in the above table. It only has 5 columns even though both tables each have 3 columns. And there's a `pet_name` column, which doesn't exist in `pets`. We'll get to those details later. But at least you can see the main concept.
+
+
+## The JOIN syntax
+
+The `JOIN` syntax (which works for `INNER JOIN` and any other join) is a bit strange at first. It comes after a table has been specified by `FROM`. And it uses conditional statements, like `WHERE`, except that the `JOIN` clause comes _before_ a `WHERE` clause.
+
+Here's the simplest way to join `people` to `pets`, where `people.name` is equal to `Dani`:
+
+
+~~~sql
+SELECT *
+FROM people
+INNER JOIN 
+  pets 
+    ON people.name = pets.owner_name
+WHERE people.name = 'Dani';
+~~~
+
+|  name | sex | age | name    | type | owner_name  |
+|-------+-----+-----+---------+------+-------------|
+|  Dani | F   | 41  | Artemis | cat  | Dani        |
+|  Dani | F   | 41  | Harambe | bird | Dani        |
+|  Dani | F   | 41  | Syd     | dog  | Dani        |
+{:.table-sql}
+
+
+Before you try to swallow that, let's look at the code to get a similar but technically different result: instead of joining `people` to `pets`, we'll join `pets` to `people`.
+
+Notice how only two lines/words change:
+
+
+
+~~~sql
+SELECT *
+FROM pets
+INNER JOIN 
+  people 
+    ON people.name = pets.owner_name
+WHERE people.name = 'Dani';
+~~~
+
+And notice how the results are _similar_, but the columns are ordered differently. And notice how ambiguous the `name` columns are:
+
+|  name    | type | owner_name | name | sex | age  |
+|----------+------+------------+------+-----+------|
+|  Artemis | cat  | Dani       | Dani | F   | 41   |
+|  Harambe | bird | Dani       | Dani | F   | 41   |
+|  Syd     | dog  | Dani       | Dani | F   | 41   |
+{:.table-sql}
+
+Finally, I'll show a variation in which we get a 5-column table -- basically, the same query, except not using the lazy `*` and being selective with what columns we want and how they are named (i.e. __aliasing__).
+
+Joining `people` _to_ `pets`:
+
+~~~sql
+SELECT pets.owner_name,
+  people.age, people.sex,
+  pets.name AS pet_name,
+  pets.type
+FROM people
+INNER JOIN 
+  pets 
+    ON people.name = pets.owner_name
+WHERE people.name = 'Dani';
+~~~
+
+
+|  owner_name | age | sex | pet_name | type  |
+|-------------+-----+-----+----------+-------|
+|  Dani       | 41  | F   | Artemis  | cat   |
+|  Dani       | 41  | F   | Harambe  | bird  |
+|  Dani       | 41  | F   | Syd      | dog   |
+{:.table-sql}
+
+Same query, but joining `pets` to `people` -- notice how literally almost everything in the query remains the same, except for two small changes:
+
+~~~sql
+SELECT pets.owner_name,
+  people.age, people.sex,
+  pets.name AS pet_name,
+  pets.type
+FROM pets
+INNER JOIN 
+  people
+    ON people.name = pets.owner_name
+WHERE people.name = 'Dani';
+~~~
+
+The result is the same:
+
+|  owner_name | age | sex | pet_name | type  |
+|-------------+-----+-----+----------+-------|
+|  Dani       | 41  | F   | Artemis  | cat   |
+|  Dani       | 41  | F   | Harambe  | bird  |
+|  Dani       | 41  | F   | Syd      | dog   |
+{:.table-sql}
+
+
+
+- Join name, pets, and homes
+
+## People and homes
+
+- Join people and homes
+- Smarter join
+- List people and homes in order of people's age
+- List people and homes in order of home's worth
+- List people and homes where homes are in the country and owned by females
+- list the urban home owned by the oldest person
+
+
+### People and homes and aggregations
+
+- List number of homes owned by Donald, by count
+- List average value and sum of values of homes owned by Donald and Hillary
+-  
 
 

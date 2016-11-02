@@ -1,0 +1,355 @@
+---
+title: Understanding SQL JOIN with SF Restaurants
+stub: true
+description: |
+    lorem ipsum title title title
+---
+
+# The data for this lesson
+
+- [SF Scores](/files/data/starterpack/sfscores/sfscores.sqlite)
+- [SF LIVES](/files/data/starterpack/sf-food-inspections-lives/sf-food-inspections-lives.sqlite) 
+
+
+
+
+
+
+# About the San Francisco inspection data
+
+## The normalized database
+
+
+[Businesses](https://docs.google.com/spreadsheets/d/1Ag5DBIviYiuRrt2yr3nXmbPFV-FOg5fDH5SM3ZEDnpw/edit#gid=0):
+
+<img src="images/sf-scores-businesses-1103.png" alt="sf-scores-businesses-1103.png">
+
+[Inspections](https://docs.google.com/spreadsheets/d/1Ag5DBIviYiuRrt2yr3nXmbPFV-FOg5fDH5SM3ZEDnpw/edit#gid=50965313)
+
+<img src="images/sf-scores-inspections-1103.png" alt="sf-scores-inspections-1103.png">
+
+[Violations](https://docs.google.com/spreadsheets/d/1Ag5DBIviYiuRrt2yr3nXmbPFV-FOg5fDH5SM3ZEDnpw/edit#gid=780513932)
+
+<img src="images/sf-scores-violations-1103.png" alt="sf-scores-violations-1103.png">
+
+
+## LIVES
+
+<img src="images/sf-lives-inspections-1103-first.png" alt="sf-lives-inspections-1103-first.png">
+
+
+
+
+## The LIVES standard, made especially for Yelp
+
+## Why San Francisco has two ways of publishing its restaurant inspection data
+
+The city of San Francisco offers the exact same restaurant inspection data in two formats:
+
+- As a _normalized_ database with 3 tables: businesses, violations, inspections
+- As a single _denormalized_ "flat" table, which follows the Local Inspector Value-Entry Specification (LIVES) that [Yelp developed with collaboration from cities](https://www.yelp.com/healthscores).
+
+The database version reflects how the city originally stores the data (and how most databases work in real life). The LIVES version can be thought of as the same data, but published in a simplified way that makes it easy for an external entity, like Yelp, to import the data into their own application (i.e. the Yelp web service).
+
+__Why do we care?__ We don't really care specifically about how or why Yelp needs the data in this format. But for educational purposes,  having these two versions of the same data will help us understand how SQL JOINs work. 
+
+In fact, the LIVES version of the data is just what happens when you use JOIN statements on the normalized database.
+
+-------------
+
+
+
+# Understanding the SF data with Philz Coffee on Minnesota Street
+
+https://www.yelp.com/biz/philz-coffee-san-francisco-16
+
+<img src="images/yelp-philz-coffee-minnesota-st-page.jpg" alt="yelp-philz-coffee-minnesota-st-page.jpg">
+
+The health inspection page, as saved on the Internet Archive:
+
+https://www.yelp.com/inspections/philz-coffee-san-francisco-16
+
+https://web.archive.org/web/20160930034051/https://www.yelp.com/biz/philz-coffee-san-francisco-16
+
+Here it is on the [LIVES data (as a spreadsheet)](https://docs.google.com/spreadsheets/d/1PvLaWCqxxCXqcQ9F8LGZqD3oi5k2e1-Dj3Gq3iE10go/edit#gid=1107606727):
+
+<img src="images/yelp-philz-coffee-minnesota-st-lives-spreadsheet.png" alt="yelp-philz-coffee-minnesota-st-lives-spreadsheet.png">
+
+Things we can surmise:
+
+- The Philz Coffee on 1258 Minnesota Street is known by the `business_id` of `82033`
+- It has had 3 different inspections, which you can tell by the 3 unique `inspection_id` values. And also, the 3 different inspection dates: `6/25/2015`, `3/19/2015`, `3/13/2015`.
+- Only one of those inspections was _scored_ and had violations: the `Routine - Unscheduled` on `6/25/2015`.
+- The only score that this Philz Coffee has received is `94`
+- Philz has received only 2 violations
+- Inspections happen when new construction happen, and they don't seem to result in scores.
+- If this data was snapshotted on October 6, 2016, then it has been more than 15 months since this Philz was inspected.
+
+Big picture details:
+
+- A business has one or more inspections.
+- An inspection can find more than one violation.
+- Some inspections can have no violations at all.
+
+
+
+
+
+# LIVES data
+
+~~~sql
+SELECT * 
+FROM inspection_records;
+~~~
+
+But let's keep to being minimal and start off by selecting `business_id` and `business_name`. Let's try to find the `business_id` of the Philz Coffee on Minnesota Street -- I use the wildcard for the name and address search just in case the actual literal names are `PHILZ COFFEE SHOP` and `1234 Minnesota Street`: 
+
+~~~sql
+SELECT business_id, business_address, business_name
+FROM inspection_records
+WHERE business_name LIKE 'PHILZ COFFEE%'
+  AND business_address LIKE '%MINNESOTA ST%';
+~~~
+
+
+Note how the name and ID of this Philz Coffee is repeated, over and over, in a redundant way:
+
+|  business_id | business_address  | business_name  |
+|--------------+-------------------+----------------|
+|  82033       | 1258 Minnesota St | Philz Coffee   |
+|  82033       | 1258 Minnesota St | Philz Coffee   |
+|  82033       | 1258 Minnesota St | Philz Coffee   |
+|  82033       | 1258 Minnesota St | Philz Coffee   |
+{:.table-sql}
+
+
+Let's get the types of violations that were found, and when they were found:
+
+
+~~~sql
+SELECT business_id,
+inspection_date, violation_description
+FROM inspection_records
+WHERE business_id = 82033;
+~~~
+
+Couple of interesting things. 2 of the records have a `violation_description`, and they are on the same `inspection_date`.
+
+The 2 other records have `NULL` in the `violation_description`, i.e. _no violations were found_. These two records also seem to correspond to different inspections, hence, the differing `inspection_date`:
+
+
+|  business_id | inspection_date | violation_description                                                      |
+|--------------+-----------------+----------------------------------------------------------------------------|
+|  82033       | 2015-06-25      | Inadequate food safety knowledge or lack of certified food safety manager  |
+|  82033       | 2015-06-25      | Unpermitted food facility                                                  |
+|  82033       | 2015-03-19      | NULL                                                                       |
+|  82033       | 2015-03-13      | NULL                                                                       |
+{:.table-sql}
+
+
+
+Get basic information about each inspection, including the date, type, and score of inspection, but leave out the `violation_description` for now:
+
+
+~~~sql
+SELECT business_id,
+       inspection_date, inspection_type, 
+       inspection_score
+FROM inspection_records
+WHERE business_id = 82033;
+~~~
+
+This information should confirm what we saw above: 3 different inspections. However, the `Routine - Unscheduled` inspection that took place on `2015-06-25` has 2 rows: 
+
+|  business_id | inspection_date | inspection_type       | inspection_score  |
+|--------------+-----------------+-----------------------+-------------------|
+|  82033       | 2015-06-25      | Routine - Unscheduled | 94                |
+|  82033       | 2015-06-25      | Routine - Unscheduled | 94                |
+|  82033       | 2015-03-19      | New Construction      | NULL              |
+|  82033       | 2015-03-13      | New Construction      | NULL              |
+{:.table-sql}
+
+
+OK now let's repeat the query we just did, but add `violation_description`:
+
+
+~~~sql
+SELECT business_id, 
+       inspection_date, inspection_type, 
+       inspection_score,
+       violation_description
+FROM inspection_records
+WHERE business_id = 82033;
+~~~
+
+|  business_id | inspection_date | inspection_type       | inspection_score | violation_description                                                      |
+|--------------+-----------------+-----------------------+------------------+----------------------------------------------------------------------------|
+|  82033       | 2015-06-25      | Routine - Unscheduled | 94               | Inadequate food safety knowledge or lack of certified food safety manager  |
+|  82033       | 2015-06-25      | Routine - Unscheduled | 94               | Unpermitted food facility                                                  |
+|  82033       | 2015-03-19      | New Construction      | NULL             | NULL                                                                       |
+|  82033       | 2015-03-13      | New Construction      | NULL             | NULL                                                                       |
+{:.table-sql}
+
+
+### A Philz with more than one record
+
+The [Philz on 4298 24th Street is more interesting](https://www.yelp.com/biz/philz-coffee-san-francisco-6). Here's a screenshot of its [inspection record](http://web.archive.org/web/20161031195334/https://www.yelp.com/inspections/philz-coffee-san-francisco-6) -- note how it has multiple inspections, each with multiple violations:
+
+<img src="images/yelp-philz-coffee-24th-st-inspection-page.png" alt="yelp-philz-coffee-24th-st-inspection-page.png">
+
+
+
+Let's find its ID:
+
+~~~sql
+SELECT business_id, business_address, business_name
+FROM inspection_records
+WHERE business_name LIKE 'PHILZ COFFEE%'
+  AND business_address LIKE '%24TH ST%';
+~~~
+
+|  business_id | business_address | business_name  |
+|--------------+------------------+----------------|
+|  68079       | 4298 24th St     | Philz Coffee   |
+|  68079       | 4298 24th St     | Philz Coffee   |
+|  68079       | 4298 24th St     | Philz Coffee   |
+|  68079       | 4298 24th St     | Philz Coffee   |
+|  68079       | 4298 24th St     | Philz Coffee   |
+|  68079       | 4298 24th St     | Philz Coffee   |
+|  68079       | 4298 24th St     | Philz Coffee   |
+|  68079       | 4298 24th St     | Philz Coffee   |
+|  68079       | 4298 24th St     | Philz Coffee   |
+{:.table-sql}
+
+
+Let's start off with a simple aggregation: how many records for the business:
+
+~~~sql
+SELECT business_id,
+       COUNT(*) as rcount
+FROM inspection_records
+WHERE business_id = 68079;
+~~~
+
+|  business_id | rcount  |
+|--------------+---------|
+|  68079       | 9       |
+{:.table-sql}
+
+Add a few more aggregations, such as the lowest, highest, and average score attained:
+
+~~~sql
+SELECT business_id,
+       COUNT(*) AS rcount,
+       MIN(inspection_score) AS min_score, 
+       MAX(inspection_score) AS max_score,
+       AVG(inspection_score) AS avg_score
+FROM inspection_records
+WHERE business_id = 68079;
+~~~
+
+
+
+
+|  business_id | rcount | min_score | max_score | avg_score         |
+|--------------+--------+-----------+-----------+-------------------|
+|  68079       | 9      | 91        | 92        | 91.4285714285714  |
+{:.table-sql}
+
+
+Note that the `avg_score` looks like it could be accurate, but it probably isn't? Why? Because remember that there is one row for every __violation and/or inspection__. Try selecting a list of inspection dates, scores, and violation descriptions:
+
+
+~~~sql
+SELECT business_id,
+  inspection_date, inspection_type, inspection_score,
+  violation_description
+FROM inspection_records
+WHERE business_id = 68079;
+~~~
+
+|  business_id | inspection_date | inspection_type       | inspection_score | violation_description                             |
+|--------------+-----------------+-----------------------+------------------+---------------------------------------------------|
+|  68079       | 2016-03-08      | Reinspection/Followup | NULL             | NULL                                              |
+|  68079       | 2015-03-02      | Routine - Unscheduled | 92               | Moderate risk food holding temperature            |
+|  68079       | 2014-05-12      | Reinspection/Followup | NULL             | NULL                                              |
+|  68079       | 2016-02-25      | Routine - Unscheduled | 91               | Permit license or inspection report not posted    |
+|  68079       | 2016-02-25      | Routine - Unscheduled | 91               | High risk food holding temperature                |
+|  68079       | 2015-03-02      | Routine - Unscheduled | 92               | Unapproved or unmaintained equipment or utensils  |
+|  68079       | 2015-03-02      | Routine - Unscheduled | 92               | Unclean or degraded floors walls or ceilings      |
+|  68079       | 2014-04-10      | Routine - Unscheduled | 91               | Unclean or degraded floors walls or ceilings      |
+|  68079       | 2014-04-10      | Routine - Unscheduled | 91               | No hot water or running water                     |
+{:.table-sql}
+
+
+In other words, the erroneous average we calculated was the result of this:
+
+    (91 + 91 + 92 + 92 + 91 + 91 + 92) / 7
+
+(when calculating the average, SQL ignores counting the 2 `NULL` values, hence, why our divisor is `7`)
+
+### Getting distinct inspection records using `GROUP BY`
+
+Recall what the Yelp health inspection page looks like:
+
+<img src="images/yelp-philz-coffee-24th-st-inspection-page.png" alt="yelp-philz-coffee-24th-st-inspection-page.png">
+
+Though there are __7__ violations. there are only 3 scored inspections. How do we get to that number?
+
+~~~sql
+SELECT business_id, inspection_date
+FROM inspection_records
+WHERE business_id = 68079
+GROUP BY business_id, inspection_date;
+~~~
+
+Note that we don't technically have to group by `business_id`, because the `WHERE` clause all but ensures that there will only be records belonging to `business_id = 68079`. But it's just good practice (for when we have multiple `business_id`s).
+
+
+
+
+
+### Using GROUP BY
+
+Get the number of Routine - Unscheduled inspections:
+
+~~~sql
+SELECT COUNT(*)
+FROM inspection_records
+WHERE business_id = 82033
+AND inspection_type = 'Routine - Unscheduled';
+~~~
+
+Get the number of violations:
+
+~~~sql
+SELECT COUNT(*)
+FROM inspection_records
+WHERE business_id = 5104
+
+~~~
+
+
+
+# Normalized data
+
+
+~~~sql
+SELECT *
+FROM businesses
+WHERE business_id = 1103;
+~~~
+
+~~~sql
+SELECT *
+FROM inspections
+WHERE business_id = 1103;
+~~~
+
+
+~~~sql
+SELECT *
+FROM violations
+WHERE business_id = 1103;
+~~~
+

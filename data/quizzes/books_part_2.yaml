@@ -1,0 +1,71 @@
+instructions: |
+
+  Writing on paper today!
+
+  - A few questions from chapters 3, 4, 5, from _Homicide_.
+  - 1 short-answer question from _Art of Access_
+  - 2 questions involving writing SQL from scratch.
+
+questions:
+
+  - prompt: |
+      For a homicide detective, what is "better than being good"?
+
+    choices:
+      A: Great
+      B: Methodical
+      C: Rich
+      D: Lucky
+      E: Loved
+
+
+  - prompt: |
+      What is the cap on overtime pay for a Balitmore homicide detective before he/she's taken off the rotation?
+    choices:
+      A: "50 percent of the detective's base pay."
+      B: $150,000
+      C: $250,000
+      D: "20 percent of the detective's base pay."
+      E: "100 percent of the detective's base pay."
+
+
+  - prompt: |
+      Fill in the blanks for this aphorism about how murders are solved.
+
+      > In reference to the color of money, and the colors by which open and solved murders are chronicled on the board, the rule states:
+
+      > First they're ________. Then they're green. Then they're _______.
+
+
+  - prompt: |
+      Describe with a couple sentences what a __retention schedule__ is, in regards to public records (Chapter 4: Art of Access). Feel free to include a few examples.
+
+
+  - prompt: |
+      Given a table named `people` that looks like this:
+
+
+      | name   | age    |
+      |--------|--------|
+      | Blair  |  40    |
+      | Dani   |  60    |
+      | Egon   |  20    |
+      {:.table-sql}
+
+      Write a SQL query that selects from the `people` table and ends with this resulting table:
+
+      | age    |
+      |--------|
+      | 60     |
+      {:.table-sql}
+
+
+  - prompt: |
+      Same table and format as the previous question, except write the query to get this result:
+
+      | avg_age    | peeps |
+      |------------|-------|
+      | 40         |   3   |
+      {:.table-sql}
+
+      Hint: it requires a couple of aggregation functions and aliasing. But no `GROUP BY`.

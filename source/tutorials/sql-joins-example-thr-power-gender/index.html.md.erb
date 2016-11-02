@@ -1,0 +1,627 @@
+---
+title: SQL Joins for estimating gender and Hollywood power
+description: |
+    THR released a list of Most Powerful People in Entertainment. How can we analyze that as data?
+references:
+  - title "The THR 100: Hollywood Reporter's Most Powerful People in Entertainment"
+    url: http://www.hollywoodreporter.com/topic/thr-100
+---
+
+
+# The data
+
+The first part of the tutorial goes over how I manually spreadsheetified the Hollywood Reporter feature, [The THR 100: Hollywood Reporter's Most Powerful People in Entertainment](http://www.hollywoodreporter.com/topic/thr-100)
+
+
+
+To do the SQL in this lesson, download the database here [thr-gendered-babynames.sqlite](/files/data/starterpack/ssa-babynames/thr-gendered-babynames.sqlite)
+
+
+
+
+
+
+# Checking out Hollywood Reporter's 100 Most Powerful Entertainers list
+
+In 2016, THR put out its first power ranking of Hollywood entertainers: It's [a great read:
+
+[The THR 100: Hollywood Reporter's Most Powerful People in Entertainment](http://www.hollywoodreporter.com/lists/thr-100-hollywood-reporters-powerful-904591)
+
+<img src="images/thr-article-header.jpg" alt="thr-article-header.jpg">
+
+
+Here's their methodology --  [THR 100: How the Staff Put Together This Power List](http://www.hollywoodreporter.com/news/thr-100-how-staff-put-904869) -- though you may want to skip it until we run our SQL analysis, as to not spoil the surprise of accuracy.
+
+## Wrangling a story-list into a spreadsheet
+
+I love lists. Lists are a great way for displaying and organizing data, and THR's feature is no different. That said, anything that can be a list can be a _better_ spreadsheet at some point. What if there were other ways to look at this list other than a ranking of 100 to 1? What if we wanted to count number of actors vs. producers vs. CEO types, for example? 
+
+Even this straightforward narrative list can be separated into enough interesting parts to warrant a spreadsheet. Unfortunately, because this was a very narrative feature, there is no easy program that will suck up the data in this list and make it structured.
+
+### Doing things by hand
+
+So I did it the old fashioned way: I read the entire list, and then I hand-entered it into a spreadsheet, [which you can view here on Google Drive](https://docs.google.com/spreadsheets/d/1SISI-7A8dD_ccj1Q1anHUpR9aVIARQWGZOP2iibB0zY/edit#gid=1432806492).
+
+Here's the final version of the spreadsheet, ready to be imported into a database:
+
+<a href="https://docs.google.com/spreadsheets/d/1SISI-7A8dD_ccj1Q1anHUpR9aVIARQWGZOP2iibB0zY/edit#gid=1432806492"><img src="images/thr-packaged-spreadsheet.png" alt="thr-packaged-spreadsheet.png"></a>
+
+And here's how it was first entered into the spreadsheet -- basically copying-and-pasting efficiently:
+
+<a href="https://docs.google.com/spreadsheets/d/1SISI-7A8dD_ccj1Q1anHUpR9aVIARQWGZOP2iibB0zY/edit#gid=273725939"><img src="images/thr-draft-spreadsheet.png" alt="thr-draft-spreadsheet.png">
+</a>
+
+### Tidying up narrative data
+
+The THR feature made for a great read, but things got messy when trying to break it down to data. For example, each rank does not represent a single person. For [rank 11, they stuffed 3 people -- Jeff Shell, Donna Langley and Ron Meyer](http://www.hollywoodreporter.com/lists/thr-100-hollywood-reporters-powerful-904591/item/jeff-shell-donna-langley-ron-904777) -- and their respective titles into a single slot:
+
+<img src="images/thr-11-people.jpg" alt="thr-11-people.jpg">
+
+It makes editorial sense --  the team of Shell, Langley, and Meyer is what makes them the 11th most powerful Hollywood entertaining force. But it causes a lot of inconveniences in data, especially with databases when we want one piece of information per cell. Here's what I ended up doing -- each person gets their own line, and I split up the job titles as best I could:
+
+<img src="images/thr-11-people-as-data.jpg" alt="thr-11-people-as-data.jpg">
+
+When each person has their own line, there are __125__ individual humans in this list. You can view it on [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1SISI-7A8dD_ccj1Q1anHUpR9aVIARQWGZOP2iibB0zY/edit#gid=1432806492).
+
+Or, you can download the SQLite database I've created, which contains this simple table of THR entertainers and also, a table of gendered babyname data. You can probably guess what comes next.
+
+Download the database here: [thr-gendered-babynames.sqlite](/files/data/starterpack/ssa-babynames/thr-gendered-babynames.sqlite)
+
+
+
+# About the gendered_names table
+
+Once you've download the SQLite database -- [thr-gendered-babynames.sqlite](/files/data/starterpack/ssa-babynames/thr-gendered-babynames.sqlite) -- you'll notice that besides the THR table, there's a table named `gendered_babynames` which looks like this:
+
+<img src="images/genedred-names-table-intro.png" alt="genedred-names-table-intro.png">
+
+
+It's a transformed version of the [Social Security Baby Names for All States, 2015](/tutorials/sqlite-data-starterpacks/#toc-social-security-administration-baby-names-2015-for-all-states) that we've come across. The original database contains a row for male and female count of a given name in a given state:
+
+
+~~~sql
+SELECT state, year, name, sex, count 
+FROM babynames 
+WHERE name = "Parker" 
+  AND state = "US";
+~~~
+
+Take note of how there are substantially more male Parkers than female.
+
+|  state | year | name   | sex | count  |
+|--------+------+--------+-----+--------|
+|  US    | 2015 | Parker | M   | 5383   |
+|  US    | 2015 | Parker | F   | 1439   |
+{:.table-sql}
+
+The raw baby name data has always had potential for gender-analysis use. To simplify things for SQL beginners, I've taken the liberty of aggregating/transforming the data so that names like `Parker` only get one row: 
+
+~~~sql
+SELECT *
+FROM gendered_names
+WHERE name = "Parker"
+  AND state = 'US';
+~~~
+
+|  year | state | name   | total_babies | primary_sex | primary_sex_ratio | per_100k_in_state  |
+|-------+-------+--------+--------------+-------------+-------------------+--------------------|
+|  2015 | US    | Parker | 6822         | M           | 78.9              | 186                |
+{:.table-sql}
+
+
+The original data is still (mostly) there -- to calculate number of females named Parker in 2015, we multiply `6822` by `(100 - 78.9)`.
+
+
+But the main reason to have the baby name data in this simplified format is so that we can do queries like these:
+
+
+###### What are the most popular gender-neutral names that have at least 2,000 total babies nationwide?
+
+~~~sql
+SELECT name, total_babies, primary_sex, primary_sex_ratio
+FROM gendered_names
+WHERE total_babies >= 2000
+  AND primary_sex_ratio < 70
+LIMIT 10;
+~~~
+
+|  name    | total_babies | primary_sex | primary_sex_ratio  |
+|----------+--------------+-------------+--------------------|
+|  Hayden  | 4415         | M           | 61.4               |
+|  Charlie | 3216         | M           | 51.7               |
+|  Rowan   | 2781         | M           | 64.7               |
+|  River   | 2440         | M           | 61.4               |
+|  Amari   | 2035         | M           | 66.9               |
+|  Emerson | 2971         | F           | 59.9               |
+|  Finley  | 2653         | F           | 60.2               |
+|  Dakota  | 2254         | F           | 58.7               |
+|  Skyler  | 2013         | F           | 55.2               |
+{:.table-sql}
+
+###### What are the most male-skewed names that begin and end in vowels?
+
+(Making a crude judgment that guy names have "harsh" sounds)
+
+~~~sql
+SELECT name, total_babies, primary_sex_ratio
+FROM gendered_names
+WHERE SUBSTR(name, 1, 1) IN ('A', 'E', 'I', 'O', 'U')
+  AND SUBSTR(name, -1, 1) IN ('a', 'e', 'i', 'o', 'u')
+  AND primary_sex = 'M'
+ORDER BY primary_sex_ratio DESC, total_babies DESC
+LIMIT 10;
+~~~
+
+As it turns out, vowelly names for boys is a popular thing outside of the traditional U.S.:
+
+|  name      | total_babies | primary_sex_ratio  |
+|------------+--------------+--------------------|
+|  Antonio   | 2708         | 100                |
+|  Alejandro | 2303         | 100                |
+|  Emiliano  | 1660         | 100                |
+|  Eduardo   | 1440         | 100                |
+|  Andre     | 1310         | 100                |
+|  Angelo    | 1200         | 100                |
+|  Emilio    | 1182         | 100                |
+|  Enzo      | 1039         | 100                |
+|  Armando   | 749          | 100                |
+|  Eli       | 741          | 100                |
+{:.table-sql}
+
+
+OK, now that we have an idea of what's in the THR table and what's in `gendered_names`, let's put the two together for a quick analysis of THR's list.
+
+
+# Gender analysis of THR's Powerful Entertainers
+
+The [__THR 100__](http://www.hollywoodreporter.com/news/www.hollywoodreporter.com/lists/thr-100-hollywood-reporters-powerful-904591) is new this year, but THR has traditionally done separate 100 lists, including [favorite films](http://www.hollywoodreporter.com/lists/100-best-films-ever-hollywood-favorites-818512), [lawyers](http://www.hollywoodreporter.com/lists/power-lawyers-2016-hollywoods-top-885270), and [women in entertainment](http://www.hollywoodreporter.com/lists/women-entertainment-power-100-reps-846686)
+
+## No longer pitting women vs. women
+
+Last year, THR decided to stop doing a separate Entertainment Power 100 List for women, and wrote a [great essay explaining their thoughts](http://www.hollywoodreporter.com/features/hollywood-reporter-end-rankings-women-839046):
+
+> And yet today, in legend and reality, women fight for position on these lists in ways that don't always make them, or us, comfortable. THR's Power 100 list, by its nature, pits the town's most impressive females against one another. I can't help but think of a telling passage I read from Lansing's upcoming biography that describes her ascension in an era when men felt there was room for just one alpha woman at a time at the studios.
+
+> I've come to believe that something as simple as our ranked women's lists contributes to keeping that sense alive, that we accidentally created a beauty pageant of brains where only one woman gets crowned. Some women have publicly cried upon seeing their rankings. That is funny to some people. But it's depressing as hell to me.
+
+
+
+
+In their methodology, [THR admits that it's not exactly about hard numbers](http://www.hollywoodreporter.com/news/thr-100-how-staff-put-904869):
+
+> For some, power is the ability to get a green light. Others say it's the ability to give a green light. Access to gigantic sums of money was a part of the equation, as were fame (turning heads when you enter a restaurant is practically a primal form of alpha-ism) and smarts (information is power). The key criterion was influence in the transactional machinery of day-to-day Hollywood. Boiled down, the simplest test of determining the differential between people became this: Whose phone call would you return first? Not because you like them but because your financial future and career just might, might, be altered by the time you hung up?
+
+As one metric for whether or not the THR 100 reflects rankings, THR has a nice chart ranking the THR 100 by how much ink they received:
+
+<img src="images/thr-chart-ink.png" alt="thr-chart-ink.png">
+
+
+But what about THR's desire to recognize the influence and power of women entertainers? Was that reflected in the THR 100. What metric would we use to decide that?
+
+Well, the best metrics are sometimes the simplest: let's just count how many women are on the list.
+
+## Joining gender to THR names
+
+The THR 100 list is short enough. But with SQL, we can actually do this calculation in mere seconds. How?
+
+By connecting the gender-of-name data found in the `gendered_names` table to each name in the `thr_power_list` table.
+
+Let's review what `thr_power_list` contains: names, ranks, and job info
+
+~~~sql
+SELECT * 
+FROM thr_power_list
+ORDER BY rank
+LIMIT 10;
+~~~
+
+
+
+~~~sql
+SELECT * 
+FROM thr_power_list
+ORDER BY rank
+LIMIT 10;
+~~~
+
+|  rank | full_name       | first_name | last_name | occupation                                      | company                |
+|-------+-----------------+------------+-----------+-------------------------------------------------+------------------------|
+|  1    | Bob Iger        | Bob        | Iger      | Chairman and CEO                                | Walt Disney Co.        |
+|  2    | James Murdoch   | James      | Murdoch   | CEO                                             | 21st Century Fox       |
+|  2    | Lachlan Murdoch | Lachlan    | Murdoch   | Executive chairman                              | 21st Century Fox       |
+|  2    | Rupert Murdoch  | Rupert     | Murdoch   | Executive chairman                              | 21st Century Fox       |
+|  3    | Leslie Moonves  | Leslie     | Moonves   | President and CEO                               | CBS Corp.              |
+|  4    | Steve Burke     | Steve      | Burke     | CEO                                             | NBC Universal          |
+|  5    | Ted Sarandos    | Ted        | Sarandos  | Chief content officer                           | Netflix                |
+|  6    | Sumner Redstone | Sumner     | Redstone  | President, national amusements, and vice chair, | Viacom and CBS Boards  |
+|  6    | Shari Redstone  | Shari      | Redstone  | Chairman emeritus                               | Viacom and CBS Corp.   |
+|  7    | Jeff Bewkes     | Jeff       | Bewkes    | Chairman and CEO                                | Time Warner            |
+{:.table-sql}
+
+
+Pretend we we knew nothing about typical American names, such as the traditional gender for people named `Bob`, `James`, `Lachlan`, and `Leslie`.
+
+How would we find the gender-ratio for each of these names, using just the database that we have?
+
+Just do a simple `SELECT/WHERE` on `gendered_names` for each of the `first_name` values in `thr_power_list`, and tally up the males and females:
+
+
+~~~sql
+SELECT name, primary_sex, primary_sex_ratio, total_babies 
+FROM gendered_names
+WHERE name = 'Bob';
+~~~
+
+(wow, only 14 babes named `Bob` in the entire U.S. for 2015?)
+
+|  name | primary_sex | primary_sex_ratio | total_babies  |
+|-------+-------------+-------------------+---------------|
+|  Bob  | M           | 100               | 14            |
+{:.table-sql}
+
+
+
+~~~sql
+SELECT name, primary_sex, primary_sex_ratio, total_babies 
+FROM gendered_names
+WHERE name = 'Leslie';
+~~~
+
+This is where our data is wrong. For a more robust gender detector, we should be using data from past decades, back when `Leslie` was still a common male name, like [Leslie Nielsen](https://en.wikipedia.org/wiki/Leslie_Nielsen) and, in this case, [Leslie Moonves](https://en.wikipedia.org/wiki/Leslie_Moonves). Alas, our `gendered_names` data only includes 2015 data, and apparently, `Leslie` is now almost exclusively a female name:
+
+|  name   | primary_sex | primary_sex_ratio | total_babies  |
+|---------+-------------+-------------------+---------------|
+|  Leslie | F           | 94.2              | 930           |
+{:.table-sql}
+
+
+
+# Let's JOIN
+
+
+OK, now that we've got the idea, let's see how the `JOIN` clause can make our analysis so much quicker (the accuracy problem will have to be dealt with later).
+
+## Start with the non-JOIN SQL we know
+
+
+Let's start with what we _know_ we want and what we _know_ we can do, at the very least: getting a list of first names from `thr_power_list`:
+
+~~~sql
+SELECT first_name
+FROM thr_power_list;
+~~~
+
+
+Which looks like this:
+
+|  first_name   |
+|---------------|
+|  Chris        |
+|  Jason        |
+|  Robert       |
+|  Emma         |
+{:.table-sql}
+
+
+Given the above table, let's now think (but not overthink) about the very next data point we need to count the genders of this list.
+
+
+### Matching sex/gender to name
+
+To count the genders-by-name in this list, we need to know what gender each name is. Even if we don't know how to get to this result, at least we know we _need_ this result:
+
+
+| first_name | primary_sex |
+|------------|-------------|
+| Chris      | M           |
+| Jason      | M           |
+| Robert     | M           |
+| Emma       | F           |
+{:.table-sql}
+
+
+`primary_sex` -- the column that states whether a given name is mostly-male or mostly-female based on baby count -- is in the `gendered_names` table.
+
+To get the results table we want, it would seem we would have to _join_ the two tables, `thr_power_list` and `gendered_names`.
+
+
+## The JOIN syntax 
+
+OK, finally, getting to the point of writing `JOIN` in a SQL query:
+
+### Starting with the answer
+
+The section goes down a rabbit hole of what happens when you misunderstand the `JOIN` concept and/or syntax. It's important to go down this rabbit hole. But let's not miss the big picture or what best practice is.
+
+So, if this is the result we want and need (and it is) to count up gender per name in the THR list:
+
+| first_name | primary_sex |
+|------------|-------------|
+| Chris      | M           |
+| Jason      | M           |
+| Robert     | M           |
+| Emma       | F           |
+{:.table-sql}
+
+This is the SQL JOIN statement we write:
+
+
+~~~sql
+SELECT thr_power_list.first_name,
+       gendered_names.primary_sex
+FROM 
+  thr_power_list
+INNER JOIN 
+  gendered_names ON
+    thr_power_list.first_name = gendered_names.name;
+~~~
+
+Run the query in your own database. See if you can figure out what's needed to get an aggregate count of males and females...
+
+
+Otherwise, back to exploring JOIN, slowly and painfully:
+
+### The FROM part of a JOIN
+
+A JOIN involves joining two tables. That first table comes from the `FROM` clause:
+
+~~~sql
+SELECT first_name
+FROM thr_power_list;
+~~~
+
+### The JOIN part of a JOIN
+
+To include a second table, we use the `JOIN` keyword -- it comes after the `FROM` clause, and we give it a table name, i.e. the second table we want to join:
+
+Note -- do _not_ run this query. Nothing will go wrong, _per se_, but it may take a very long time:
+
+~~~sql
+SELECT first_name
+FROM thr_power_list
+JOIN gendered_names;
+~~~
+
+#### Always write `INNER JOIN` instead of just `JOIN`
+
+Second thing I want to note: even though `JOIN` by itself defaults to a `INNER JOIN` operation, I believe it is best practice to _always_ write out `INNER JOIN` and will do so for every lesson and example going forward. It's just one more word for a lot more clarity:
+
+
+~~~sql
+SELECT first_name
+FROM thr_power_list
+INNER JOIN gendered_names;
+~~~
+
+The `INNER JOIN` is just cosmetic. Don't run the above query unless you want to tie up your computer.
+
+## Blowing things up when joining without a condition
+
+Let's take a step back, why is the previous SQL query so bad?
+
+First of all, it won't be an __error__ because it's perfectly good SQL. And the database engine will just run it. Unfortunately, running this type of query -- a JOIN without an `ON` conditiona -- can be extremely computationally expensive.
+
+
+### The illogical WHERE
+
+The closest analogy I can think of is when we write a `WHERE` clause, but give it a boolean expression that is always true (or false)
+
+~~~sql
+SELECT *
+FROM mytable
+WHERE 1;
+~~~
+
+`1` is considered a truthy value, all the time, so this query retrieves all the rows and columns from `mytable`, just as if we wrote:
+
+~~~sql
+SELECT *
+FROM mytable;
+~~~
+
+So what's the point of that `WHERE`, except to confuse everyone who reads the code? Or, more likely, it's a human-created error, but one that doesn't cause the query to crash with an error response.
+
+
+So going back to the bad JOIN query:
+
+~~~sql
+SELECT first_name
+FROM thr_power_list
+INNER JOIN gendered_names;
+~~~
+
+We need to give it an `ON` clause with a boolean expression. This boolean expression tells the interpreter:
+
+> If this ON condition is true for a row in `thr_power_list`, and another row in `gendered_names`, then the results should contain a row consisting of the two rows JOINED together.
+
+Specifically, in the example below, the `ON` condition tests if a given row in `thr_power_list` has a `first_name` equal to a given row in `gendered_names`. If true, then the result set will have a row consisting of the two joined rows.
+
+Try it out:
+
+~~~sql
+SELECT first_name
+FROM 
+  thr_power_list
+INNER JOIN 
+  gendered_names
+    ON 
+    gendered_names.name = thr_power_list.first_name;
+~~~
+
+Think of `ON` as almost the same usage as `WHERE`, except we _never_ use `WHERE` inside a `JOIN` clause. `WHERE` belongs where it does, later in the query, outside of the `JOIN`.
+
+
+Note: I like adding extra return lines and indentation to emphasize that two tables are being accessed:
+
+
+
+ -- which feels a lot like `WHERE` except that we just never use `WHERE`, the keyword
+
+
+-- has a similar logic flaw. We almost always want to `JOIN` based on a conditional statement, just like we almost always use `WHERE` to filter out results. 
+
+In the situation of `WHERE`, when there isn't a real conditional clause/test on how to filter/reject results from a query, the database engine will return all ows in a result.
+
+In the situation of `JOIN`, when we omit the conditional clause/test, the database engine will proceed to JOIN the two tables in the most broadly, brute way possible.
+
+### People and suits example
+
+It's easier to show using a small example:
+
+`people`
+
+|  name | size |
+|-------|------|
+| Dan   | M    |
+| Bobbi | XL   |
+| Ted   | L    |
+{:.table-sql}
+
+`suits`
+
+| color | size |
+|-------|------|
+| Red   | S    |
+| Green | M    |
+| Pink  | L    |
+| Blue  | XL   |
+{:.table-sql}
+
+I want to join `people` and `suits`, so that each person row is associated with a corresponding suit `row`. How do we match people with suits? With `size`. A __proper join query__ would look like this:
+
+~~~sql
+SELECT * 
+FROM  people
+INNER JOIN  suits
+  ON people.size = suits.size;
+~~~
+
+And the result, everyone gets a suit (notice how `size` from both tables is repeated, thanks to my lazy use of `*`):
+
+|  name  | size | color | size  |
+|--------+------+-------+-------|
+|  Dan   | M    | Green | M     |
+|  Bobbi | XL   | Blue  | XL    |
+|  Ted   | L    | Pink  | L     |
+{:.table-sql}
+
+
+### Blowing up the JOIN
+
+OK, what does a bad `JOIN` and `ON` condition look like? How about when `ON` is always False?
+
+~~~sql
+SELECT * 
+FROM  people
+INNER JOIN  suits
+  ON 1 = 2;
+~~~
+
+The result: 0 rows. But nothing too crazy happened.
+
+Let's do the `JOIN` that I warned about: a `JOIN` with no `ON` condition, and thus, a `JOIN` that will mash up every combination of row:
+
+~~~sql
+SELECT * 
+FROM  people
+INNER JOIN  suits;
+~~~
+
+The result is a non-sensical table with as many rows as multiplying `people` by `suits`. Because that's basically what happened:
+
+|  name  | size | color | size  |
+|--------+------+-------+-------|
+|  Dan   | M    | Red   | S     |
+|  Dan   | M    | Green | M     |
+|  Dan   | M    | Pink  | L     |
+|  Dan   | M    | Blue  | XL    |
+|  Bobbi | XL   | Red   | S     |
+|  Bobbi | XL   | Green | M     |
+|  Bobbi | XL   | Pink  | L     |
+|  Bobbi | XL   | Blue  | XL    |
+|  Ted   | L    | Red   | S     |
+|  Ted   | L    | Green | M     |
+|  Ted   | L    | Pink  | L     |
+|  Ted   | L    | Blue  | XL    |
+{:.table-sql}
+
+
+
+# Analyzing the THR list with SQL and INNER JOIN
+
+That was enough off meandering over syntax-details. Let's get to the real work: using a JOIN to quickly count the male and female entrants to THR's Top 100 Most Powerful in Hollywood.
+
+Returning to an earlier query:
+
+~~~sql
+SELECT thr_power_list.first_name,
+       gendered_names.primary_sex
+FROM 
+  thr_power_list
+INNER JOIN 
+  gendered_names ON
+    thr_power_list.first_name = gendered_names.name;
+~~~
+
+And breaking it down:
+
+1. Specify the 2 columns we want, `first_name` and `primary_sex`
+2. Specify the first table to select FROM: `thr_power_list`
+3. Specify the second table to JOIN wit: `gendered_names`
+4. For that join, specify the condition that a row from `gendered_names` joins with a row from `thr_power_list` (when `first_name` is equal to `name`)
+
+## Joining sex to THR's list of names
+
+And here are the results of that join query -- looks like a lot of guys in the first dozen:
+
+|  first_name  | primary_sex  |
+|--------------+--------------|
+|  Chris       | M            |
+|  Jason       | M            |
+|  Robert      | M            |
+|  Neal        | M            |
+|  Brian       | M            |
+|  Alejandro   | M            |
+|  Scott       | M            |
+|  Kevin       | M            |
+|  Aaron       | M            |
+|  David       | M            |
+|  Doug        | M            |
+|  Amy         | F            |
+|  Thomas      | M            |
+|  Mary        | F            |
+|  Zack        | M            |
+|  Jamie       | F            |
+
+
+
+### Doing a GROUP BY aggregate count to sum up males vs females
+
+Joins add a seemingly significant amount of syntax and cognitive load -- though it's worth it for what they do. However, once you get used to seeing them, you'll realize that all of the other things you've learned still do what they used to, and JOINs are just another piece.
+
+Case in point, how do we get a count by gender for the THR list? Just add a `GROUP BY` and aggregate function:
+
+~~~sql
+SELECT gendered_names.primary_sex, 
+  COUNT(*) AS the_count
+FROM 
+  thr_power_list
+INNER JOIN 
+  gendered_names ON
+    thr_power_list.first_name = gendered_names.name
+GROUP BY gendered_names.primary_sex
+ORDER BY the_count DESC; 
+~~~
+
+|  primary_sex | the_count  |
+|--------------+------------|
+|  M           | 99         |
+|  F           | 19         |
+{:.table-sql}
+
+How close were we? [According to Hollywood Reporter's methodology](http://www.hollywoodreporter.com/news/thr-100-how-staff-put-904869), we were pretty much on the dot:
+
+And lastly, yes, we know that a lot of this list is white guys. We won't need social media, thanks anyway, to drop an anvil on our heads to realize this. Out of the 124 names on the list (due to some shared groupings), there are only 19 women and 10 people of color (six African-Americans, two Asians, two Latinos). I'd like to think we cover the issues of gender and diversity that plague Hollywood with a critical eye and will continue to. And I hope and expect that one day in the near future this list has a wholly improved and reflective composition.
+
+...though obviously some of that was luck. And I'm not sure why we ended up with 128 people instead of 124, but we can clear out some of the hiccups (usually dealing with GROUP BY) at another point.
+

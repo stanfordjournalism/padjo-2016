@@ -1,0 +1,43 @@
+---
+title: tutorials/sql-example-sf-inspections-scores-joins
+stub: true
+description: |
+    lorem ipsum title title title
+---
+
+
+# Small picture
+
+
+
+# Big picture
+
+
+## How many unique Starbucks exist?
+## How many inspections have been done on Starbucks
+## How many
+
+inspections have been done
+## 
+
+
+## The restaurants that have not been insp
+## The dirtiest Starbucks
+
+
+
+~~~sql
+SELECT businesses.business_id, businesses.name,
+  inspections.score, inspections.date 
+FROM businesses
+INNER JOIN 
+  inspections
+  ON businesses.business_id = inspections.business_id
+  
+WHERE 
+  businesses.name LIKE '%STARBUCKS%'
+  AND inspections.type = 'Routine - Unscheduled'
+ORDER BY inspections.Score ASC
+LIMIT 5
+~~~
+

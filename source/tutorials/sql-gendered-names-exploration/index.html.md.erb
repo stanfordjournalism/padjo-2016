@@ -1,0 +1,18 @@
+---
+title: tutorials/sql-gendered-names-exploration
+stub: true
+description: |
+    lorem ipsum title title title
+---
+
+
+Most popular  gender neutral names:
+
+~~~sql
+SELECT * from gendered_names
+where state='US' AND primary_sex_ratio < 70
+ORDER BY total_babies DESC;
+~~~
+
+
+Which states are most skewed?

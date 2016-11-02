@@ -186,3 +186,44 @@
       url: http://www.cde.ca.gov/ds/sd/sd/filessp.asp
     - title: Landing page for Postecondary Preparation test results
       url: http://www.cde.ca.gov/ds/sp/ai/
+
+
+
+- title: Gendered Baby Names 2015
+  path: /files/data/starterpack/ssa-babynames/babynames-gendered-2015.sqlite
+  size_mb: 19.6
+  table_count: 1
+  description: |
+    This dataset is a transformation of the data in the 2015 Social Security babyname dataset. Instead of having a `M` and `F` entry for `Leslie`, this dataset has one entry for every name, with two additional fields that specify what that name's majority gender is (and by how much).
+
+    This is a useful dataset for joining on other tables with names to get a gender calculation. This dataset includes name data for each state and nationwide.
+  links:
+    - title: Social Security Administration landing page for baby name data
+      url: https://www.ssa.gov/oact/babynames/limits.html
+
+- title: Gender assessment of Hollywood Reporter's 2016 Power 100 Rankings
+  path: /files/data/starterpack/ssa-babynames/thr-gendered-babynames.sqlite
+  table_count: 2
+  size_mb: 1.6
+  description: |
+    This database contains a copy of the Gendered Baby Names 2015 dataset (just nationwide, not each state), as well as a hand-copied spreadsheet I made of the Hollywood Reporter's 100 Most Powerful People in Entertainment feature. Useful for an exercise in learning real-world messy JOINs.
+  links:
+      - title: "The THR 100: Hollywood Reporter's Most Powerful People in Entertainment"
+        url: http://www.hollywoodreporter.com/lists/thr-100-hollywood-reporters-powerful-904591
+      - title: Spreadsheet where I hand-cleaned THR's rankings
+        url: https://docs.google.com/spreadsheets/d/1SISI-7A8dD_ccj1Q1anHUpR9aVIARQWGZOP2iibB0zY/edit
+
+
+# - title: FEC Independent Expenditure Data for Utah with Name Data
+#   path: /files/data/starterpack/fec/utah-fecdata.sqlite
+#   description: |
+#     This database contains a snapshot of FEC data relating to Utah -- particularly individual contributions to presidential campaigns and to Utah congressional races for 2012, 2014, and most of 2016.
+
+#     There is also a few additional tables: 40,000 of the most popular Census 2000 last names. The 2015 gendered US babynames table. And a lookup table for all the Utah individual donors, in which the name field is separated (kind of) into last and first name. This allows us to do gender/race analysis on individual contributors to the Utah race.
+
+
+#   links:
+#       - title: "The THR 100: Hollywood Reporter's Most Powerful People in Entertainment"
+#         url: http://www.hollywoodreporter.com/lists/thr-100-hollywood-reporters-powerful-904591
+#       - title: Spreadsheet where I hand-cleaned THR's rankings
+#         url: https://docs.google.com/spreadsheets/d/1SISI-7A8dD_ccj1Q1anHUpR9aVIARQWGZOP2iibB0zY/edit

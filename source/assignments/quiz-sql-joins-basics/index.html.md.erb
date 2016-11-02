@@ -1,0 +1,179 @@
+---
+title: SQL Joins Basics
+description: |
+assigned_date: 2016-11-01
+due_date: 2016-11-03
+due_time: 1:30 PM
+points: 5
+type: Quiz
+deliverables:
+  - Fill out the answers on a blank sheet of paper!
+requirements:
+  - Write your SUNET id on the paper, please
+---
+
+# Sample questions
+
+The quiz will be short and have something along these lines, except easier. And not 5 questions. Just make sure you feel comfortable with how this works:
+
+Given two tables, `people` and `pets`:
+
+
+| id |   name   | age | sex |
+|----|----------|-----|-----|
+|  1 | Alice    |  27 | F   |
+|  2 | Bob      |  19 | M   |
+|  3 | Cordelia |  33 | F   |
+{:.table-sql}
+
+|    name   | species | owner_id |
+|-----------|---------|----------|
+| Fluffles  | dog     |        1 |
+| Poochy    | dog     |        2 |
+| Itchy     | cat     |        2 |
+| Barfunkel | dog     |        3 |
+| Meowzer   | cat     |        1 |
+| Hots      | dog     |        3 |
+| Zim       | cat     |        1 |
+{:.table-sql}
+
+
+
+How do you know if you're good. If you can write the SQL to the following queries on pen and paper. 
+
+##### 1. How many pets are there?
+
+This is just an aggregation, no joining necessary. The results (note the aliased header):
+
+| pet_count |
+|-----------|
+|         7 |
+{:.table-sql}
+
+
+##### 2. How many cats and dogs are there?
+
+Again, no join necessary, just an aggregation (with a `GROUP BY`). Probably need a sort to get the results to look exactly like: 
+
+
+| species | pet_count |
+|---------|-----------|
+| cat     |         3 |
+| dog     |         4 |
+{:.table-sql}
+
+
+##### 3. List all of the pets owned by Cordelia, with her name next to the pet's name and species
+
+OK, now we have to do a join. The end result should look something like:
+
+
+| owner_name |  pet_name | species |
+|------------|-----------|---------|
+| Cordelia   | Barfunkel | dog     |
+| Cordelia   | Hots      | dog     |
+{:.table-sql}
+
+
+##### 4. How many pets does Cordelia own?
+
+This requires a join and aggregation. We probably won't do anything difficult for the quiz.
+
+Obviously, the answer is `2`:
+
+| owner_name | pet_count |
+|------------|-----------|
+| Cordelia   |         2 |
+{:.table-sql}
+
+
+
+
+##### 5. List the people, in order of most pets owned
+
+If you can do #4, you can probably do this one. It requires a JOIN, a GROUP BY, and good old SORT BY and LIMIT:
+
+| owner_name | pet_count |
+|------------|-----------|
+| Alice      |         3 |
+{:.table-sql}
+
+
+
+# Sample answers
+
+##### 1. How many pets are there?
+
+~~~sql
+SELECT COUNT(*) AS pet_count 
+FROM pets;
+~~~
+
+##### 2. How many cats and dogs are there?
+
+~~~sql
+SELECT 
+  species,
+  COUNT(*) AS pet_count 
+FROM pets
+GROUP BY species
+ORDER BY species ASC;
+~~~
+
+
+##### 3. List all of the pets owned by Cordelia, with her name next to the pet's name and species
+
+This is one way (and probably the most straightforward way to do it):
+
+~~~sql
+SELECT people.name AS owner_name,
+  pets.name AS pet_name,
+  pets.species
+FROM people
+INNER JOIN 
+  people.id = pets.owner_id
+WHERE 
+  people.name = 'Cordelia';
+~~~
+
+
+
+
+##### 4. How many pets does Cordelia own?
+
+This combines a `GROUP BY` with the `INNER JOIN`...the tricky part is remember the right order for `GROUP BY`, `WHERE`, and `INNER JOIN`...which is why I won't be testing hard on it.
+
+The best way to think about this problem is to use the same code from the previous query, but trim it to what we need:
+
+~~~sql
+SELECT people.name AS owner_name
+FROM people
+INNER JOIN 
+  people.id = pets.owner_id
+WHERE 
+  people.name = 'Cordelia';
+~~~
+
+This seems weird -- we don't include any fields about the pet. And subsequently, we don't any info about each pet. But the JOIN still works, and 2 (boring) rows are returned:
+
+
+
+
+But we don't need to. We don't care about the individual pets. We only care about the aggregate count.
+
+
+
+
+
+This is one way (and probably the most straightforward way to do it):
+
+~~~sql
+SELECT people.name AS owner_name,
+  pets.name AS pet_name,
+  pets.species
+FROM people
+INNER JOIN 
+  people.id = pets.owner_id
+WHERE 
+  people.name = 'Cordelia';
+~~~

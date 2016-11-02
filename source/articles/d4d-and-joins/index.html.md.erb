@@ -1,0 +1,43 @@
+---
+title: Joins and Dollars 4 Docs
+stub: true
+description: |
+    An example of how useful it is to think in terms of joining data, in and out of data.
+---
+
+<img src="https://www.propublica.org/images/ngen/gypsy_big_image/stanford-hoover-630x420.jpg" alt="">
+
+I previously discussed this story, [Med Schools Flunk at Keeping Faculty Off Pharma Speaking Circuit](https://www.propublica.org/article/medical-schools-policies-on-faculty-and-drug-company-speaking-circuit), which had significant impact in academic circles. The programming/data-work it took to find subjects was literally in the minutes.
+
+I had a computer to help me, but the big concept is the same: to find interesting stories, join together datasets. In this [ProPublica story](https://www.propublica.org/article/medical-schools-policies-on-faculty-and-drug-company-speaking-circuit), the two datasets were:
+
+1. Doctors on famous medical schools' faculty
+2. Doctors on spreadsheets disclosing their financial ties with pharma companies.
+
+You could imagine the SQL looking like this:
+
+~~~sql
+SELECT hospitalstaff.doctor_name pharmalist.payment 
+FROM hospitalstaff
+INNER JOIN 
+  pharmalist
+    ON pharmalist.doctor_name = hospitalstaff.doctor_name;
+~~~
+
+And there's not much more to that concept. Even though pharma-ties was a big issue for decades, ProPublica managed to come in late to the game and make an impact, because we went at it efficently.
+
+
+# OpenPayments and an abundance of data
+
+<img src="images/openpayments.jpg" alt="openpayments.jpg">
+
+
+Today, the government's OpenPayments tracks industry-doctor payments. When it launched, [reporters were able to immediately find stories](http://www.nytimes.com/2014/10/03/business/financial-ties-between-doctors-and-health-care-firms-detailed.html).
+
+
+> Dr. James Januzzi Jr., a cardiologist at Massachusetts General Hospital in Boston, earned more than $328,000 for speaking and consulting assignments, mainly from the drug maker Boehringer Ingelheim, according to the federal data. Dr. Januzzi did not return a call and email for comment. A spokesman for Massachusetts General said that the hospital has rigorous policies requiring disclosure and review of outside activities of its staff, and that it limits the types of outside activities that it permits.
+
+
+# Thinking about data in the wild
+
+I don't know how the reporter keyed into Dr. Januzzi. Maybe the reporter looked up names one by one, [until she found a doctor with a big sum?](https://openpaymentsdata.cms.gov/physician/167386). If you're someone who knows the beat and what names to check out, this can work. But for the most part, poking around websites is of limited use.
