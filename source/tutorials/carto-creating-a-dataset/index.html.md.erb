@@ -1,0 +1,177 @@
+---
+title: How to import data to create a Carto Dataset
+description: |
+    We learn how to import geospatial data into Carto from a CSV text file.
+---
+
+# Introduction
+
+
+## Prerequisites
+
+This tutorial assumes you've created a Carto account and have access to its new (as of 2016) __Builder__ interface.
+
+## Coverage
+
+The earthquakes data as a plain text CSV file is at this URL:
+
+[https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/us_quakes.csv](https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/us_quakes.csv) 
+
+And in a spreadsheet, it looks something like this:
+
+<a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/us_quakes.csv"><img src="images/quakes-data-wide-sheet.png" alt="quakes-data-wide-sheet.png"></a>
+
+
+At the end of the tutorial, you'll know how to import this data into Carto to create a dataset, which you can view at this URL:
+
+[https://padjo2016student.carto.com/tables/us_quakes/public/table](https://padjo2016student.carto.com/tables/us_quakes/public/table)
+
+As a convenience, Carto shows a preview of what the data looks like as a map (we learn how to work with Carto Maps in the next lesson):
+
+<a href="https://padjo2016student.carto.com/tables/us_quakes/public/table"><img src="images/quakes-data-carto-preview-dataset.png" alt="quakes-data-carto-preview-dataset.png">
+</a>
+
+
+
+# Uploading a dataset
+
+
+From your dashboard, click the __Maps ▼__ link to summon a dropdown menu; __Your datasets__ will be one of the options:
+
+
+<img src="images/add-dataset-menu-dropdown.png" alt="add-dataset-menu-dropdown.png">
+
+Click on the __Your datasets__ link, which will take you to this page:
+  
+    https://padjo2016student.carto.com/dashboard/datasets
+
+<img src="images/datasets-page.png" alt="datasets-page.png">
+
+
+Click on the __New Dataset__ button in the right corner to bring up the __Connect dataset__ page:
+
+<img src="images/connect-dataset.png" alt="connect-dataset.png">
+
+There are several ways to upload a dataset, including clicking the __Browse__ button to select a file on your computer to upload. Carto can also connect to various other services, such as Google Drive and Dropbox. 
+
+Or you can pass in a URL -- either to a file that lives online, or to an existing (and public) Carto dataset page.
+
+For this exercise, to keep things simple, use my [__us_quakes__ dataset](https://dun2.carto.com/dataset/us_quakes), which can be found in CSV form at this URL:
+
+[https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/us_quakes.csv](https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/us_quakes.csv)
+
+You can either download that CSV file manually, and re-upload it to Carto using the __Browse__ button. Or you can just copy-and-paste that URL directly.
+
+To do the latter, under the __Upload a file or a URL__ heading, paste the [__us_quakes__ dataset URL](https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/us_quakes.csv) into the input-text box that has the __Submit__ button:
+
+<img src="images/upload-quakes-url.png" alt="upload-quakes-url.png">
+
+Then hit the __Submit__ button. This will bring up an intermediary menu -- with the subheading, __File selected__ -- of sycning options that are irrelevant (and unavailable, unless you've upgraded your account) to us. 
+
+So look at the bottom-right corner of the page for the __Connect Dataset__ button and click that:
+
+<img src="images/connect-quakes-dataset.png" alt="connect-quakes-dataset.png">
+
+This will bring up a little progress bar as the data is imported, a process that should take at most a few moments:
+
+<img src="images/connecting-quakes-dataset.png" alt="connecting-quakes-dataset.png">
+
+# The Dataset view
+
+After the data is successfully imported, your browser will be redirected to the __Dataset page__, which presents a tabular view of the newly uploaded data:
+
+![image dataset-view.png](images/dataset-view.png)
+
+If this looks similar to a view of a SQL database table that's because Carto's datasets _are_ a SQL database tables, a feature of which we will soon make great use.
+
+
+## Editing a dataset's metadata
+
+The default name of the dataset -- __us_quakes__ -- is derived from the filename in the URL: `us_quakes.csv`. Because Carto datasets are like SQL tables, sometimes we'll want to shorten up the name to make it easier to type out when writing SQL queries.
+
+To edit a dataset's title and other metadata, click the little 3-dot-icon -- `  ⋮` -- next to the table name (in this case, is __us_quakes__). 
+
+This brings up a dropdown menu with the __Edit metadata__ option:
+
+![image edit-metadata-dropdown.png](images/edit-metadata-dropdown.png)
+
+Clicking __Edit metadata__  brings up a menu of __Dataset metadata__. For the most part, the __Dataset Name__ attribute is the one most relevant to our work, because we use it in referring to a dataset by name in SQL. Editing things like __Description__ is good for documentation purposes, to remind ourselves where the data came from and any caveats or specifics about it. 
+
+The name `us_quakes` for this dataset works for me. Feel free to change it if you wish, though subsequent examples in the tutorial will assume this dataset is named `us_quakes`.
+
+
+## The cartodb_id and the_geom columns
+
+Carto ingests data just like a SQLite database or your typical spreadsheet software. However, because Carto is also a web visualization package, Carto tacks on a couple of columns it uses for its interactive mapping: `cartodb_id` and `the_geom`.
+
+This is what the `us_quakes.csv` data looks like in a [spreadsheet](https://docs.google.com/spreadsheets/d/1GdYEXyGNeDMgUDlsidhMDnp1HdIcfkCLzh8WhOh1hM4/edit#gid=645129190), with the `time`, `latitude`, and `longitude` columns being the first 3 columns:
+
+<img src="images/quakes-original-schema.png" alt="quakes-original-schema.png">
+
+When this data is uploaded to Carto and turned into a Carto Dataset, the `cartodb_id` and `the_geom` columns are prepended to the data:
+
+<img src="images/quakes-as-carto-dataset.png" alt="quakes-as-carto-dataset.png">
+
+We'll cover how these columns are used in the SQL-based parts of this tutorial. For now, it's worth noting how the `the_geom` column has a datatype of `geometry`, and it seems to be nothing more than the `longitude` and `latitude` values combined.
+
+
+## How Carto stores a geospatial point
+
+Indeed, when a dataset has `longitude` and `latitude` columns defined, Carto will assume that each row in the dataset corresponds to a specific geospatial __point__.
+
+As I've said before, you should __almost never__ be manually editing data values in the table of a database -- instead, opt to fix the data in its raw form _before_ importing it -- and that applies to Carto datasets, too.
+
+But if you hover your mouse pointer over any data cell, you'll see a `⋮` symbol for that cell. Clicking it brings up a dropdown menu allowing you to __Edit this cell__.
+
+Try it with any one of the values in `the_geom`:
+
+<img src="images/cell-dropdown.png" alt="cell-dropdown.png">
+
+And you'll see that the actual value stored is not-what-you-see-is-what-you-get, but a special format for geospatial points: 
+
+<img src="images/cell-edit-the-geom.png" alt="cell-edit-the-geom.png">
+
+Compare that to the what-you-see-is-what-you-get values in the `latitude` and `longitude` columns (both listed as having `number` datatypes):
+
+<img src="images/cell-edit-latitude.png" alt="cell-edit-latitude.png">
+
+What does this mean? Just that geospatial points (and other kinds of geospatial data) are a little more complex than plain numbers and text values. It doesn't have much effect on how we already do data analysis, but it's just a peek under the hood of how geospatial analysis tools such as Carto handle geospatial data.
+
+
+# Creating a map from a dataset
+
+It's important to note that when we upload data to Carto, we are creating a __Dataset__. And 99% of the time, we intend for that _data_ to be turned into a _map_, but that does not mean that a __Dataset__ _is_ a __Map__, automatically.
+
+It seems like a pedantic detail, but important to remember so you don't get confused later on when navigating through Carto's interface. But one Big Picture implication is that a Carto Map can feature _multiple_ datasets. 
+
+Hence, you need to remember: __A Carto Dataset is Not (necessarily) a Map__
+
+To reiterate that there's a difference between the two things, on each Dataset view page is a __Create Map__ button in the bottom right corner:
+
+<img src="images/create-map-button.png" alt="create-map-button.png">
+
+Before clicking that, though, click on the __Preview__ link to bring up a pop-up preview of how the __us_quakes__ data is rendered as a map:
+
+<img src="images/preview-quakes-map.png" alt="preview-quakes-map.png">
+
+That looks like what we might expect an earthquake map of the continental United States to look like. Go ahead and hit the __Create Map__ button to create what Carto considers to be a __Map__:
+
+<img src="images/created-quakes-map.png" alt="created-quakes-map.png">
+
+# Conclusion
+
+Knowing the basics of how to upload data and being acquainted with the Dataset view page is good enough for this lesson, as we'll be importing data and creating new Datasets frequently. And it's important to understand how Carto stores the data as Datasets (specifically, SQL tables) independent of the maps we might make.
+
+We'll cover how to style and publish our new map in the next lesson.
+
+
+
+
+
+
+
+
+
+
+
+
