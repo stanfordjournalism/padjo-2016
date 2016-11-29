@@ -1,0 +1,314 @@
+---
+title: "SQLite Simple Folks: Joining on inexact names"
+description: |
+  Analyzing data across multiple tables -- basically, the reason we learn SQL.
+sequence:
+  landing: /tutorials/sql-simplefolks-overview
+---
+
+
+# Get the data
+
+- Download the [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite). 
+- Preview it [as a Google Spreadsheet](https://docs.google.com/spreadsheets/d/12mwh5m0ryzK9fKPBtxGB9DRddzRefYVDt1AOrZJHLcE/edit#gid=0)
+
+Once you've downloaded [simplefolks.sqlite data file](/files/data/starterpack/simplefolks.sqlite) onto your computer, open it with your SQLite client and be ready to write some queries.
+
+## Simple politicians and inmates
+
+- As of 2016, no one in either table is either incarcerated or in politics.
+- No one served non-consecutive prison terms.
+- No one was elected into non-consecutive terms. 
+- At most, a politician has one prison term.
+- At most, an inmate has one elected position.
+- Not every inmate was/became a politician, and not every politician was/became an inmate.
+
+
+
+# Queries
+
+## Getting to know the inmates, individually
+
+Let's start off with non-joining queries and practice our basic data filtering and sorting.
+
+### List the 5 inmates in reverse alphabetical order of last name and first name, and in ascending order of birth year
+
+SELECT last_name, first_name, birth_year
+FROM inmates
+ORDER BY
+
+### List 3 inmates in order of shortest full name and alphabetical order
+
+#### Complex
+
+SELECT first_name, last_name, 
+    LENGTH(first_name), LENGTH(last_name),
+    LENGTH(first_name) +  LENGTH(last_name)
+FROM inmates
+ORDER BY 
+  (LENGTH(first_name) + LENGTH(last_name)) ASC,
+  last_name ASC, first_name ASC
+LIMIT 3;
+
+#### Minimalist
+
+SELECT first_name, last_name
+FROM inmates
+ORDER BY 
+  (LENGTH(first_name) + LENGTH(last_name)) ASC,
+  last_name ASC, first_name ASC
+LIMIT 3;
+
+#### Cleaner 1
+
+SELECT first_name, last_name,
+  (LENGTH(first_name) + LENGTH(last_name)) AS namelen
+FROM inmates
+ORDER BY 
+  namelen ASC,
+  last_name ASC, first_name ASC
+LIMIT 3;
+
+
+#### Concatenate to full name
+
+SELECT (last_name || ', ' ||  first_name) AS full_name,
+  LENGTH(first_name || last_name) AS namelen
+FROM inmates
+ORDER BY 
+  namelen ASC,
+  full_name ASC
+LIMIT 3;
+
+
+
+### Who had the longest prison term?
+
+
+SELECT *, 
+  (sentence_end - sentence_start) AS termlength
+FROM inmates
+ORDER BY termlength DESC
+LIMIT 1
+
+
+### Who was the youngest to be incarcerated?
+
+SELECT *, 
+  (sentence_start - birth_year) AS prisonage
+FROM inmates
+ORDER BY prisonage ASC
+LIMIT 1
+
+--------------
+
+
+## Getting to know the inmates as a group
+
+### How many inmates are there?
+
+### What last names occur more than once?
+
+### What is the oldest and youngest birth year?
+
+### What is the average age of initial incarceration (rounded to nearest year)?
+
+SELECT 
+  ROUND(AVG(sentence_start - birth_year)) AS avgprisonage
+FROM inmates;
+
+
+
+
+### What is the shortest, longest, and average length of sentence?
+
+SELECT 
+  MIN(sentence_end - sentence_start) AS minsentence,
+  MAX(sentence_end - sentence_start) AS maxsentence,
+  AVG(sentence_end - sentence_start) AS avgsentence
+FROM inmates;
+
+
+### List the count of inmates by length of last name
+
+
+SELECT
+  LENGTH(last_name) as lastnamelength,
+  COUNT(*) AS icount
+FROM inmates
+GROUP BY lastnamelength
+ORDER BY lastnamelength;
+
+### List the count of inmates by birth decade
+
+SELECT
+  (SUBSTR(birth_year,1, 3) || '0') AS birthdecade,
+  COUNT(*) AS icount
+FROM inmates
+GROUP BY birthdecade
+ORDER BY birthdecade;
+
+
+#### Is that a number?
+
+SELECT
+  COUNT(*) AS icount,
+  (SUBSTR(birth_year,1, 3) * 10) AS birthdecade
+FROM inmates
+GROUP BY birthdecade
+ORDER BY birthdecade;
+
+------------------------
+
+## Getting to know the politicians
+
+
+### List the Whig politicians in order of position, state, and name
+
+SELECT * FROM 
+politicians
+WHERE party = 'Whig'
+ORDER BY position ASC, state ASC, last_name ASC, first_name ASC;
+
+
+
+### Who was the youngest politician at the time of election?
+
+SELECT *
+FROM politicians
+ORDER BY service_start - 
+
+### Who was the oldest Senator at the end of their service?
+
+### Who had the longest time in office?
+
+### Which Whig spent the least time in office?
+
+
+### Who spent the longest percentage of their life in office?
+
+#### Most number of years
+
+SELECT service_end - service_start  AS term_length,
+  politicians.*
+FROM politicians
+ORDER BY  DESC
+LIMIT 3;
+
+
+#### As a percentage of total life
+
+
+SELECT
+  100.0 * (service_end - service_start) / (2016 - birth_year) AS office_pct,
+  politicians.*
+FROM politicians
+ORDER BY office_pct DESC
+LIMIT 3;
+
+
+## Getting to know politicians as a group
+
+
+
+
+### List the parties and number of politicians, in order of most politicians
+
+SELECT 
+  party AS party,
+  COUNT(*) AS xcount
+FROM politicians
+GROUP BY party;
+
+### List and count the politicians by party, state, and position
+
+SELECT 
+  party, state,
+  COUNT(*) AS xcount
+FROM politicians
+GROUP BY   party, state
+ORDER BY xcount DESC;
+
+### Number of years served, total
+
+SELECT SUM(service_end - service_start) AS years_served
+FROM politicians;
+
+
+
+### Number of years served, by party
+
+SELECT party, SUM(service_end - service_start) AS years_served
+FROM politicians
+GROUP BY party
+ORDER BY years_served DESC;
+
+
+### Youngest and oldest age of election by party and position
+
+And order it by oldest age
+
+
+SELECT 
+party,
+position,
+MIN(service_start - birth_year) AS youngest,
+MAX(service_start - birth_year) AS oldest
+FROM politicians
+GROUP BY  party, position
+ORDER BY oldest DESC;
+
+### Count of, and years served, of Whig politicians by position
+
+SELECT 
+    position,
+  count(*) AS pcount, 
+  SUM(service_end - service_start) AS years_served
+FROM politicians
+WHERE party = 'Whig'
+GROUP BY position
+
+---------------------------
+
+## Which politicians have been incarcerated?
+
+### Joining politicians to inmates by name, lazily and naively
+
+SELECT * 
+
+### Joining politicians to inmates by name, naively
+
+### Joining politicians to inmates, exactish
+
+### Joining inmates to politicians
+
+### Politicians who were later incarcerated
+
+### Inmates who became politicians
+
+~~~sql
+SELECT * 
+FROM inmates
+INNER JOIN 
+  politicians 
+    ON  
+      SUBSTR(UPPER(politicians.first_name), 1, 1) = SUBSTR(UPPER(inmates.first_name), 1, 1)
+      AND  UPPER(politicians.last_name) = UPPER(inmates.last_name)
+      AND inmates.birth_year = politicians.birth_year 
+      
+WHERE politicians.service_start > inmates.sentence_end;
+~~~
+
+
+### The politicians who spent the most time in jail?
+
+
+### The inmates who spent the most time in politics?
+
+
+### The politician-turned-inmate who had the quickest transition into prison life?
+
+### The inmate-turned-politician who had the longest wait before being elected?
+
+
+## Aggregating politicians and inmates 

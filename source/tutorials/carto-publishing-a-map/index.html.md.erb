@@ -1,0 +1,263 @@
+---
+title: Publishing a Carto Map
+description: |
+    lorem ipsum title title title
+---
+
+# Introduction
+
+Data visualization is a hugely complex field to build a service around. So is geospatial analysis. And so the publishing of web interactives. So you can imagine the unavoidable cluster**** that comes when a service like Carto attempts to do all three.  
+
+While Carto's interface is, in my opinion, by _far_ simpler and cleaner than similar services and applications such as [QGIS](http://www.qgistutorials.com/en/docs/leaflet_maps_with_qgis2leaf.html), [ArcGIS](https://doc.arcgis.com/en/arcgis-online/reference/what-is-web-map.htm), and [Tableau](https://onlinehelp.tableau.com/current/pro/desktop/en-us/maps_shapefiles.html), there is still a bit of complexity to manage.
+
+The Map page is the landing page for this complexity. 
+
+
+
+# Carto Maps on your dashboard
+
+By default, when you visit your dashboard page &ndash; which is at the URL:
+
+    https://YOUR_USERNAME.carto.com/dashboard
+
+
+&ndash; Carto will show a listing of your maps -- which, if you followed the previous tutorial -- should look something like this:
+
+<img src="images/carto-dashboard-default-maps.png" alt="carto-dashboard-default-maps.png">
+
+If you're in the dashboard's __Datasets__ view, click on the __Datasets ▼__ link in the header to bring up a dropdown menu; the option, "**Your maps**", will take you to the dashboard listing of maps:
+
+<img src="images/dashboard-dropdown-your-maps.png" alt="dashboard-dropdown-your-maps.png">
+
+## Creating a new map
+
+To create a new map at any time, find the __New Map__ button in the top right of the maps dashboard:
+
+<img src="images/dashboard-button.png" alt="dashboard-button.png">
+
+This will bring up __Add datasets__ menu, which includes a list of your current datasets. If you've created the `us_quakes`, you can click on that and then the __Create Map__ button at the bottom:
+
+<img src="images/add-datasets-menu.png" alt="add-datasets-menu.png">
+
+Though it's worth nothing that you can create a map without any datasets by clicking the __Create Empty Map__ link, and then add the datasets later -- again, Carto Maps and Datasets can be completely independent of each other.
+
+
+So if you haven't already, create a map based off of the __us_quakes__ Dataset -- or click-through to an existing map on the dashboard Maps view. 
+
+# Publishing a map from the Map page
+
+You should find yourself on the Carto Builder Map page, which looks something this:
+
+<img src="images/us-quakes-map-page-overview.png" alt="us-quakes-map-page-overview.png">
+
+As I said in the introduction, Carto's Map page contains a variety of complex functionality. To make this tutorial relatively brief, we're only covering how to __publish__ an interactive map. It doesn't matter whether the map is as simple as the map we've just created from the __us_quakes__ data, or a much more complicated data visualization, the steps to style and publish the map so that you can embed it in an online publication or your blog will remain the same.
+
+
+## The Share button
+
+Let's get right to publishing our earthquake map -- as basic as it is -- onto the web. Just because _you_ are able to view the map on Carto doesn't mean anyone else can. In fact, try visiting the URL in your browser's incognito mode -- i.e. as a non-logged-in user -- you'll see something like this:
+
+<img src="images/no-map-private.png" alt="no-map-private.png">
+
+On the Map page, look at the bottom for the __Share__ button:
+
+<img src="images/share-button.png" alt="share-button.png">
+
+Click on it to get a pop-up dialog, of which the only important part is the __Publish__ button at the top:
+
+<img src="images/publish-button.png" alt="publish-button.png">
+
+After pushing that button, you'll be presented with two options for sharing your work:
+
+<img src="images/share-urls.png" alt="share-urls.png">
+
+
+### Get the link
+
+Just a good old fashioned hyperlink, which, unlike the Map page for editing, has a [full-page view of the map](https://padjo2016student.carto.com/builder/7efc1f10-b51c-11e6-a94e-0e233c30368f/embed):
+
+<a href="https://padjo2016student.carto.com/builder/7efc1f10-b51c-11e6-a94e-0e233c30368f/embed"><img src="images/get-url-full-map.png" alt="get-url-full-map.png">
+</a> 
+
+### Embed it
+
+This is HTML code that you can paste into a content management system (such as your blog) so that the interactive map can live inside of an article. The code will look something like this:
+
+~~~html
+<iframe width="100%" height="520" frameborder="0" src="https://padjo2016student.carto.com/builder/7efc1f10-b51c-11e6-a94e-0e233c30368f/embed" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen>
+</iframe>
+~~~
+
+When pasted into the code for a webpage, that embed code will render exactly as below:
+
+<iframe width="100%" height="520" frameborder="0" src="https://padjo2016student.carto.com/builder/7efc1f10-b51c-11e6-a94e-0e233c30368f/embed" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen>
+</iframe>
+
+#### Quitting the Share page
+
+To exit the __Share__ page, click the __X__ in the top-right corner, or the __Done__ button in the bottom-right:
+
+<img src="images/exit-publish-button.png" alt="exit-publish-button.png">
+
+
+## Changing a map's display options
+
+To change the visual components and controls of a map, such as whether to display the legend at all, or provide a search box and zoom buttons for interactivity, use the __Map Options panel__.
+
+By default, the Map page shows the __Edit panel__, which is represented as a pencil icon on the left-side sidebar. The __Map Options panel__ is indicated by an icon that...looks like a settings panel:
+
+<img src="images/sidebar-map-options-button.png" alt="sidebar-map-options-button.png">
+
+The options are presented as a series of checkboxes:
+
+<img src="images/map-options-panel.png" alt="map-options-panel.png">
+
+Note that we can't configure the actual legend for the map here, just whether or not it should be visible.
+
+### Previewing a map's look-and-feel
+
+The entire __right-side panel__ of the Map page is a __preview__ of how the published map will look and behave. This includes changes to the options.
+
+In the screenshot below, I've enabled the __Layer selector__ option. Because this only has one "layer" -- the __us_quakes__ Dataset -- it's kind of a superfluous option for our simple map, but you can see how it's reflected on the right-side preview panel of the map:
+
+<img src="images/map-options-panel-layer-selector-updated.png" alt="map-options-panel-layer-selector-updated.png">
+
+### Updating the options (and other changes) to a published map
+
+
+If your map is already published and live on the Web, any change in these options won't be reflected until you __update__ the published map.
+
+To update a published map, click the __Share__ button. The __Update__ button will be enabled if there are changes to be made:
+
+
+<img src="images/update-share.png" alt="update-share.png">
+
+
+
+## Changing the basemap
+
+If you're still in the Map Options panel, click on the __pencil__ icon on the left-sidebar to get back to the __Edit panel__.
+
+The __basemap__ will probably be one of the feature you most obsess about when it comes to your interactive Carto map. This refers to the style of the underlying map tiles. 
+
+### The default basemap, Positron
+
+By default, the default basemap for Carto is __Positron__, which is a pleasant light gray rendering of geography with relatively minimal ink. Here's what it looks like zoomed out:
+
+<img src="images/positron-zoomed-out.png" alt="positron-zoomed-out.png">
+
+Here's what it looks like zoomed in close enough to see city streets:
+
+<img src="images/positron-zoomed-streets.png" alt="positron-zoomed-streets.png">
+
+Here's how Positron renders the Stanford main quad at maximum zoom:
+
+<img src="images/positron-max-zoom-stanford-quad.png" alt="positron-max-zoom-stanford-quad.png">
+
+### Changing the basemap style
+
+To change the basemap, look for the subtly-highlighted button/option with the label of __Basemap__, which, by default, is set to __Positron__:
+
+<img src="images/change-basemap-button.jpg" alt="change-basemap-button.jpg">
+
+Clicking the __Basemap__ button will switch the left-panel to show two sets of options, __Source__ and __Style__. For now, look at the __Style__ menu:
+
+<img src="images/basemap-style-menu.jpg" alt="basemap-style-menu.jpg">
+
+Click on any of the __Style__ options to get a new basemap style.
+
+For example, Positron comes in a "lite" mode if you don't want the clutter of labels:
+
+<img src="images/positron-lite-streets.png" alt="positron-lite-streets.png">
+
+And it has a "night-mode" variant named __Dark Matter__, which looks especially nice with the orange dots used to mark earthquakes:
+
+<img src="images/dark-matter-bay-area.png" alt="dark-matter-bay-area.png">
+
+Not all styles have the same amount of detail. If you pick one of the "CARTO"-prefixed designs, such as __CARTO World Eco__, you'll see that zoom level is capped at __10__, instead of the __18__ offered by Positron and its variants:
+
+<img src="images/carto-world-eco-basemap.png" alt="carto-world-eco-basemap.png">
+
+### Changing the source
+
+The Carto-designed layers are great enough to be used in virtually every situation. But  the Carto Map Builder provides access to layers from other well-loved sources, such as [Stamen Design](http://stamen.com/) and NASA satellite imagery.
+
+
+
+
+[Stamen's high-contrast Toner-style](http://maps.stamen.com/toner/#12/37.7706/-122.3782) is nice for showing borders, rivers, and roads:
+
+<img src="images/stamen-toner.jpg" alt="stamen-toner.jpg">
+
+
+Stamen also the less-informational but more-whimsical Watercolor style:
+
+<img src="images/stamen-watercolor.jpg" alt="stamen-watercolor.jpg">
+
+
+### Using NASA satellite imagery as a basemap
+
+If photorealism is important to your visualization, click on __NASA__ as a source. In the __Style__ menu, click the `+` icon to add (and customize) the style:
+
+<img src="images/source-nasa.png" alt="source-nasa.png">
+
+The customization options include choosing the date of the satellite imagery, and whether you want a daytime or nighttime visual:
+
+<img src="images/source-nasa-add-basemap.png" alt="source-nasa-add-basemap.png">
+
+
+Earth during the day:
+
+<img src="images/source-nasa-terra-day.jpg" alt="source-nasa-terra-day.jpg">
+
+And at night (useful for showing urban development):
+
+<img src="images/source-nasa-terra-night.jpg" alt="source-nasa-terra-night.jpg">
+
+(I wasn't able to get the date picker to work at time of publication)
+
+--------------
+
+Remember that, as with other changes to a published map's display, you have to click the __Share__ button and then the __Update__ button to have the changes propagate to the published version:
+
+<img src="images/update-share.png" alt="update-share.png">
+
+
+To exit the basemap customization panel, click on the top-left arrow icon:
+
+<img src="images/back-arrow-basemap-panel.png" alt="back-arrow-basemap-panel.png">
+
+(it's pretty subtle, and is yet another way that navigation between feature sets and panels is done in Carto)
+
+
+## Editing the map's metadata
+
+Unlike the Dataset metadata, in which the _name_ of the Dataset is used to reference the Dataset in SQL queries, the metadata of the Map will just affect how the map is cataloged by Carto for discoverability.
+
+On the Map page, click the vertical ellipsis symbol -- `⋮` -- to reveal a dropdown menu:
+
+Click the __Edit metadata...__ option:
+
+<img src="images/edit-metadata-dropdown.png" alt="edit-metadata-dropdown.png">
+
+And edit the attributes of the map at your pleasure:
+
+<img src="images/edit-metadata-dialog.png" alt="edit-metadata-dialog.png">
+
+
+## Choosing the map's starting position
+
+As I mentioned before, the right-side panel of the Map page shows a preview of how the published map will look like and behave. This includes where the map will be positioned in its initial state, before the user starts zooming and panning.
+
+It's pretty critical to pick a view that represents the big picture of the data that you want to show to a user. If you set the map preview to be zoomed into Iowa, where there hasn't been much seismic activity at all, your earthquake map is going to look very silly wherever it is embedded or linked from:
+
+<img src="images/iowa-quake-preview.png" alt="iowa-quake-preview.png">
+
+Luckily, as with other changes to a map's options, just panning and zooming the map in preview mode won't automatically change how it's rendered in the currently published versions. You have to hit the __Share__ button and __Update__ the map for the repositioning to take effect. 
+
+<img src="images/update-share.png" alt="update-share.png">
+
+
+# Conclusion
+
+Everything we've done in this lesson applies to the publication of _any_ Carto map. It's important to keep in remember where these options are, because when we start digging deep into the Layer and SQL functionality of Carto, you don't want to be digging through those menus when all you need to do is update the zoom functionality of a published map.

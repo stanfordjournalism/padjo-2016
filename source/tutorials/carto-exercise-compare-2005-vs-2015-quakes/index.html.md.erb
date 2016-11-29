@@ -1,0 +1,188 @@
+---
+title: tutorials/carto-sql-basics
+stub: true
+description: |
+    lorem ipsum title title title
+---
+
+
+# Final maps
+
+Dots
+
+<iframe width="100%" height="520" frameborder="0" src="https://padjo2016student.carto.com/builder/2e66e4a0-fbaf-40d6-a465-76c354c04717/embed" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>
+
+Hexbin
+
+https://padjo2016student.carto.com/builder/8be52a43-48cd-4c17-8fc2-fce13f71bdbb/embed
+
+<iframe width="100%" height="520" frameborder="0" src="https://padjo2016student.carto.com/builder/8be52a43-48cd-4c17-8fc2-fce13f71bdbb/embed" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>
+
+
+
+
+# Single layer
+
+~~~sql
+SELECT *, 
+  DATE_PART('year', time) AS year
+FROM us_quakes
+WHERE 
+  DATE_PART('year', time) IN(2005, 2015)
+~~~
+
+
+<img src="images/sql-query-year-in-2005-or-2015.png" alt="sql-query-year-in-2005-or-2015.png">
+
+Get to the tabular view by clicking the table/spreadsheet icon, very subtly hidden in the right-corner of the map preview:
+
+<img src="images/focus-on-data-view-button.png" alt="focus-on-data-view-button.png">
+
+
+The tabular view:
+
+<img src="images/sql-query-year-in-2005-or-2015-data-view.png" alt="sql-query-year-in-2005-or-2015-data-view.png">
+
+You could even get minimalist and just ask for the `cartodb_id`, `the_geom_webmercator` and the `year` column:
+
+~~~sql
+SELECT cartodb_id, the_geom_webmercator,
+  DATE_PART('year', time) AS year
+FROM us_quakes
+WHERE 
+  DATE_PART('year', time) IN(2005, 2015)
+~~~
+
+<img src="images/sql-query-year-in-2005-or-2015-data-view-minimal-columns.png" alt="sql-query-year-in-2005-or-2015-data-view-minimal-columns.png">
+
+
+Going too far with minimalism.
+
+~~~sql
+SELECT 
+  DATE_PART('year', time) AS year
+FROM us_quakes
+WHERE 
+  DATE_PART('year', time) IN(2005, 2015)
+~~~
+
+<img src="images/sql-too-minimal-need-geom-webmercator.png" alt="sql-too-minimal-need-geom-webmercator.png">
+
+
+
+
+## Styling the dots by value
+
+Select Fill to bring up dropdown:
+
+<img src="images/dropdown-style-by-value-option-to-select.png" alt="dropdown-style-by-value-option-to-select.png">
+
+select __By Value__ to see a list of columns, scroll down till you find the `year` column:
+
+<img src="images/dropdown-style-by-value-find-year-column.png" alt="dropdown-style-by-value-find-year-column.png">
+
+Because the `year` column is a __number__, the default coloring scheme treats it as a _continuous_ value, i.e. as if it were a range of numbers. But we know that `year` is a _discrete_ value (integers) and more importantly, there are only 2 possible values based on our SQL query: `2005` and `2015`.
+
+So select the vertical ellipsis by __Quantiles__ to bring up a list of possible __Quantification__ methods:
+
+<img src="images/dropdown-focus-quantiles-elipsis.png" alt="dropdown-focus-quantiles-elipsis.png">
+
+Scroll down until you find __Category__:
+
+<img src="images/dropdown-quantification-category.png" alt="dropdown-quantification-category.png">
+
+And pick the colors for each `year` "category" as you please:
+
+<img src="images/fill-category-dropdown-2005-2015.png" alt="fill-category-dropdown-2005-2015.png">
+
+## Customize the legend
+
+Select the __Custom__ style and add the appropriate year to each color:
+
+<img src="images/dot-map-2005-vs-2015-with-legend.png" alt="dot-map-2005-vs-2015-with-legend.png">
+
+
+# Double layer solution
+
+## Add layer
+
+Use the Add button:
+
+<img src="images/add-layer-button-focus.png" alt="add-layer-button-focus.png">
+
+
+No problem to add two layers based on the same dataset:
+
+
+<img src="images/double-us-quakes-layer.png" alt="double-us-quakes-layer.png">
+
+
+### 2005 datepart
+
+
+#### Rename the layers
+
+Click the dropdown:
+
+<img src="images/dropdown-rename-option.png" alt="dropdown-rename-option.png">
+
+Rename the layers, __2005 quakes__ and __2015 quakes__:
+
+(and while you're here, hide the __2015 quakes__ layer)
+
+<img src="images/rename-layer-2005.png" alt="rename-layer-2005.png">
+
+#### Run the query
+
+~~~sql
+SELECT * 
+FROM us_quakes
+WHERE 
+  DATE_PART('year', time) = 2005
+~~~
+
+
+<img src="images/sql-query-where-2005.png" alt="sql-query-where-2005.png">
+
+#### 2015 datepart
+
+Do the same for the __2015 quakes__ layer:
+
+~~~sql
+SELECT * 
+FROM us_quakes
+WHERE 
+  DATE_PART('year', time) = 2015
+~~~
+
+<img src="images/sql-query-where-2015.png" alt="sql-query-where-2015.png">
+
+## Style each layer
+
+### Add a legend
+
+<img src="images/2005-v-2015-quake-dots-double-layer.png" alt="2005-v-2015-quake-dots-double-layer.png">
+
+
+### Combine aggregation with dots
+
+- Change 2015 to orange dots
+- Change 2005 to hex layers and move below 2015
+- Change the basemap to not have labels (Positron Lite)
+
+Boost it to 10:
+
+<img src="images/2005-v-2015-green-hexes-size-10.png" alt="2005-v-2015-green-hexes-size-10.png">
+
+
+Boost it to 20
+
+<img src="images/2005-v-2015-green-hexes-size-20.png" alt="2005-v-2015-green-hexes-size-20.png">
+
+Go all the way with 100:
+
+<img src="images/2005-v-2015-green-hexes-size-100.png" alt="2005-v-2015-green-hexes-size-100.png">
+
+
+
+

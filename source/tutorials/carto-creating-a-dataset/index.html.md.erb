@@ -6,6 +6,8 @@ description: |
 
 # Introduction
 
+Oklahoma earthquakes: http://earthquakes.ok.gov/what-we-know/earthquake-map/
+
 
 ## Prerequisites
 
@@ -35,8 +37,7 @@ As a convenience, Carto shows a preview of what the data looks like as a map (we
 
 # Uploading a dataset
 
-
-From your dashboard, click the __Maps ▼__ link to summon a dropdown menu; __Your datasets__ will be one of the options:
+From your dashboard page, look at the __header__ and click the __Maps ▼__ link to summon a dropdown menu. "__Your datasets__" will be one of the options:
 
 
 <img src="images/add-dataset-menu-dropdown.png" alt="add-dataset-menu-dropdown.png">
@@ -121,7 +122,7 @@ Indeed, when a dataset has `longitude` and `latitude` columns defined, Carto wil
 
 As I've said before, you should __almost never__ be manually editing data values in the table of a database -- instead, opt to fix the data in its raw form _before_ importing it -- and that applies to Carto datasets, too.
 
-But if you hover your mouse pointer over any data cell, you'll see a `⋮` symbol for that cell. Clicking it brings up a dropdown menu allowing you to __Edit this cell__.
+But if you hover your mouse pointer over any data cell, you'll see a vertical ellipsis symbol -- `⋮` -- for that cell. Clicking it brings up a dropdown menu allowing you to __Edit this cell__.
 
 Try it with any one of the values in `the_geom`:
 
@@ -157,6 +158,28 @@ Before clicking that, though, click on the __Preview__ link to bring up a pop-up
 That looks like what we might expect an earthquake map of the continental United States to look like. Go ahead and hit the __Create Map__ button to create what Carto considers to be a __Map__:
 
 <img src="images/created-quakes-map.png" alt="created-quakes-map.png">
+
+That's enough learning for now, the next lesson covers the Map page in greater detail.
+
+
+# How to return to your Dashboard
+
+Because it will be easy to get lost in the Datasets and Maps you create, it's worth highlighting how to get back to your __Dashboard__ from either a Dataset page or a Map page.
+
+There's always the option of manually typing the URL in. The URL for your Carto Dashboard will look something like this:
+
+    https://YOUR_USERNAME.carto.com/dashboard
+
+
+But if you are on a Dataset or Map page, look in the __top-left__ corner for __Carto's logo__, which can be described as: **a (white) dot inside a bigger dot**. Clicking on the logo will take you back to your Dashboard:
+
+<img src="images/that-dot.png" alt="that-dot.png">
+
+
+
+
+
+
 
 # Conclusion
 
