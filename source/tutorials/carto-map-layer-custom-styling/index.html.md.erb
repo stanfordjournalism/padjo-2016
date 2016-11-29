@@ -1,0 +1,280 @@
+---
+title: Styling a Carto layer's data points
+description: |
+    lorem ipsum title title title
+image_url: /tutorials/carto-map-layer-custom-styling/images/overview-image-of-styled-map.jpg
+---
+
+
+
+# Finished map
+
+
+https://padjo2016student.carto.com/builder/86cc1498-b5f8-11e6-bd1d-0e05a8b3e3d7
+
+
+# Getting started
+
+- Set the basemap to Positron Lite
+
+
+Check out the overplotting of earthquakes, especially around California and Oklahoma:
+
+TK: mark san francisco area and oklahoma, which is denser?
+
+<img src="images/overplotted-quakes-nation.jpg" alt="overplotted-quakes-nation.jpg">
+
+
+## The __Style__ subpanel
+
+TK: focus on the style link
+
+
+<img src="images/focus-style-submenu-link.png" alt="focus-style-submenu-link.png">
+
+The default style for a Carto layer of data points is orange-filled dots at a size of `7`, with a 1-pixel white outline as the stroke.
+
+More importantly, the default __Aggregation__ is __None__:
+
+TK: highlight aggregation panel
+
+<img src="images/default-aggregation-none.png" alt="default-aggregation-none.png">
+
+We'll deal only with the styling of _non-aggregated_ data points in this lesson and save aggregation for the [next tutorial](#TK).
+
+
+# Setting fixed/solid styles
+
+By "Solid", or "Fixed", we mean _constant_ -- a datapoint with a "solid" fill of orange is _always_ orange.
+
+## Dot size
+
+
+
+TK: highlight the click-seven
+
+<img src="images/dropdown-dot-size.png" alt="dropdown-dot-size.png">
+
+You can type in values or drag the slider. The max point size is `45` pixels, which really exaggerates the overplotting:
+
+TK: circle 45
+
+<img src="images/dot-size-45.png" alt="dot-size-45.png">
+
+I think the default dot size of `7` is fine, but I'll change it to `10` for the purposes of this lesson to make things a little easier to see. Here's how a point size of `10` compares to `7`:
+
+<img src="images/dot-size-10-vs-7.jpg" alt="dot-size-10-vs-7.jpg">
+
+### Fill color
+
+Turn your attention again to the __Fill__ option and click on the (now orange) color strip to customize the __Fill color__ of the dots:
+
+TK: circle strip
+
+<img src="images/fill-color-dropdown.jpg" alt="fill-color-dropdown.jpg">
+
+The color slider should be straightforward. Let's make the quakes lavender:
+
+
+<img src="images/lavender-quakes.jpg" alt="lavender-quakes.jpg">
+
+### Changing the alpha (transparency) value
+
+Look at the 0.9:
+
+TK circle
+
+<img src="images/focus-alpha-slider.jpg" alt="focus-alpha-slider.jpg">
+
+Change it to `0.42` to make each dot _more_ transparent:
+
+<img src="images/focus-alpha-slider-42.jpg" alt="focus-alpha-slider-42.jpg">
+
+The effect of the transparency is to make the background show more clearly, hence the effect of isolated dots looking lighter than the cluster of dots.
+
+The inverse is true -- isolated dots are darker -- when a dark basemap is used:
+
+<img src="images/alpha-slider-42-dark-map.jpg" alt="alpha-slider-42-dark-map.jpg">
+
+
+## Stroke
+
+
+TK: circle option
+
+<img src="images/focus-stroke-option.png" alt="focus-stroke-option.png">
+
+
+### Stroke color
+
+TK: circle black
+
+<img src="images/stroke-dropdown-color-solid-black.jpg" alt="stroke-dropdown-color-solid-black.jpg">
+
+That's a bit too dark, let's go solid gray:
+
+<img src="images/stroke-dropdown-color-solid-gray.jpg" alt="stroke-dropdown-color-solid-gray.jpg">
+
+We also have the option of changing the __alpha__ value. Setting the stroke color back to solid black with an alpha value of `0.50` produces a decidedly different effect than solid gray. We can now more clearly see where earthquake events directly overlap:
+
+<img src="images/stroke-dropdown-color-50-alpha-black.jpg" alt="stroke-dropdown-color-50-alpha-black.jpg">
+
+
+
+### Stroke width
+
+Pretty self explanatory. Click the number by the __Stroke__ option to bring up a slider that goes from `0` to `10`. With data points having a size of `10` pixels, even a `3`-pixel stroke will add an overpowering amount of ink to the visualization:
+
+TK: circle number clicky
+
+<img src="images/stroke-dropdown.jpg" alt="stroke-dropdown.jpg">
+
+### Outlines, compared
+
+
+The table below shows the effect of setting the stroke length to `0.5`, `1`, `1.5`, and `2` -- I'm a fan of the 0.5 width myself:
+
+<table class="table table-sm">
+  <tbody>
+    <tr>
+      <td><img src="images/stroke-width-0.jpg" alt="stroke-width-0.jpg"></td>
+    </tr>
+    <tr>
+      <td><img style="border: 2px solid red;" src="images/stroke-width-05.jpg" alt="stroke-width-05.jpg"></td>
+    </tr>
+    <tr>
+      <td>
+      <img src="images/stroke-width-1.jpg" alt="stroke-width-1.jpg"></td>
+    </tr>
+    <tr>
+      <td><img src="images/stroke-width-2.jpg" alt="stroke-width-2.jpg"></td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+
+
+## Blending
+
+
+By default, no blending is done:
+
+TK Blending circled:
+
+<img src="images/focus-blending-default-none.png" alt="focus-blending-default-none.png">
+
+If you're a photo-editing aficionado, then the various blending options, such as "color burn" and "color dodge" will be familiar. Carto has [a comprehensive guide on what each option does](https://carto.com/docs/carto-engine/cartocss/composite-operations/).
+
+But for our purposes, where we want to visually emphasize the _overlap_, i.e. _density_ of data points, the __Darken__ and __Multiply__ options are pretty straightforward to that end. 
+
+This is how the [Carto guide describes __Multiply__](https://carto.com/docs/carto-engine/cartocss/composite-operations/#multiply):
+
+> Multiply literally multiplies the color of the top layer by the color of each layer beneath, which typically results in the overlapping areas become darker...Imagine it like layering colored sheets of cellophane over one another; white disappears, black stays black. Use this when you want to darken overlapping areas in your map:
+
+<a href="https://carto.com/docs/carto-engine/cartocss/composite-operations/#multiply"><img src="images/carto-map-example-of-multiply-blend.jpg" alt="carto-map-example-of-multiply-blend.jpg"></a>
+
+Here is the effect on our current data:
+
+<img src="images/blending-multiply-option.jpg" alt="blending-multiply-option.jpg">
+
+
+Our current visual style choices -- 10-pixel-sized dots with 0.5-pixel dark-outlines -- ends up being too heavy when using the __Blending__ option of __Multiply__. So let's lighten those up to reduce the ink on our visualization.
+
+By removing the stroke outline complete, and setting the dot size to `5`, we can more clearly see how __Multiply__ visually emphasizes overlapping data points:
+
+
+<img src="images/blending-multiply-option-minimal-style-ink.jpg" alt="blending-multiply-option-minimal-style-ink.jpg">
+
+
+# Setting style values based on data v alues
+
+## Setting the dot size by value
+
+TK: focus on BY VALUE
+
+<img src="images/dot-size-dropdownn-focus-by-value.png" alt="dot-size-dropdownn-focus-by-value.png">
+
+This brings up a list of columns in the data:
+
+<img src="images/dot-size-dropdown-column-options.png" alt="dot-size-dropdown-column-options.png">
+
+
+
+## Setting fill by value
+
+### Color by value
+
+### Size by value
+
+
+## Continuous vs Categorical
+
+
+
+
+
+# Labeling data
+
+
+TK: circle the option
+
+It doesn't work here as things are too cluttered, but keep it in mind for when we have layers with fewer data points
+
+<img src="images/style-labels-option-kind-of-cluttered.png" alt="style-labels-option-kind-of-cluttered.png">
+
+
+# Advanced styling: CartoCSS
+
+
+TK: circle switch
+
+<img src="images/focus-carto-css-switch.png" alt="focus-carto-css-switch.png">
+
+<img src="images/focus-carto-css-switched-to-cartocss.png" alt="focus-carto-css-switched-to-cartocss.png">
+
+<img src="images/cartocss-boilerplate-label-code.png" alt="cartocss-boilerplate-label-code.png">
+
+
+~~~css
+#layer {
+  marker-width: 5;
+  marker-fill: #ffa100;
+  marker-fill-opacity: 0.3;
+  marker-allow-overlap: true;
+  marker-line-width: 0.5;
+  marker-line-color: #000000;
+  marker-line-opacity: 0.35;
+}
+
+#layer [ mag >= 5 ]{
+  marker-width: 15;
+  marker-line-opacity: 0.70;
+}
+
+#layer [ mag > 6 ]{
+  marker-width: 30;
+}
+~~~
+
+
+<img src="images/custom-carto-css-fancy-radius.png" alt="custom-carto-css-fancy-radius.png">
+
+A closer look at the effect:
+
+<img src="images/closeup-fancy-cartocss-circles.png" alt="closeup-fancy-cartocss-circles.png">
+
+
+# Conclusion
+
+- Base the dot size on `mag`, varying from a point size of `2` to `8`
+- Base the dot fill color on `mag` too...because, we don't have many other columns to facet on...going from pink to red.
+- Removed the stroke outline
+- Used a blending of __darken__
+
+
+<iframe width="100%" height="520" frameborder="0" src="https://padjo2016student.carto.com/builder/86cc1498-b5f8-11e6-bd1d-0e05a8b3e3d7/embed" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>
+
+

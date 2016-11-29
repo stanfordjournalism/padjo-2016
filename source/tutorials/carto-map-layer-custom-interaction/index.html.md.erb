@@ -1,0 +1,178 @@
+---
+title: "Styling a Carto Map layer (Part 1)"
+description: |
+    lorem ipsum title title title
+---
+
+# Introduction
+
+<iframe width="100%" height="520" frameborder="0" src="https://padjo2016student.carto.com/builder/54f6efbf-de86-4239-b595-f0c49aea291c/embed" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>
+
+
+
+
+
+Create or duplicate the previous map.
+
+# Overview view of a Map layer
+
+
+## Hiding a layer
+
+<img src="images/hiding-layer-in-overview.png" alt="hiding-layer-in-overview.png">
+
+
+## Exporting data
+
+
+
+
+
+## Adding a new layer
+
+
+TK: show focus on Add button 
+
+TK: show adding dataset screen
+
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/ca_tracts_2015.zip
+
+
+New layers are stacked on top of a the existing ones. The polygons in the census data completely obscure all the California earthquakes:
+
+<img src="images/shapes-obscuring-quake-points.jpg" alt="shapes-obscuring-quake-points.jpg">
+
+
+## Rearranging a data layer
+
+It's pretty easy to re-arrange the visual stacking order of layers. Hover over a layer to reveal a "grippy" icon to the left of the layer label. Click and drag that icon to move the layer label where you desire:
+
+<img src="images/moving-layer-in-overview.png" alt="moving-layer-in-overview.png">
+
+
+With the Census shapefile layer _below_ the `us_quakes` earthquake points, we can now see how the earthquakes overlaid on the tract boundaries:
+
+<img src="images/shapes-under-quake-points.jpg" alt="shapes-under-quake-points.jpg">
+
+## Deleting a data layer
+
+To delete a layer, hover over its label and click the vertical-ellipsis icon that shows up to the right of the eyeball icon. You'll see a dropdown menu of which __Delete layer...__ is one of the options:
+
+TK circle eye/ellipsis
+
+<img src="images/dropdown-delete-layer.png" alt="dropdown-delete-layer.png">
+
+Go ahead and delete the Census tract layer for now.
+
+
+### Export a data layer
+
+In later lessons, we'll be modifying the data in a layer using SQL. Sometimes it's worth exporting that data as CSV (or shapefile) to be used in another application. The __Export data__ option is in the same dropdown as the __Delete layer...__ option.
+
+Clicking it takes you to this popup:
+
+<img src="images/export-data-layer.png" alt="export-data-layer.png">
+
+You don't have to export anything now, but worth keeping this feature in mind.
+
+
+## Selecting a data layer to style
+
+Finally, let's get to what we came here for: selecting the layer that we want to style.
+
+It's as easy as clicking either the name of the layer, in this case, `us_quakes`, or its square icon.
+
+TK: circle the clickable parts
+
+<img src="images/clicky-layer-icon.png" alt="clicky-layer-icon.png">
+
+I know that seems super obvious, but Carto's interface doesn't give enough visual feedback (in my opinion) that those things are clickable. You might be tempted to click on some other icon, or that attractive, blue link labeled, __Add Analysis__...
+
+
+### Don't click "Add Analysis"
+
+TK: X-out analysis
+
+For the purposes of this tutorial, __don't click the "Add Analysis"__ link. Not because it will break anything, but because I don't know how to use its features, which were unrolled at the same time Carto overhauled itself to become easier-to-use for laypersons.
+
+But we're not laypersons, because we know SQL. I suspect many of the analytical features use SQL under the hood anyway. Since we went through the excruciating trouble to learn SQL, we might as well use it rather than try to figure out and memorize Carto's push-button-abstractions.
+
+That said, if you _are_ interested in Carto's Analysis features, and you don't want to be held back by my ignorance, you're free to [check out their guides](https://carto.com/learn/guides/analysis/analysis-tips-and-behavior) on your own time.
+
+
+
+
+# Customizing a Map layer's interactive features
+
+Selecting a layer takes us to a new panel, which itself contains 5 subpanels of options for customizing the look and feel of a Map layer:
+
+- **Data** -- this contains one very important feature: access to the __SQL Editor__, which we'll cover in a later tutorial.
+- **Analysis** -- I told you not to click on this, whatever it is.
+- **Style** -- This panel allows us to change the look of the layer's data, such as the outline and fill color of the dots, among many other things. This panel has so many options that the [next tutorial in this sequence](#TK) is devoted to it.
+- **Pop-up** -- This panel allows us to customize how the _published interactive map_ behaves when a user hovers over or clicks on one of the layer's elements (i.e. an earthquake point).
+- **Legend** -- This panel has options for customizing a legend box that floats over the map to provide context.
+
+For the purposes of this tutorial, we'll cover the __Legend__ and the __Pop-up__ panels. The __Style__ panel is covered in the next tutorial, [TK](#TK). And the **Data** panel (more specifically, the SQL Editor) is covered in [TK](#TK).
+
+
+## Adding a legend
+
+Click on the __Legend__ submenu. By default, the legend's __Style__ is set to __None__. Click on the other option to get a boilerplate legend, which is based on how our data is currently labeled and styled.
+
+Our data layer doesn't really have a *name* for what's plotted on the map, hence the default title of "Untitled". There's not really *any* need to have a legend at all, actually, because every data point from the `us_quakes` Dataset is plotted as is. It's self-evident that each orange dot is an earthquake:
+
+<img src="images/legend-defaults.png" alt="legend-defaults.png">
+
+
+### Adding arbitrary items
+
+The fact that our map doesn't _need_ a legend makes this a good time to show how Carto's __Legend__ customization features are *wholly* independent of the actual data. That is, we can fill it with whatever we want. Add a title, click __Add Item__ to add new things and colors to the legend. It doesn't have to make any sense or be connected to the data:
+
+<img src="images/legend-shaky-event.png" alt="legend-shaky-event.png">
+
+### Custom HTML
+
+For those of you that know HTML, at the very bottom of __Legend__ panel is an option to customize the HTML TK:
+
+TK: focus on Custom HTML option
+
+If you know HTML, you can add arbitrary HTML -- i.e. whatever you want -- to be displayed in the layer's legend. 
+
+
+<img src="images/adding-custom-html.png" alt="adding-custom-html.png">
+
+BTW, that `{{Legend}}` code is part of Carto's templating language. I actually don't know if it's new from Carto's overhaul, but here's Carto's older documentation on customizing the HTML for a [legend if you feel the need (and have the time) to do something special](https://carto.com/docs/carto-editor/maps/#legends).
+
+And if you don't know HTML? Forget I even mentioned this feature, we have enough to learn without getting into HTML basics.
+
+# Add pop-up interaction
+
+<img src="images/popup-click-hover-none.png" alt="popup-click-hover-none.png">
+
+## Hover or Click?
+
+<img src="images/popup-hover-vs-click.png" alt="popup-hover-vs-click.png">
+
+
+
+## Adding attributes
+
+<img src="images/popup-hover-all.png" alt="popup-hover-all.png">
+
+### Customizing attributes
+
+<img src="images/popup-hover-selective-attributes.png" alt="popup-hover-selective-attributes.png">
+
+### Customizing the popup's HTML
+
+<img src="images/popup-hover-custom-html.png" alt="popup-hover-custom-html.png">
+
+Here's a map with both:
+
+<iframe width="100%" height="520" frameborder="0" src="https://padjo2016student.carto.com/builder/54f6efbf-de86-4239-b595-f0c49aea291c/embed" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>
+
+
+## A warning about pop-up (and other mouse-clicky) interaction
+
+Don't do too much
+

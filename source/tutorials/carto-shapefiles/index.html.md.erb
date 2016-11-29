@@ -4,39 +4,346 @@ description: |
     lorem ipsum title title title
 ---
 
+<iframe width="100%" height="520" frameborder="0" src="https://padjo2016student.carto.com/builder/f77699ea-b64b-11e6-9768-0e05a8b3e3d7/embed" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>
 
 
-http://www.dot.ca.gov/hq/tsip/gis/datalibrary/
+# What is a shapefile?
 
-# California Rail Stations
-http://www.dot.ca.gov/hq/tsip/gis/datalibrary/Metadata/Rail_Sta_13.html
-http://www.dot.ca.gov/hq/tsip/gis/datalibrary/zip/rail/Rail_Sta_13.zip
-https://stanford.carto.com/u/duna/dataset/ca_rail_stations
+Here are some U.S. state boundaries:
 
-# California Rail Network
-
-http://www.dot.ca.gov/hq/tsip/gis/datalibrary/Metadata/Rail_13.html
-http://www.dot.ca.gov/hq/tsip/gis/datalibrary/zip/rail/Rail_13.zip
-https://stanford.carto.com/u/duna/dataset/ca_rail_network
-
-# Census tract files
-
-Shapefiles:
-https://stanford.carto.com/u/duna/dataset/acs2014_ca_tracts
-https://github.com/stanfordjournalism/padjo-2016/raw/master/source/files/shapes/acs2014_ca_tracts.geojson
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/us_state_shapes.zip
 
 
-# Quakes
+Download that file and unzip it. You'll get a folder full of files like this:
 
-http://earthquake.usgs.gov/fdsnws/event/1/query.csv?starttime=2010-01-01%2000:00:00&endtime=2015-12-31%2023:59:59&maxlatitude=42.199&minlatitude=31.507&maxlongitude=-114.917&minlongitude=-125.2&minmagnitude=2.5&eventtype=earthquake&orderby=time-asc
+<img src="images/unzipped-shapefile.png" alt="unzipped-shapefile.png">
+
+With shapefiles, we move past the the simple and flat plain text CSV that we could just open up in a spreadsheet or text editor. Luckily, we don't really have to deal with the details of shapefiles. If the U.S. Census says it has zipped shapefiles of state, county, and other U.S. political boundaries, we take it at its word. 
+
+And services such as Carto do too -- we don't need to unpack a shapefile before uploading it to Carto, as Carto will automatically unpack the zipped shapefile on its server and turn its data files into a Carto Dataset for us to use.
+
+## Uploading the U.S. state boundaries shapefile
+
+Let's see how Carto handles shapefiles by uploading the state boundaries shapefile. It works the same as uploading a CSV data file -- go to the Datasets view of your Dashboard and click the __New Dataset__ button. 
+
+Then upload the shapefile you just downloaded. Or you can paste in the [URL directly](https://dannguyen.github.io/sql-carto-journalism-exercises/congress_districts_114th.zip):
+
+<img src="images/importing-shapefiles-via-upload.png" alt="importing-shapefiles-via-upload.png">
+
+## What a shapefile looks like as a Dataset
+
+After the upload is done and Carto successfully processes the file, we'll be redirected to the page of the new Dataset. It looks no different than if we had uploaded a spreadsheet:
+
+<img src="images/shapefile-as-a-new-dataset-page.png" alt="shapefile-as-a-new-dataset-page.png">
+
+This new Dataset from the state boundaries shapefile has 56 rows, one for each U.S. state and territory. The Census doesn't include much data or content other than what's needed to render the boundaries, but you can see that the human-readable names, postal abbreviations, and FIPS codes of the U.S. states -- as columns `name`, `stusps`, `statefp`, respectively -- are included:
 
 
-https://stanford.carto.com/u/duna/dataset/usgs_quakes_ca_2010_2015
+<img src="images/dataset-state-names-column.png" alt="dataset-state-names-column.png">
+
+So where is all the geospatial data that necessitates the use of the arcane zipped shapefile folder? Look for `the_geom` column -- which I mentioned before as one of the Carto-specific columns that Carto attaches to every Dataset:
+
+<img src="images/the-geom-column-is-just-polygons.png" alt="the-geom-column-is-just-polygons.png">
+
+### Inspecting the contents of a Polygon data cell
+
+In the normal Dataset view, the `the_geom` column doesn't show anything but the word `Polygon`. But double-click on any one of the cells marked `Polygon` to see its full contents:
+
+<img src="images/inspecting-polygon-cell-contents.png" alt="inspecting-polygon-cell-contents.png">
+
+Geometry objects, as used by Carto and other GIS software, are stored according [in GeoJSON format](https://en.wikipedia.org/wiki/GeoJSON). It's not important for us to know the details of that, since we won't be editing or creating GeoJSON data by hand, but it's all just text and numbers that follow a specific convention. CSV files -- plaintext in which commas denote data columns -- are the same concept, but simpler.
+
+### Don't sweat about GeoJSON...
+
+Check out the `us_quakes` Dataset that we've been using -- remember that it too has a `the_geom` column, and even simple __points__ -- latitude and longitude pairs, are stored in this special GeoJSON format by Carto:
+
+<img src="images/the-geom-column-also-does-points.png" alt="the-geom-column-also-does-points.png">
+
+Polygon and other geospatial shapes (by *other*, I mean __lines__, which we'll see later in this lesson) are simply a collection of points.
+
+Anyway, no need to relive geometry class. It's enough to know that -- for all we care -- a Dataset made from a shapefile of polygons is not much different than a Dataset made from a CSV file with latitude/longitude data.
 
 
-https://stanford.carto.com/u/duna/dataset/sf_robbers_2015
 
-# 311 data 
+# Mapping Polygons in Carto
+
+OK, now that we've successfully created a dataset from the shapefile of U.S. state boundaries, let's make a map.
+
+Note: If you're following along, we'll be using this state boundaries Dataset in the future, so I've chosen to give it a more convenient name -- `us_state_shapes` -- as `cb_2015_us_state_5m` gets tiring to type. If you want to follow my instructions literally, I suggest you, too, rename the Dataset to `us_state_shapes`
+
+Making a map from a shapefile Dataset is no different than with any other type of dataset. Just press the __Create Map__ button and Carto will do the work:
+
+<img src="images/us-states-as-a-map.png" alt="us-states-as-a-map.png">
 
 
-https://data.sfgov.org/City-Infrastructure/Case-Data-from-San-Francisco-311-SF311-/vw6y-z8j6
+## Working with polygon layers
+
+We can customize a layer of polygons in much the same way that we've styled point data. This includes adding Pop-up functionality:
+
+<img src="images/pop-up-state.png" alt="pop-up-state.png">
+
+And we can change the fill and stroke of the polygons, though there aren't any __aggregation__ options for Polygons. As I mentioned before, the Census shapefiles don't have many interesting data columns other than labels and names for each state.
+
+[According to Census documentation](https://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2014/TGRSHP2014_TechDoc_Ch3.pdf), the `ALAND` column represents the number of square meters of a state's land area. Let's base the __Fill__ value on that:
+
+<img src="images/aland-fill-states.png" alt="aland-fill-states.png">
+
+
+...And that's not very interesting. The bigger the state is, the bigger its `ALAND` value is. But we don't need to add color to tell the viewer which states are big, that's already self-evident from just looking at the map and the state boundaries.
+
+Let's base the fill color instead on `AWATER`, which denotes each state's water area. This is an obviously more useful visualization than `ALAND`, as `AWATER` can't easily be discerned. Currently, the fill color of each state is obscuring all the basemap detail. And we can't see all the bodies of water when zoomed out.
+
+Here's the states' fill color when based on `AWATER`:
+
+<img src="images/awater-fill-states.png" alt="awater-fill-states.png">
+
+That's more interesting, though I suspect some very large states, such as Texas, have high `AWATER` values simply because they are very large states. If only there was a way, via *code* and *data*...to visualize `AWATER` relative to a state's `ALAND`...oh well, we'll just have to wait for another lesson.
+
+### Labeling Polygons
+
+We can label Polygons just like points, and it's usually more useful to label Polygons (and other shapes more complex than a simple point), because Polygons take up more visual space, and hence, they aren't drowned out by the ink of their own label in the same way that points are.
+
+The default basemap of Positron places labels above a layer's data elements, including points and polygons. But what if we're using a basemap that doesn't have labels, such as NASA satellite imagery?
+
+In the example below, I've removed the fill of the state polygons so that only their borders are shown against the nighttime imagery from NASA's satellites:
+
+<img src="images/white-outlines-night-nasa.jpg" alt="white-outlines-night-nasa.jpg">
+
+Let's pretend it's necessary to label our ghostly-state shapes. The NASA satellite imagery doesn't come with text, so let's use the __Labels__ option in our layer's __Style__ subpanel.
+
+In the example below, I've enabled the __Labels__ checkbox and I've selected `STUSPS` as the column to use -- "STUSPS" stands for, "state U.S. postal service...code", i.e. postal abbreviation. The label text is colored white, and I've added a `1`-pixel green halo to make them stand out more:
+
+<img src="images/white-outlines-labeled-states-nasa-night.jpg" alt="white-outlines-labeled-states-nasa-night.jpg">
+
+
+# Lines as geospatial data
+
+Besides points and polygons, the other geometry-type we'll frequently encounter are __lines__. Polygons are composed of lines, of course, but not all line geometries create a closed shape: this includes things like roads, traffic routes, hurricane paths, and fault lines.
+
+
+## The streets of San Francisco
+
+The city of San Francisco publishes a shapefile titled, ["Streets of San Francisco" on its data portal](https://data.sfgov.org/Geographic-Locations-and-Boundaries/Streets-of-San-Francisco/4ugn-hf48). The description of this dataset is as follows:
+
+> View of Street Centerlines excluding Paper streets, unpaved rights-of-way and pseudo streets. Updated nightly.
+
+And here's what [it looks like on SF's data portal](https://data.sfgov.org/Geographic-Locations-and-Boundaries/Streets-of-San-Francisco/4ugn-hf48):
+
+<img src="images/sf-streets-on-socrata.jpg" alt="sf-streets-on-socrata.jpg">
+
+Let's see if we can do something more interesting. You can export the data directly from the [page on Socrata](https://data.sfgov.org/Geographic-Locations-and-Boundaries/Streets-of-San-Francisco/4ugn-hf48). Or, you could (and probably *should*) use my mirror at this URL:
+
+[https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/sf_streets.zip](https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/sf_streets.zip)
+
+You can download it and re-upload it to Carto. Or just pass the URL directly to Carto. Either way, find yourself at a new dataset page and name it `sf_streets`:
+
+
+<img src="images/sf-streets-as-carto-dataset.png" alt="sf-streets-as-carto-dataset.png">
+
+
+### What a line geometry looks like as data
+
+Like points and polygons, lines are a geospatial geometric object stored in Carto's `the_geom` column. Double-click on any of the `Line` cells to see the contents:
+
+
+<img src="images/contents-of-line-cell.png" alt="contents-of-line-cell.png">
+
+Hey, it's not too complicated. Two of what looks like latitude/longitude pairs. It's almost as if a line is defined by a starting point and an ending point...
+
+### Adding a line layer to the mix
+
+We don't need to create a new map from `sf_streets`. Go to the map we've been working on with the state boundaries and NASA nightime imagery.
+
+Click the __Add__ button to add a layer from the `sf_streets` Dataset:
+
+TK focus on button
+
+<img src="images/focus-add-new-layer-on-nasa.jpg" alt="focus-add-new-layer-on-nasa.jpg">
+
+
+### The limits of NASA imagery
+
+Unfortunately, Carto's map application restricts the zoom level for NASA imagery. We can't get closer than zoom level `8`, which means that the streets of San Francisco, from our vantage point, looks nothing more than a glob of color:
+
+<img src="images/sf-street-glob.jpg" alt="sf-street-glob.jpg">
+
+Let's switch to one of the Positron basemaps -- I recommend __Positron Lite__ for the least amount of clutter:
+
+<img src="images/sf-streets-positron-lite.jpg" alt="sf-streets-positron-lite.jpg">
+
+
+## Customizing and styling the street data
+
+Click on the `sf_streets` layer and navigate to its __Style__ panel. Lines have similar options for styling and customization as shapes and points, though they lack both the ability to do an aggregation. And lines being lines, they don't have a __Fill__ option, just __Stroke__.
+
+Let's start by reducing the stroke from `1.5` to `1`. When zoomed out, it seems that some streets are still thicker than others, despite that fixed value for the stroke width: 
+
+<img src="images/sf-streets-fixed-1-stroke-zoom-12.png" alt="sf-streets-fixed-1-stroke-zoom-12.png">
+
+Zoom in and you'll see that it was just an illusion caused by the density of streets:
+
+<img src="images/sf-streets-fixed-1-stroke-zoom-16.png" alt="sf-streets-fixed-1-stroke-zoom-16.png">
+
+Refer back to the `sf_streets` Dataset page to see the columns include in the shapefile:
+
+<img src="images/sf-streets-layer-column.png" alt="sf-streets-layer-column.png">
+
+
+Without diving into the city's documentation, we won't know the significance of concisely named fields such as `accepted` and `cnntext`. That said, the `layer` column, with values like `PRIVATE`, `STREETS`, and `FREEWAYS`, seems to be a column worth faceting on.
+
+
+### Coloring street lines with categorical values from "Layer"
+
+Don't get confused by how the city of SF chose to name this particular column, `layer`, when it could have been something like `street_type`. Switch back to the map and the `sf_streets`-based layer. Go to the __Style__ panel, and click on the color options for __Stroke__. 
+
+Then click the __By Value__ tab and choose `layer` as the column, and hopefully you'll get a categorical color listing that looks like this:
+
+<img src="images/lines-style-stroke-color-dropdown-by-value-layer.png" alt="lines-style-stroke-color-dropdown-by-value-layer.png">
+
+Tweak the colors as you like. By default, Carto will generate a key for the colors. In my map, I chose to associate the `FREEWAYS` value with a bright, aqua blue. When zoomed out, it's easy to see these main arterials of San Francisco:
+
+<img src="images/sf-streets-zoomed-aqua-highways.png" alt="sf-streets-zoomed-aqua-highways.png">
+
+### One-way streets
+
+I don't see any columns in `sf_streets` that lend themselves to continuous colorization, so let's do one more categorical example:
+
+The `layer` column has a lot of different possible values, so nothing much stands out besides freeways and roads inside city parks. A more appropriate column would be the `oneway` column, which ostensibly denotes whether a street is one-way or not.
+
+There are only 3 values,`F`, `T`, and  `B` -- I don't really know what those mean (false, true, and...boring?), so I just made them arbitrary colors. You get the idea:
+
+<img src="images/what-one-way-color.jpg" alt="what-one-way-color.jpg">
+
+
+
+
+# Quakes and hazard maps
+
+To close this lesson, let's return to the subject of earthquakes and their apparent frequency in Oklahoma.
+
+## 2014 map
+
+Which can be seen here: 
+
+<a href="https://pubs.usgs.gov/sim/3325/pdf/SIM3325_sheet1.pdf"><img src="images/usgs-hazard-pha-pct-50-years-map.jpg" alt="usgs-hazard-pha-pct-50-years-map.jpg"></a>
+
+https://pubs.usgs.gov/sim/3325/downloads/datafiles/SIM3325_1.zip
+
+
+I personally prefer this simplified version:
+
+<img src="images/usgs-2014-hazards-pga10pct-simplified-map.png" alt="usgs-2014-hazards-pga10pct-simplified-map.png">
+
+<a id="mark-legend-hazard"></a>
+
+Let's zoom in on the legend to see what makes up its colors:
+
+
+<img src="images/usgs-2014-hazards-pga10pct-simplified-legend.png" alt="usgs-2014-hazards-pga10pct-simplified-legend.png">
+
+
+### Uploading as a dataset
+
+
+Just 2 non-geospatial columns:
+
+<img src="images/simple-hazards-map-columns-dataset.png" alt="simple-hazards-map-columns-dataset.png">
+
+And one of them a numeric column titled: `acc_val`, which seems to correspond to the ["Peak acceleration value as a percent of gravity"](#mark-legend-hazard) in the title of the hazard map's legend.
+
+
+## Making a map
+
+<img src="images/usgs-hazard-layer-over-all.png" alt="usgs-hazard-layer-over-all.png">
+
+
+### Styling the layer fill by "acc_val"
+
+You know the drill. Specify the layer's Fill color to be based on a value, specifically, the `acc_val` column. Here's what we get:
+
+<img src="images/usgs-hazard-layer-pinkish-acc-val-layer.png" alt="usgs-hazard-layer-pinkish-acc-val-layer.png">
+
+That gets us pretty close to the color patterns and distribution in the USGS 2014 hazards map, though I prefer using less-of-the-rainbow for this kind of thing (See: [How the Rainbow Color Map Misleads](https://eagereyes.org/basics/rainbow-color-map)): 
+
+<img src="images/usgs-2014-hazards-pga10pct-simplified-map.png" alt="usgs-2014-hazards-pga10pct-simplified-map.png">
+
+Unfortunately, an acceleration intensity of zero or near-zero on our Carto map still fills the polygon with an entirely opaque off-white color that makes it impossible to see the base map, which is a bit ugly, nevermind confusing -- where's Florida and Texas or any of the East Coast?
+
+<img src="images/hazard-peach-covers-coast.png" alt="hazard-peach-covers-coast.png">
+
+
+## Improving our ugly data layer by hacking the Carto visual options
+
+In the next lesson (**finally!**), we'll learn how to use SQL to quickly filter out this kind of noise. For now, let's do a hack based on what we know and what we have. The results will be imperfect, but it's a good rundown of Carto features we've learned so far.
+
+### Customize the "acc_val" buckets
+
+We can remove that distracting off-white by making the very last bucket in the `acc_val` fill-gradient just _white_:
+
+<img src="images/white-out-the-peach.png" alt="white-out-the-peach.png">
+
+Not bad.
+
+### Add "us_state_shapes" layer on top
+
+We have U.S. state boundary data in the form of the [us_states_shapes Dataset](https://padjo2016student.carto.com/dataset/us_state_shapes). 
+
+Let's include the states shapefile as a new layer, make the fill completely transparent, as we still want to see the pink areas for acceleration values, and add labels for the state names:
+
+<img src="images/add-state-layers-to-pink-hazards.png" alt="add-state-layers-to-pink-hazards.png">
+
+
+### Add "us_quakes" point layer
+
+Finally, let's add point data in the form of [us_quakes](https://padjo2016student.carto.com/tables/us_quakes) , the dataset we've been using that contains the M3.0+ earthquakes in the lower United States.
+
+Here's what the data looks like after adding the layer and changing the dot color from orange to purple for visibility:
+
+<img src="images/quakes-purple-on-orange-basic.png" alt="quakes-purple-on-orange-basic.png">
+
+It does look like, at first glance, that numerous earthquakes, particularly in Kansas and Texas, happened outside of the 2014 forecast of seismic activity. 
+
+But we don't know, without more clicking our filtering, whether those quakes are extremely minor, or glitches of activity from as old as 2005. Boy that would be easy to fix if we only knew how to express it as SQL...
+
+
+
+
+## Fault lines aren't everything
+
+One more data layer: upload this shapefile of fault lines to Carto as a Dataset.
+
+[https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/us_state_shapes.zip](https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/us_state_shapes.zip)
+
+Then add the new Dataset to the your current map. Hide all of the other polygon layers so that the only 2 visible layers are the `us_quakes` dots and `usgs_fault_lines` line data. Without doing much filtering or special styling of the fault line data, we can see that there's a lot of earthquake activity in areas where there are no known fault lines:
+
+<img src="images/earthquake-fault-lines-vs-quakes-at-a-glance.png" alt="earthquake-fault-lines-vs-quakes-at-a-glance.png">
+
+Here's some highlights:
+
+<img src="images/earthquake-fault-lines-vs-quakes-at-a-highlight.jpg" alt="earthquake-fault-lines-vs-quakes-at-a-highlight.jpg">
+
+## When current events changes your model
+
+The presence of fault lines is traditionally a big factor in USGS's prediction models. That so many earthquakes were happening in Oklahoma without known active fault lines meant that the [USGS had to consider the impact of human activity, such as fracking](https://www2.usgs.gov/blogs/features/usgs_top_story/induced-earthquakes-raise-chances-of-damaging-shaking-in-2016/).
+
+Normally, the USGS updates its hazard maps every 6 years, which means we wouldn't normally expect a new map until 2020 (6 years after 2014). But that would've been a long time to reevaluate the 2014 hazards model, so the USGS released a report in 2016, titled: [2016 one-year seismic hazard forecast for the Central and Eastern United States from induced and natural earthquakes](https://pubs.er.usgs.gov/publication/ofr20161035)
+
+I couldn't find the shapefile data for it, but here's a screenshot of what it looks like:
+
+<img src="images/usgs-forecast-2016-citylab.jpg" alt="usgs-forecast-2016-citylab.jpg">
+
+
+[From CityLab's report](http://www.citylab.com/weather/2016/03/usgs-map-human-induced-earthquake-map/475800/):
+
+> Approximately seven million people live and work in areas of the Central and Eastern U.S. that are at risk of damage from “induced seismicity”—essentially, manmade earthquakes.
+
+> That’s according to a new report by the U.S. Geological Service, which, for the first time ever, is including induced seismicity in its national models of earthquake hazards. The agency released maps Monday that identify the potential hazards of such earthquakes alongside those of natural quakes. Causes include wastewater injection, fracking, and other processes that involve pushing fluid underground at high pressure.
+
+> “By including human-induced events, our assessment of earthquake hazards has significantly increased in parts of the U.S.,” Mark Petersen, Chief of the USGS National Seismic Hazard Mapping Project, said in a press release.
+
+
+
+
+# Conclusion
+
+We've reached the limits of what we can do with slapping data layers together and tweaking the Layer Style customization panels In the next lesson, we'll  re-use the datasets and maps from previous lessons to see how SQL -- or more generally, the ability to efficiently filter and join data -- greatly impacts our visualization abilities.
