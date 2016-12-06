@@ -1,0 +1,180 @@
+---
+title: Pre-Packaged Geospatial Data
+---
+
+
+# The datasets to download
+
+Just copy-and-paste the following URLs into the Carto Dataset maker:
+
+~~~
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/atf_firearm_dealers_2016_08.csv
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/congressmembers.csv
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/intercensal_county_estimates.csv
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/presidential_election_state_results.csv
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/presidential_election_county_results.csv
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/ccd_schools.csv
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/chicago_homicides_and_gun_crimes.csv
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/us_quakes.csv
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/starbucks_locations.csv
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/congress_districts_114th.zip
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/us_county_shapes.zip
+https://dannguyen.github.io/sql-carto-journalism-exercises/datashapefiles/usgs_hazards_2014.zip
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/usgs_fault_lines.zip
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/us_state_shapes.zip
+https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/zcta_simplified.zip
+~~~
+
+
+For more information about the datasets, here's some context:
+
+
+
+## CSV data files that lack geospatial coordinates
+
+These datasets may have columns that directly relate to geography, such as a street address  or even a Census tract code. But this is _not_ geospatial data that can be directly mapped; for example the street address  `100 Broadway, New York, NY`, needs to be __geocoded__ and "converted" into a latitude,longitude pair.
+
+This election dataset has state and county names, but for our purposes, we don't think of it as (directly) having geospatial coordinates.
+
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/atf_firearm_dealers_2016_08.csv">ATF Listing of Federal Firearm Licenses</a>
+</h4>
+<div>
+  <a href="https://www.atf.gov/firearms/listing-federal-firearms-licensees-ffls-2016">via the ATF's Listing of Federal Firearms Licensees</a>
+</div>
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/congressmembers.csv">Members of the 114th U.S. Congress</a>
+</h4>
+<div>
+  <a href="https://sunlightlabs.github.io/congress/#legislator-spreadsheet">via The Sunlight Foundation</a>
+</div>
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/intercensal_county_estimates.csv">Census Intercensal Estimates of the Resident Population 2000 to 2010</a>
+</h4>
+<div>
+  <a href="https://www.census.gov/popest/data/intercensal/county/CO-EST00INT-alldata.html">via U.S. Census Population Estimates by Counties page</a>
+</div>
+
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/presidential_election_state_results.csv">Presidential Election Results by State</a>
+</h4>
+<div>
+  <a href="https://simonrogers.net/2016/11/16/us-election-2016-how-to-download-county-level-results-data/">h/t Simon Rogers of Google News</a>
+</div>
+
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/presidential_election_county_results.csv">Presidential Election Results by Count (2004 and 2008)</a>
+</h4>
+<div>
+  <a href="https://github.com/helloworlddata/us-presidential-election-county-results">via the Hello World Data project</a>
+</div>
+
+
+
+## CSV datafiles containing geospatial data 
+
+For the most part, this will be __latitude__ and __longitude__ coordinate pairs that can be plotted directly onto a map.
+
+The [earthquake data is an obvious example](https://docs.google.com/spreadsheets/d/1GdYEXyGNeDMgUDlsidhMDnp1HdIcfkCLzh8WhOh1hM4/edit#gid=645129190):
+
+
+<img src="images/quakes-spreadsheet-obv-geospatial.png" alt="quakes-spreadsheet-obv-geospatial.png">
+
+
+
+
+
+
+
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/ccd_schools.csv">School Demographic and Free Lunch Participation</a>
+</h4>
+<div>
+  <a href="http://nces.ed.gov/ccd/pubschuniv.asp">extracted from the Common Core of Data's Universe Survey</a>
+</div>
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/chicago_homicides_and_gun_crimes.csv">Chicago crime incidents involving homicides or guns</a>
+</h4>
+<div>
+  <a href="https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2/data">Extracted from City of Chicago data portal</a>
+</div>
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/us_quakes.csv">M3.0+ Earthquakes in the Contiguous U.S., 2005 to 2015</a>
+</h4>
+<div>
+  <a href="https://github.com/helloworlddata/usgs-earthquakes">Copied from Hello World Data</a>
+</div>
+
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/starbucks_locations.csv">Starbucks Locations, worldwide</a>
+</h4>
+<div>
+  <a href="https://opendata.socrata.com/Business/All-Starbucks-Locations-in-the-World/xy4y-c4mk">As scraped and uploaded to Socrata OpenData</a>
+</div>
+
+
+
+## Shapefiles
+
+When data rows are attached to something more complicated that a lat/long pair -- such as the many lat/long points needed to draw a state border, we use __shapefiles__. Or rather, we download them from one source and upload it to the next. All of these files are zip files, but you don't need to actually unzip them and mess with the files. Just upload the zip file straight to Carto.
+
+Representing earthquake _fault lines_ is more complicated the way earthquakes are often simplified to a point.
+
+<img src="images/fault-map-google.jpg" alt="fault-map-google.jpg">
+
+
+Checkout the [USGS interactive fault map here](http://earthquake.usgs.gov/hazards/qfaults/map/#qfaults)
+
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/congress_districts_114th.zip">114th House Congressional District Census Boundaries </a>
+</h4>
+<div>
+  <a href="https://www.census.gov/geo/maps-data/data/cbf/cbf_cds.html">via U.S. Census Bureau</a>
+</div>
+
+
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/us_county_shapes.zip">2015 Census boundaries for all U.S. counties</a>
+</h4>
+<div>
+  <a href="https://www.census.gov/geo/maps-data/data/cbf/cbf_counties.html">via U.S. Census Bureau</a>
+</div>
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/datashapefiles/usgs_hazards_2014.zip">The USGS 2014 Earthquake Hazards Report/</a>
+</h4>
+<div>
+  <a href="https://earthquake.usgs.gov/hazards/hazmaps/conterminous/index.php">6-year-seismic-prediction report by the USGS</a>
+</div>
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/usgs_fault_lines.zip">Fault lines, as determined by the USGS in 2015</a>
+</h4>
+<div>
+  <a href="http://earthquake.usgs.gov/hazards/qfaults/map/#qfaults">Via the U.S. Geological Survey</a>
+</div>
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/us_state_shapes.zip">2015 Census boundaries for U.S. States</a>
+</h4>
+<div>
+  <a href="https://www.census.gov/geo/maps-data/data/tiger.html">via U.S. Census Bureau</a>
+</div>
+
+<h4>
+  <a href="https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/zcta_simplified.zip">2015 Census boundaries for U.S. Zip Code Tabulation Areas, but (vastly) simplified using MapShaper</a>
+</h4>
+<div>
+  <a href="https://www.census.gov/geo/reference/zctas.html">via U.S. Census Bureau</a>
+</div>

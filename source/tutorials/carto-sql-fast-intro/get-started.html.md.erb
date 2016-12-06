@@ -1,0 +1,91 @@
+
+# Getting started
+
+If you haven't already created an account, here's the login:
+
+[https://carto.com/login](https://carto.com/login)
+
+After successfully registering, you'll see this Welcome screen:
+
+<img src="images/welcome-to-cartodb.png" alt="welcome-to-cartodb.png">
+
+
+### Your Dashboard is your Home in Carto
+
+Take a note of the URL: 
+
+<img src="images/url-dashboard.png" alt="url-dashboard.png">
+
+My username here is `txtestd`, which means my Carto account will be at:
+
+      https://txtestd.carto.com/
+
+Usually, this will redirect me to my __Dashboard__:
+
+      https://txtestd.carto.com/dashboard
+
+
+The __Dashboard__ is an important landing page. Its your homepage for quickly finding all the maps and datasets you have. It's easy to get lost in the various navigation interfaces and conventions that Carto uses. Oftentimes hitting the Back button doesn't take you back to where you *thought* you were on your Map.
+
+A fast way to find your way back click the __Carto logo__ in the header nav to get back to the Dashboard.
+
+As you add more __Maps__ and __Datasets__, the __Dashboard__ will get cluttered but you'll always have an easy way to find your maps and datasets via the header nav dropdown (labeled __Maps__ in the screenshot below) menu:
+
+<img src="images/dashboard-mess-dropdown.jpg" alt="dashboard-mess-dropdown.jpg">
+
+## Create a new Carto Dataset
+
+
+OK, back to building in Carto. The __New Map__ but go to the header menubar and click "__Maps__" in the header nav, then the option, __Your datasets__:
+
+<img src="images/click-maps-reveal-menu.png" alt="click-maps-reveal-menu.png">
+
+If you're a new user, Carto will list public datasets that you can import.
+
+<img src="images/new-dataset-user.png" alt="new-dataset-user.png">
+
+
+
+However, skip that for now. I want you to download a CSV dataset at the following URL:
+
+[https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/us_quakes.csv](https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/us_quakes.csv)
+
+
+
+After the download is complete, click the __New Dataset button__ in the top-left corner and drop in the `us_quakes.csv` file you just downloaded. The click the __Connect Dataset__ button in the bottom-right corner:
+
+<img src="images/connect-dataset-quakes.png" alt="connect-dataset-quakes.png">
+
+After a few moments, you'll be taken to the __Dataset page__ for your new `us_quakes` dataset. Carto uses PostgresSQL, so whenever we upload or work with data, we'll be taking advantage of SQL (either indirectly, or, writing raw SQL ourselves).
+
+## The SQL editor
+
+
+In the bottom left corner is a subtle button that switches between __\Metadata__ and __SQL__:
+
+<img src="images/sql-button.png" alt="sql-button.png">
+
+
+What we're viewing now -- the `us_quakes` data columns and their contents -- is the "Metadata" view. Flick that button to go into SQL mode:
+
+<img src="images/sql-mode-from-dataview.png" alt="sql-mode-from-dataview.png">
+
+You can write SQL to do things like count the rows. Or, maybe you want to filter the data before creating a map from it. You can figure that out for yourself. For now, just remember that there is a SQL editor.
+
+Now turn your attention to the __Create Map__ button in the lower-right corner:
+
+<img src="images/create-map-lower-rightbutton.png" alt="create-map-lower-rightbutton.png">
+
+
+# Creating a map
+
+It's important to remember that even though maps and datasets seem to go hand-in-hand, Carto considers a __Map__ and a __Dataset__ to be two distinct kind of objects. For one thing, a map can query and display more than one dataset. And a dataset can be used by more than on emap.
+
+But as you start out, you'll generally be uploading data that you want to then put on a map. You'll find that __Create Map__ button to be very convenient.
+
+
+## The Map Overview
+
+After the map is created, you're taken to what I think of as the __Map overview__ page. From here, you see all the datasets that is currently on
+
+

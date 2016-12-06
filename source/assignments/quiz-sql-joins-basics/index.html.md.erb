@@ -2,15 +2,40 @@
 title: SQL Joins Basics
 description: |
 assigned_date: 2016-11-01
-due_date: 2016-11-03
-due_time: 1:30 PM
-points: 5
+due_date: 9999-01-01
+points: 0
+stub: true
 type: Quiz
 deliverables:
   - Fill out the answers on a blank sheet of paper!
 requirements:
   - Write your SUNET id on the paper, please
 ---
+
+# Ooops
+
+
+If you're reading this on Thursday, Nov 3, ignore it. I'm moving these questions into a larger, more organized collection.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(ignore everything after this)
+
+
+
+
+
 
 # Sample questions
 
@@ -146,7 +171,8 @@ This combines a `GROUP BY` with the `INNER JOIN`...the tricky part is remember t
 The best way to think about this problem is to use the same code from the previous query, but trim it to what we need:
 
 ~~~sql
-SELECT people.name AS owner_name
+SELECT people.name AS owner_name,
+  COUNT(*) AS pet_count 
 FROM people
 INNER JOIN 
   people.id = pets.owner_id
@@ -157,13 +183,19 @@ WHERE
 This seems weird -- we don't include any fields about the pet. And subsequently, we don't any info about each pet. But the JOIN still works, and 2 (boring) rows are returned:
 
 
+| owner_name | pet_count |
+|------------|-----------|
+| Cordelia   |         2 |
+{:.table-sql}
 
 
-But we don't need to. We don't care about the individual pets. We only care about the aggregate count.
+##### 5. List the people, in order of most pets owned
 
+In the previous problem, we didn't write a `GROUP BY`, and yet, the `pet_count` was faceted to just Cordelia. Yeah, that's confusing -- but it makes logical sense because with `WHERE people.name = 'Cordelia'`, every row in the result will correspond to `Cordelia`.
 
+In order to see the effect of the `GROUP BY`, we need a result set with more than one `owner_name`.
 
-
+This question only asks
 
 This is one way (and probably the most straightforward way to do it):
 

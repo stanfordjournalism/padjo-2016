@@ -36,5 +36,9 @@ end
 
 
 def link_to_cr(cr)
+    unless cr.is_a?(ContentResource)
+        cr = contentresource(cr)
+    end
+
     link_to(cr.title, cr.url)
 end

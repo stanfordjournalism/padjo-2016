@@ -1,0 +1,28 @@
+---
+title: About the Midterm SF Lobbying data
+---
+
+
+
+# List officials that have gotten the most money
+
+
+~~~sql
+SELECT official, 
+  SUM(amount) AS total_amount
+FROM political_contributions
+GROUP BY official
+ORDER BY total_amount DESC;
+~~~
+
+
+
+# The officials who have had the most contacts
+
+~~~sql
+SELECT official, 
+  SUM(amount) AS total_amount
+FROM political_contributions
+GROUP BY official
+ORDER BY total_amount DESC;
+~~~

@@ -1,0 +1,50 @@
+
+# Twitter Joining
+
+A set of tweets and Twitter information collected from Twitter during Election 2016.
+
+
+## Twitter Tables
+
+
+### tw_users
+
+|  ID        | Since               | Following | Followers | screen_name  | Name                 | Bio                                                                                                                                                              |
+|------------+---------------------+-----------+-----------+--------------+----------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|  196168350 | 2010-09-28 14:04:51 | 634       | 1061719   | anncoulter   | Ann Coulter          | Author - follow me on #Facebook! http://t.co/i7VTQ5btPI Disregard my earlier claims that I'd never be on Facebook.                                               |
+|  18646108  | 2009-01-05 21:05:43 | 6652      | 857942    | bretbaier    | Bret Baier           | Bret Baier is the Chief Political Anchor for @FoxNews & Anchor & Executive Editor of @SpecialReport with Bret Baier. Bret's book #SpecialHeart is a bestseller.  |
+|  42995067  | 2009-05-27 23:33:11 | 947       | 64050     | brianefallon | Brian Fallon         | Press secretary for @HillaryClinton for America. Formerly @TheJusticeDept and @ChuckSchumer spokesman. Brooklyn, NY/Washington, D.C.                             |
+|  14515799  | 2008-04-24 18:41:42 | 5063      | 401028    | brianstelter | Brian Stelter        | CNN's host of @ReliableSources and senior media correspondent. Formerly @nytimes, @tvnewser and Top of the Morning. Email: bstelter@gmail.com                    |
+|  22799750  | 2009-03-04 17:02:09 | 1088      | 1147611   | chriscuomo   | Christopher C. Cuomo | facebook: chris cuomo Instagram: chrisccuomo                                                                                                                     |
+{:.table-sql}
+
+
+
+### tweets
+
+
+
+~~~sql
+SELECT ID, "Posted at" AS time_tweeted,
+"Screen name" AS screen_name, Text
+FROM tweets 
+WHERE Text LIKE '%#%'
+ORDER BY time_tweeted DESC 
+LIMIT 5 
+OFFSET 2222;
+~~~
+
+|  ID                 | time_tweeted        | screen_name     | Text                                                                                                                                |
+|---------------------+---------------------+-----------------+-------------------------------------------------------------------------------------------------------------------------------------|
+|  789104196003868673 | 2016-10-20 14:01:15 | piersmorgan     | My new @DailyMail column is about last night's final presidential TV debate. Posting soon. #Trump #Clinton https://t.co/lxEkbMPHAr  |
+|  789102711551635456 | 2016-10-20 13:55:21 | creynoldsnc     | Get out there, North Carolina. Let's #TurnNCBlue https://t.co/6g0EeYDfWa                                                            |
+|  789101425557110784 | 2016-10-20 13:50:15 | brianstelter    | A first look at last night's #debate ratings... coming up next on @CNN TV with @CarolCNN...                                         |
+|  789095747635572736 | 2016-10-20 13:27:41 | realdonaldtrump | Thank you America! #MAGA
+
+Rasmussen National Poll
+Donald Trump 43%
+Hillary Clinton 40% https://t.co/n4eZ3qpcjg                      |
+|  789088297989640192 | 2016-10-20 12:58:05 | brianstelter    | RT @ExtremeLiberal: Go @brianstelter for going after the "only elites" are concerned about our democratic process. @cnn #cnn        |
+{:.table-sql}
+
+

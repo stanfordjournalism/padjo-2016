@@ -1,0 +1,267 @@
+---
+title: articles/la-dog-licenses-sidebar
+stub: true
+description: |
+    lorem ipsum title title title
+---
+
+
+### Get popular names
+
+
+~~~sql
+SELECT Name, 
+    COUNT(*) AS ct
+FROM licenses 
+WHERE type = 'DOG'
+GROUP BY Name
+ORDER BY ct DESC
+LIMIT 10;
+~~~
+
+|  Name    | ct    |
+|----------+-------|
+|  NULL    | 2848  |
+|  MAX     | 1112  |
+|  BELLA   | 1075  |
+|  LUCKY   | 953   |
+|  ROCKY   | 905   |
+|  CHARLIE | 901   |
+|  BUDDY   | 876   |
+|  LUCY    | 858   |
+|  DAISY   | 857   |
+|  COCO    | 806   |
+{:.table-sql}
+
+
+### Get popular names by sex
+
+
+~~~sql
+SELECT 
+  Name, 
+  CASE 
+    WHEN sex_status IN ('S', 'F') THEN 'F' 
+    WHEN sex_status IN ('N', 'M') THEN 'M' 
+    ELSE NULL 
+  END AS sex,
+  COUNT(*) AS count
+FROM licenses 
+WHERE type = 'DOG'
+GROUP BY name, sex
+ORDER BY count DESC
+LIMIT 10;
+~~~
+
+|  Name     | sex | count  |
+|-----------+-----+--------|
+|  NULL     | M   | 1275   |
+|  NULL     | F   | 1216   |
+|  MAX      | M   | 1040   |
+|  BELLA    | F   | 1021   |
+|  LUCY     | F   | 838    |
+|  ROCKY    | M   | 837    |
+|  BUDDY    | M   | 831    |
+|  DAISY    | F   | 823    |
+|  CHARLIE  | M   | 774    |
+|  PRINCESS | F   | 727    |
+{:.table-sql}
+
+### Popular non-null dog names, by sex, ranked by dogs/100000
+
+
+~~~sql
+WITH dogs AS
+    (SELECT 
+          licenses.*,
+          CASE 
+            WHEN sex_status IN ('S', 'F') THEN 'F' 
+            WHEN sex_status IN ('N', 'M') THEN 'M' 
+            ELSE NULL 
+          END AS sex
+     FROM licenses
+     WHERE 
+        type = 'DOG' 
+        AND sex IS NOT NULL
+    )
+SELECT sex, COUNT(*) AS total
+FROM dogs
+GROUP BY sex
+ORDER BY sex;
+~~~
+
+
+|  sex | total  |
+|------+--------|
+|  F   | 53644  |
+|  M   | 57073  |
+{:.table-sql}
+
+
+### Popular non-null dog names, by sex, ranked by dogs/100000
+
+
+~~~sql
+WITH dogs AS
+    (SELECT 
+          licenses.*,
+          CASE 
+            WHEN sex_status IN ('S', 'F') THEN 'F' 
+            WHEN sex_status IN ('N', 'M') THEN 'M' 
+            ELSE NULL 
+          END AS sex
+     FROM licenses
+     WHERE 
+        type = 'DOG'
+        AND name IS NOT NULL 
+        AND sex IS NOT NULL),
+  tx AS 
+    (SELECT name, sex, 
+        COUNT(*) AS total
+      FROM dogs
+      GROUP BY name, sex),
+  xx AS (
+      SELECT sex, COUNT(*) AS total
+      FROM dogs
+      GROUP BY sex
+      ORDER BY sex)
+SELECT tx.name, tx.sex, 
+  tx.total, 
+  ROUND(100000.0 * tx.total / xx.total, 1) AS per_100k
+FROM tx
+INNER JOIN xx
+   ON xx.sex = tx.sex
+ORDER BY per_100k DESC
+LIMIT 10;
+~~~
+
+|  name     | sex | total | per_100k  |
+|-----------+-----+-------+-----------|
+|  BELLA    | F   | 1051  | 2011.6    |
+|  MAX      | M   | 1083  | 1946.9    |
+|  LUCY     | F   | 848   | 1623.1    |
+|  DAISY    | F   | 844   | 1615.4    |
+|  ROCKY    | M   | 880   | 1582.0    |
+|  BUDDY    | M   | 857   | 1540.6    |
+|  CHARLIE  | M   | 804   | 1445.4    |
+|  PRINCESS | F   | 754   | 1443.2    |
+|  LUCKY    | M   | 734   | 1319.5    |
+|  LOLA     | F   | 605   | 1158.0    |
+{:.table-sql}
+
+
+
+# Pop dog names with names
+
+~~~sql
+SELECT 
+  dognames.name, dognames.sex, 
+  dognames.per_100k AS dogs_per_100k,
+  babynames.per_100k_within_sex * 10 AS babies_per_1m,
+  dognames.total AS total_dogs, 
+  babynames.count AS total_babies
+FROM dognames
+INNER JOIN 
+  babynames
+    ON UPPER(babynames.name) = dognames.name
+      AND babynames.sex = dognames.sex
+WHERE total_dogs >= 10      
+ORDER BY dogs_per_100k DESC limit 10;
+~~~
+
+
+|  name     | sex | dogs_per_100k | babies_per_1m | total_dogs | total_babies  |
+|-----------+-----+---------------+---------------+------------+---------------|
+|  BELLA    | F   | 2011.6        | 2125.0        | 1051       | 3760          |
+|  MAX      | M   | 1946.9        | 1789.0        | 1083       | 3398          |
+|  LUCY     | F   | 1623.1        | 2550.0        | 848        | 4512          |
+|  DAISY    | F   | 1615.4        | 991.0         | 844        | 1754          |
+|  ROCKY    | M   | 1582.0        | 121.0         | 880        | 229           |
+|  BUDDY    | M   | 1540.6        | 14.0          | 857        | 27            |
+|  CHARLIE  | M   | 1445.4        | 875.0         | 804        | 1662          |
+|  PRINCESS | F   | 1443.2        | 151.0         | 754        | 267           |
+|  LUCKY    | M   | 1319.5        | 23.0          | 734        | 43            |
+|  LOLA     | F   | 1158.0        | 816.0         | 605        | 1443          |
+{:.table-sql}
+
+
+### Most popular dog names that aren't significantly popular for humans
+
+~~~sql
+SELECT 
+  dognames.name, dognames.sex, 
+  dognames.per_100k AS dogs_per_100k,
+  babynames.per_100k_within_sex * 10 AS babies_per_1m,
+  dognames.total AS total_dogs, 
+  babynames.count AS total_babies
+FROM dognames
+INNER JOIN 
+  babynames
+    ON UPPER(babynames.name) = dognames.name
+      AND babynames.sex = dognames.sex
+WHERE total_dogs >= 10
+  AND (total_babies < 100 OR babynames.name IS NULL)
+ORDER BY dogs_per_100k DESC limit 10;
+~~~
+
+|  name   | sex | dogs_per_100k | babies_per_1m | total_dogs | total_babies  |
+|---------+-----+---------------+---------------+------------+---------------|
+|  BUDDY  | M   | 1540.6        | 14.0          | 857        | 27            |
+|  LUCKY  | M   | 1319.5        | 23.0          | 734        | 43            |
+|  ROXY   | F   | 1114.0        | 45.0          | 582        | 80            |
+|  COCO   | F   | 1048.9        | 47.0          | 548        | 83            |
+|  GINGER | F   | 869.0         | 38.0          | 454        | 68            |
+|  LADY   | F   | 721.6         | 6.0           | 377        | 10            |
+|  LULU   | F   | 591.4         | 33.0          | 309        | 59            |
+|  BUSTER | M   | 548.3         | 9.0           | 305        | 17            |
+|  TEDDY  | M   | 546.5         | 48.0          | 304        | 91            |
+|  SHADOW | M   | 489.0         | 6.0           | 272        | 11            |
+{:.table-sql}
+
+
+
+### Average gender polarity of top dog names
+
+
+~~~sql
+
+~~~
+
+
+
+### Top breeds of dogs
+
+~~~sql
+SELECT "Breed 1" AS breed,
+  COUNT(*) AS total_dogs
+FROM licenses
+GROUP BY breed
+ORDER BY total_dogs DESC 
+LIMIT 10;
+~~~
+
+### Number of zip codes
+
+~~~sql
+SELECT 
+  "Zip Code" AS zipcode,
+  COUNT(*) AS total_dogs
+FROM licenses
+GROUP BY zipcode
+ORDER BY total_dogs DESC;
+
+~~~
+
+### Counties for which Chihuauas
+
+~~~sql
+SELECT 
+  "Zip Code" AS zipcode,
+  "Breed 1" AS breed,
+   COUNT(*) AS total_dogs
+  FROM licenses
+  WHERE type = 'DOG'
+  GROUP BY breed, zipcode
+  ORDER BY zipcode, total_dogs DESC;
+~~~
+

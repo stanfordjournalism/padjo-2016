@@ -11,11 +11,10 @@
             <% if (agenda = lesson.agenda) %>
                 <% agenda.each do |item| %>
                     <div class="item">
-                        <h5 class="title"><%=link_to item.title, item.url %></h5>
+                        <h5 class="title"><%=link_to_unless item.url.blank?, item.title, item.url %></h5>
                         <div class="description">
                             <%=item.description %>
                         </div>
-
                     </div>
                 <% end %>
             <% end %>
@@ -27,8 +26,10 @@
                     <div class="item">
                         <h6 class="title"><%=link_to a.contextual_title, a.url %></h6>
                         <div class="description">
+
                             <div class="date">
-                            <%= a.due_date.strftime('%A') %>,
+
+                            Due: <%= a.due_date.strftime('%A') %>,
                             <%=a.friendly_short_deadline%>
                             </div>
 

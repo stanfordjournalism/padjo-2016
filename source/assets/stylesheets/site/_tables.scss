@@ -1,4 +1,6 @@
 
+
+
 .table {
   border-collapse: collapse;
   border-spacing: 0;
@@ -72,6 +74,14 @@ table.table-dual{
 }
 
 
+.table-mono-desc{
+  td:first-child{
+    width: 20%;
+  font-family: $font-family-monospace;
+  }
+
+
+}
 td .hi{
   background: yellow;
 }

@@ -1,0 +1,113 @@
+---
+title: The Midterm Datasets
+description: |
+  The data for the midterm in database form.
+---
+
+
+# Datasets to download
+
+While you will be provided with printouts of what a data table looks like, it's best to get acclimated before the midterm starts.
+
+The [midterm-datasets.sqlite](/files/data/midterm/midterm-datasets.sqlite) will have all of the data we'll use. Go ahead and download it.
+
+The midterm may refer to the [simplefolks.sqlite database, which you can download here](/files/data/starterpack/simplefolks.sqlite).
+
+
+## Exercises
+
+I've been trying to put together spreadsheets of questions for each dataset, but it's been pretty repetitive (here [are some relating to Twitter](https://docs.google.com/spreadsheets/d/1GKH-OYPt2kG8r8BLnHMiouLq5Q9hz8o5DElG_4EylO8/edit)).
+
+I don't intend to give you anything harder than what's [found on the spreadsheet of queries](https://docs.google.com/spreadsheets/d/11g7klkE409-j9JR-3e6Qv2U9q22uz-TXTjirIh6pe40/edit#gid=1595620166) that accompanies the [Election Predictions with SQL](http://2016.padjo.org/assignments/election-predictions-in-sql/)
+
+
+
+
+# The data in Midterm Datasets
+
+A brief description of where the data in each table came from.
+
+
+## `electoral_votes` U.S. Presidency Electoral Votes
+
+The popular vote per major presidential party, from 1972 to 2012, such that every state has a vote value for `d` and `r` (Democrats and Republicans), making it easy to compare how much a state has changed politically over the years.
+
+Via electoral-vote.com, from their page: [Data Galore, the Presidency](http://www.electoral-vote.com/evp2016/Info/datagalore.html)
+
+
+
+
+
+## U.S. Congress Legislators
+
+Data curated by the [unitedstates.io project](https://github.com/unitedstates) and curated by [Hello World Data](https://github.com/helloworlddata/congress-legislators)
+
+
+### `congress_legislators`  Legislator biographies
+
+Biographical information about each legislator, including latest term in office.
+
+
+
+
+### `congress_terms` Legislative terms
+
+Joined to the bio information table via `bioguide_id`, contains the start, end, state, and position of each term, because each person can switch parties and chambers.
+
+
+
+
+## Los Angeles County Sheriff
+
+Three tables from the L.A. Sheriff, all related to deputy-involved shooting incidents. Thanks to the [Public Safety Open Data Portal for curating this data from Socrata](https://publicsafetydataportal.org/officer-involved-shooting-data/).
+
+
+### `lacs_shootings` Shooting Incidents involving Los Angeles Sheriff's Deputies
+
+[A spreadsheet of incident-level information in which a deputy shot at someone](https://data.lacounty.gov/Criminal/All-Shooting-Incidents-for-Deputy-Involved-Shootin/xutq-azb6).
+
+
+
+### `lacs_deputies` Deputy Details
+
+[Details specific to the deputy](https://data.lacounty.gov/Criminal/Deputy-Details-Hit-Shooting-Incidents-and-Non-Hit-/7jc3-gsk7), including race/gender/age, years of service, and number of previous shootings.
+
+
+### `lacs_people` People Details
+
+[Details specific to the person shot by an LA deputy](https://data.lacounty.gov/Criminal/Person-Details-Hit-Shooting-Incidents-and-Non-Hit-/t8vk-5p9p), including demographics and past background.
+
+
+
+##  `tweets` Tweets from Election 2016
+
+Tweets and account information from selected presidential candidates, staff, and political reporters. Data gathered courtesy [sferik's handy t tool](https://github.com/sferik/t).
+
+### `tw_users` Twitter users
+
+Profile information for each user, including how they describe themselves, when they first started tweeting, and how many friends they have.
+
+### `tweets` Tweets
+
+The most recently available tweets as of early Monday, Nov. 7, right before the 2016 election. Contains the (lowercased) author, the timestamp of the tweet, and the text. Every tweet as a unique ID.
+
+
+
+### `tw_hashtags` Mentions
+
+If you want to __mention__ another user  in a tweet and, to have Twitter notify them, you have to refer to that user by their screenname with a prepended `@` sign, i.e. "Hello @dancow".
+
+This table contains every time a user has been mentioned in a Tweet, in the given dataset.
+
+### `tw_hashtags` Hashtags
+
+Prepending a poundsign in front of a word is how you signal you want to make a term happen. It's similar to mentions, but with just words.
+
+<iframe width="853" height="480" src="https://www.youtube.com/embed/jjt9Qx9MBPk?rel=0" frameborder="0" allowfullscreen></iframe>
+
+
+
+
+
+
+

@@ -1,0 +1,25 @@
+---
+title: Assignments Table
+layout: :page_layout
+---
+
+
+<p>
+    <%= assignments.length %>
+</p>
+
+<table class="table table-sm">
+
+
+    <% assignments.each do |a| %>
+
+        <tr>
+            <td><%=link_to a.path.split('/')[-2], a.url %></td>
+            <td><%=a.type%></td>
+            <td><%=a.due_date.strftime('%Y-%m-%d')%></td>
+            <td><%=a.points%></td>
+        </tr>
+
+
+    <% end %>
+</table>

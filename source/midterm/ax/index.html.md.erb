@@ -1,0 +1,1042 @@
+---
+title: Midterm SQL 
+description: |
+  A Midterm of SQL. Read the questions. Write the answers on pieces of paper.
+due_date: 2016-11-10
+due_time: 1:30 PM
+points: 100
+type: Test
+deliverables:
+  - Hand in the test
+  - Hand in your written cheat sheet.
+requirements:
+  - |
+    Relax!
+---
+
+-----------------
+
+# Simple Data
+
+Used for "Match the query" and "Write out the query".
+
+
+## "people" table
+
+~~~sql
+SELECT *
+FROM people;
+~~~
+
+
+
+|   name   | sex | age |  eyes |
+|----------|-----|-----|-------|
+| Austin   | M   |  10 | blue  |
+| Blair    | M   |  32 | brown |
+| Carolina | F   |  28 | brown |
+| Dani     | F   |  22 | blue  |
+| Eliza    | F   |  16 | blue  |
+{:.table-sql}
+
+
+## "homes" table
+
+~~~sql
+SELECT * 
+FROM homes;
+~~~
+
+
+| owner_name |   area  | value |
+|------------|---------|-------|
+| Austin     | urban   |   500 |
+| Blair      | suburbs |   800 |
+| Carolina   | suburbs |   100 |
+| Carolina   | urban   |   200 |
+| Dani       | country |   400 |
+| Donald     | urban   |   200 |
+| Eliza      | urban   |   100 |
+{:.table-sql}
+
+---------------------
+
+
+# Match the query
+
+Just match the right query to the given result. (1 point each)
+
+### Example: Get a sum of home values, where the owner is female, grouped by eye color of the owner and area, ordered by highest total and then area (alphabetically)
+
+(this is the toughest kind of query you'll have to do)
+
+
+|  eyes  | area    | total  |
+|--------+---------+--------|
+|  blue  | country | 400    |
+|  brown | urban   | 200    |
+|  brown | suburbs | 100    |
+|  blue  | urban   | 100    |
+{:.table-sql}
+
+
+The __answer__ to this is __XC__:
+
+#### XA.
+
+~~~sql
+SELECT 
+  eyes, area, value AS total
+FROM homes
+INNER JOIN 
+   people 
+   ON people.sex = 'F'
+ORDER BY total DESC;
+~~~
+
+
+#### XB.
+
+~~~sql
+SELECT 
+  eyes, area, SUM(value) AS total
+FROM homes
+INNER JOIN 
+   people 
+WHERE people.name = homes.owner_name
+  AND sex = 'F'
+GROUP BY eyes, area
+ORDER BY total, area;
+~~~
+
+
+#### XC.
+
+
+~~~sql
+SELECT 
+  eyes, area, SUM(value) AS total
+FROM homes
+INNER JOIN 
+   people 
+   ON people.name = homes.owner_name
+WHERE sex = 'F'
+GROUP BY eyes, area
+ORDER BY total DESC,
+          area ASC;
+~~~
+
+
+
+### 1. From "people", select all the males
+
+The result:
+
+|  name   | sex | age | eyes   |
+|---------+-----+-----+--------|
+|  Austin | M   | 10  | blue   |
+|  Blair  | M   | 32  | brown  |
+{:.table-sql}
+
+
+##### 1A.
+
+~~~sql
+SELECT *
+FROM people ;
+~~~
+
+
+##### 1B.
+
+~~~sql
+SELECT *
+FROM people 
+WHERE sex = 'M';
+~~~
+
+##### 1C.
+
+~~~sql
+SELECT 'M'
+FROM people;
+~~~
+
+
+
+---------------
+
+
+### 2. List the values of the first 3 "homes", in order of value
+
+The result:
+
+|  value  |
+|---------|
+|  800    |
+|  500    |
+|  400    |
+{:.table-sql}
+
+
+
+##### 2A.
+
+~~~sql
+SELECT value
+FROM homes
+ORDER BY 
+  value DESC 
+LIMIT 3;
+~~~
+
+
+##### 2B. 
+
+
+~~~sql
+SELECT *
+FROM homes
+LIMIT 3
+ORDER BY 
+  value DESC; 
+~~~
+
+
+##### 2C. 
+
+
+~~~sql
+SELECT *
+FROM homes
+WHERE value > 400;
+~~~
+
+
+
+### 3. Count the number of people with brown eyes
+
+
+|  COUNT(*)  |
+|------------|
+|  2         |
+{:.table-sql}
+
+
+##### 3A.
+
+~~~sql
+SELECT *
+FROM people
+GROUP BY eyes;
+~~~
+
+##### 3B.
+
+~~~sql
+SELECT eyes
+FROM people
+WHERE eyes = "brown";
+~~~
+
+
+##### 3C.
+
+~~~sql
+SELECT COUNT(*)
+FROM people
+WHERE eyes = "brown";
+~~~
+
+
+
+### 4. Count the number of people grouped by sex, in descending order of count
+
+
+|  sex | the_count  |
+|------+------------|
+|  F   | 3          |
+|  M   | 2          |
+{:.table-sql}
+
+##### 4A.
+
+~~~sql
+SELECT 
+  COUNT(*) AS the_count
+FROM people;
+~~~
+
+##### 4B.
+
+~~~sql
+SELECT sex, 
+  COUNT(*) AS the_count
+FROM people
+GROUP BY sex;
+~~~
+
+##### 4C.
+
+~~~sql
+SELECT GROUP BY(sex), 
+  COUNT(*) AS the_count
+FROM people;
+~~~
+
+### 5. List all the fields for the people over 20, in order of descending age 
+
+|  name     | sex | age | eyes   |
+|-----------+-----+-----+--------|
+|  Blair    | M   | 32  | brown  |
+|  Carolina | F   | 28  | brown  |
+|  Dani     | F   | 22  | blue   |
+{:.table-sql}
+
+
+##### 5A.
+
+~~~sql
+SELECT *
+FROM people
+WHERE age > 20
+ORDER BY age;
+~~~
+
+##### 5B.
+
+~~~sql
+SELECT *
+FROM people
+WHERE age > 20
+ORDER BY age DESC;
+~~~
+
+##### 5C.
+
+~~~sql
+SELECT *
+FROM people
+ORDER BY age DESC;
+~~~
+
+
+### 6. List the sum of the value of homes by area, in order of the sum per area.
+
+
+
+|  area    | total  |
+|----------+--------|
+|  urban   | 1000   |
+|  suburbs | 900    |
+|  country | 400    |
+{:.table-sql}
+
+
+##### 6A.
+
+~~~sql
+SELECT area, 
+  SUM(value) AS total
+FROM homes 
+GROUP BY area
+ORDER BY total DESC;
+~~~
+
+##### 6B.
+
+~~~sql
+SELECT area, 
+  value AS total
+FROM homes 
+GROUP BY area
+ORDER BY total DESC;
+~~~
+
+
+##### 6C.
+
+~~~sql
+SELECT area, 
+  SUM(value) AS total
+FROM homes 
+ORDER BY total DESC;
+~~~
+
+
+### 7. Join all the "homes" to their proper owner in "people", in reverse alphabetical order of the owner's name
+
+
+|  owner_name | area    | value | name     | sex | age | eyes   |
+|-------------+---------+-------+----------+-----+-----+--------|
+|  Eliza      | urban   | 100   | Eliza    | F   | 16  | blue   |
+|  Dani       | country | 400   | Dani     | F   | 22  | blue   |
+|  Carolina   | suburbs | 100   | Carolina | F   | 28  | brown  |
+|  Carolina   | urban   | 200   | Carolina | F   | 28  | brown  |
+|  Blair      | suburbs | 800   | Blair    | M   | 32  | brown  |
+|  Austin     | urban   | 500   | Austin   | M   | 10  | blue   |
+{:.table-sql}
+
+##### 7A.
+
+~~~sql
+SELECT * 
+FROM homes
+ORDER BY 
+  homes.owner_name DESC;
+~~~
+
+##### 7B.
+
+~~~sql
+SELECT * 
+FROM homes
+INNER JOIN 
+  people ON 
+  people.name = homes.owner_name 
+ORDER BY 
+  homes.owner_name DESC;
+~~~
+
+##### 7C.
+
+~~~sql
+SELECT * 
+FROM homes
+WHERE
+  people.name = homes.owner_name 
+ORDER BY homes.owner_name DESC;
+~~~
+
+
+
+
+
+### 8. Find the homes owned by men, in descending order of value
+
+
+|  owner_name | area    | value  |
+|-------------+---------+--------|
+|  Blair      | suburbs | 800    |
+|  Austin     | urban   | 500    |
+{:.table-sql}
+
+
+##### 8A.
+
+~~~sql
+SELECT 
+  owner_name, area, value
+FROM homes
+INNER JOIN 
+  people ON 
+WHERE sex = 'M'
+ORDER BY owner_name DESC;
+~~~
+
+##### 8B.
+
+~~~sql
+SELECT 
+  owner_name, area, value
+FROM homes
+WHERE  people.name = owner_name 
+  AND sex = 'M'
+ORDER BY owner_name DESC;
+~~~
+
+##### 8C.
+
+~~~sql
+SELECT 
+  owner_name, area, value
+FROM homes
+INNER JOIN 
+  people ON 
+    people.name = owner_name 
+WHERE sex = 'M'
+ORDER BY owner_name DESC;
+~~~
+
+
+### 9. Count the number of homes owned by women
+
+
+|  COUNT(*)  |
+|------------|
+|  4         |
+{:.table-sql}
+
+
+##### 9A.
+
+~~~sql
+SELECT COUNT(*) 
+FROM homes
+INNER JOIN 
+  people ON 
+  homes.owner_name = people.name
+WHERE sex = 'F';
+~~~
+
+
+##### 9B.
+
+~~~sql
+SELECT sex, COUNT(*) 
+FROM homes
+INNER JOIN 
+  people ON 
+  homes.owner_name = people.name
+~~~
+
+
+##### 9C.
+
+~~~sql
+SELECT COUNT(*) 
+FROM homes
+INNER JOIN 
+  people 
+WHERE sex = 'F';
+~~~
+
+
+### 10. List the count and total value of homes, grouped by owner, in descending order of total value
+
+
+
+|  owner_name | total_value | total_count  |
+|-------------+-------------+--------------|
+|  Blair      | 800         | 1            |
+|  Austin     | 500         | 1            |
+|  Dani       | 400         | 1            |
+|  Carolina   | 300         | 2            |
+|  Eliza      | 100         | 1            |
+{:.table-sql}
+
+
+##### 10A.
+
+~~~sql
+SELECT GROUP BY(owner_name), 
+  SUM(value) AS total_value,
+  COUNT(*) AS total_count
+FROM homes
+INNER JOIN 
+  people ON 
+  homes.owner_name = people.name;
+~~~
+
+##### 10B.
+
+~~~sql
+SELECT owner_name, 
+  SUM(value) AS total_value,
+  COUNT(*) AS total_count
+FROM homes
+INNER JOIN 
+  people ON 
+  homes.owner_name = people.name
+GROUP BY owner_name
+ORDER BY total_value DESC;
+~~~
+
+##### 10C.
+
+~~~sql
+SELECT owner_name, 
+  SUM(value) AS total_value,
+  COUNT(*) AS total_count
+FROM homes
+INNER JOIN 
+  people ON 
+  homes.owner_name = people.name;
+~~~
+
+
+### 11. List all homes owned by people whose names begin with 'D'
+
+Hints:
+
+- No join or aggregation needed, just making sure you know how to use a function.
+
+- Use the substring function, `SUBSTR`, which the first argument is the string/column to "slice", the second argument is where to start cutting from, and the third argument is where to end the slice:
+
+
+~~~sql
+SELECT SUBSTR(owner_name, 1, 3) AS letters
+FROM homes
+LIMIT 3;
+~~~
+
+| letters |
+|---------|
+| Aus     |
+| Bla     |
+| Car     |
+{:.table-sql}
+
+(/ end of hints)
+
+
+
+**The result for the query for this given question:**
+
+
+
+
+|  first_initial | owner_name | area    | value  |
+|----------------+------------+---------+--------|
+|  D             | Dani       | country | 400    |
+|  D             | Donald     | urban   | 200    |
+{:.table-sql}
+
+
+##### 11A.
+
+~~~sql
+SELECT SUBSTR(owner_name, 1, 1) AS 'D',
+  homes.*
+FROM homes;
+~~~
+
+
+##### 11B.
+
+~~~sql
+SELECT SUBSTR(owner_name, 1, 1) AS first_initial,
+  homes.*
+FROM homes
+WHERE first_initial = 'D';
+~~~
+
+
+##### 11C.
+
+~~~sql
+SELECT SUBSTR(owner_name, 1, 1) 
+FROM homes
+WHERE first_initial = 'D';
+~~~
+
+
+
+----------------
+
+
+
+
+# Write out the query
+
+(2 points each)
+
+
+The results are provided, just write the query to get the answer.
+
+### Example: List all the homes owned by women, in order of value
+
+The results:
+
+|  owner_name | area    | value  |
+|-------------+---------+--------|
+|  Dani       | country | 400    |
+|  Carolina   | urban   | 200    |
+|  Carolina   | suburbs | 100    |
+|  Eliza      | urban   | 100    |
+{:.table-sql}
+
+
+The answer:
+
+
+~~~sql
+SELECT homes.*
+FROM homes
+INNER JOIN
+  people
+  ON people.name = homes.owner_name
+WHERE people.sex = 'F'
+ORDER BY value DESC;
+~~~
+
+
+
+
+### 1. List the homes owned by "Carolina"
+
+
+|  owner_name | area    | value  |
+|-------------+---------+--------|
+|  Carolina   | suburbs | 100    |
+|  Carolina   | urban   | 200    |
+{:.table-sql}
+
+
+
+### 2. List all the men in order of oldest to youngest
+
+
+|  name   | sex | age | eyes   |
+|---------+-----+-----+--------|
+|  Blair  | M   | 32  | brown  |
+|  Austin | M   | 10  | blue   |
+{:.table-sql}
+
+
+
+### 3. Sum the values of homes
+
+
+
+|  SUM(value)  |
+|--------------|
+|  2300        |
+{:.table-sql}
+
+
+
+### 4. Calculate the count of people grouped by eye color, in ascending order of the count
+
+(requires group-by-aggregation, but not a JOIN)
+
+
+|  eyes  | the_count  |
+|--------+------------|
+|  brown | 2          |
+|  blue  | 3          |
+{:.table-sql}
+
+
+### 5. List all homes owned by brown-eyed men
+
+(requires a JOIN, but not an aggregation)
+
+
+
+|  owner_name | area    | value  |
+|-------------+---------+--------|
+|  Blair      | suburbs | 800    |
+{:.table-sql}
+
+
+
+
+
+
+
+
+
+---------------------
+
+
+
+
+# Twitter Joining
+
+A set of tweets and hashtags from those tweets from Election 2016. The hypothetical results of the queries are given, just write the query.
+
+NOTE: Only do questions 1, which just requires the `tweets` table.
+
+Question 2 is extra credit.
+
+
+
+## Twitter Tables
+
+
+### "tweets" - A list of tweets
+
+
+|  ID                 | time_tweeted        | screen_name     | Text                                                                                                                                |
+|---------------------+---------------------+-----------------+-------------------------------------------------------------------------------------------------------------------------------------|
+|  789104196003868673 | 2016-10-20 14:01:15 | piersmorgan     | My new @DailyMail column is about last night's final presidential TV debate. Posting soon. #Trump #Clinton https://t.co/lxEkbMPHAr  |
+|  789102711551635456 | 2016-10-20 13:55:21 | creynoldsnc     | Get out there, North Carolina. Let's #TurnNCBlue https://t.co/6g0EeYDfWa                                                            |
+|  789101425557110784 | 2016-10-20 13:50:15 | brianstelter    | A first look at last night's #debate ratings... coming up next on @CNN TV with @CarolCNN...                                         |
+|  789095747635572736 | 2016-10-20 13:27:41 | realdonaldtrump | Thank you America! #MAGA                   |
+|  789088297989640192 | 2016-10-20 12:58:05 | brianstelter    | RT @ExtremeLiberal: Go @brianstelter for going after the "only elites" are concerned about our democratic process. @cnn #cnn        |
+{:.table-sql}
+
+### tw_hashtags (optional table for optional question)
+
+Hashtags as extracted from the text of tweet
+
+
+For example, a tweet with ID `101`, with this text:
+
+> I bought and sold my first #apple computer
+
+Has a corresponding entry in `tw_hashtags`  of:
+
+| tweet_id |   tag   |
+|----------|---------|
+|      101 | apple   |
+{:.table-sql}
+
+
+(note: a tweet can have more than one hashtag, but that's not important for this section.)
+
+Here's a sample from the table `tw_hashtags:
+
+
+|      tweet_id      |             tag              |
+|--------------------|------------------------------|
+| 325013411014520832 | aspen                        |
+| 325624214998626305 | regionaldirector             |
+| 325624214998626305 | timbayly                     |
+| 325624214998626305 | dannythomasmemorialpavillion |
+| 326138349939212288 | celebapprentice              |
+{:.table-sql}
+
+
+
+## Example: Get the 5 hashtags most frequently used in tweets sent on July 2016
+
+
+Result:
+
+|     tag      | hcount |
+|--------------|--------|
+| rncincle     |    349 |
+| demsinphilly |    167 |
+| hannity      |    161 |
+| trumppence16 |     83 |
+| womenwhowork |     78 |
+{:.table-sql}
+
+
+
+Query:
+
+
+
+~~~sql
+SELECT tag, 
+   COUNT(*) AS hcount
+FROM tw_hashtags
+INNER JOIN 
+  tweets ON
+  tw_hashtags.tweet_ID = tweets.ID
+WHERE 
+   SUBSTR(time_tweeted, 1, 7) = "2016-07"
+   AND
+GROUP BY tag 
+ORDER BY hcount DESC
+LIMIT 5;
+~~~
+
+(The two following questions are not this difficult; this just is a reminder of all the concepts and where they go)
+
+
+## Questions
+
+
+### T1. Count the tweets that mention "vote" somewhere in their text 
+
+(2 points)
+
+Hint: Remember to use `LIKE` and the wildcard, `%`, to see if some text string is part of another text string.
+
+
+
+Expected answer:
+
+
+|  tcount  |
+|----------|
+|  3978    |
+{:.table-sql}
+
+
+### T2. (3 points Extra credit) 
+
+(3 points)
+
+
+The prompt: 
+
+> For the user named 'realdonaldtrump' list his 5 most used hashtags when tweeting in the hours between midnight and 5 A.M.
+
+
+Basically, find all tweets by this user in that time period, connect them to their hashtags, then do a group count. All of the components are in in the example.
+
+
+##### Hints
+
+
+Hint: Don't forget that we just want it for the user with a screen name of `realdonaldtrump`
+
+
+Hint: To get a tweet that was posted at midnight, i.e. `00`, you can use `SUBSTR` to extract digits. Or you should just use `STRFTIME`:
+
+~~~sql
+SELECT * from tweets 
+WHERE 
+   STRFTIME("%H", time_tweeted) = "00"
+~~~
+
+|  ID                 | Posted at           | Screen name   | Text                                                                                                                                                          |
+|---------------------+---------------------+---------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|  795430555739373568 | 2016-11-07 00:59:57 | ingrahamangle | Sadly 12,000 ppl were unable to get into the #Minneapolis Event bc fire marshal shut it down! @realDonaldTrump https://t.co/HNr2BTcVJ8                        |
+{:.table-sql}
+
+(/end of hints)
+
+
+
+
+The expected result of the query:
+
+
+|          tag          | hcount |
+|-----------------------|--------|
+| trump2016             |     94 |
+| makeamericagreatagain |     74 |
+| bigleaguetruth        |     57 |
+| debate                |     45 |
+| maga                  |     41 |
+{:.table-sql}
+
+
+
+
+
+
+
+
+
+# Officer-involved shootings
+
+
+## Data
+
+These data tables are example, simplified excerpts from the L.A. county shooting incidents. They do not represent the LA county's actual data but have been simplified for exam results.
+
+
+### deputies
+
+
+
+
+| INCIDENT NUMBER | INCIDENT DATE |     INCIDENT TYPE     | DEPUTY RACE | DEPUTY AGE | YEARS OF SERVICE | # OF PREVIOUS SHOOTINGS |
+|-----------------|---------------|-----------------------|-------------|------------|------------------|-------------------------|
+|         1000914 | 2016-10-31    | HIT SHOOTING INCIDENT | FILIPINO    |         47 |                0 |                       0 |
+|         1000914 | 2016-10-31    | HIT SHOOTING INCIDENT | HISPANIC    |         30 |                1 |                       0 |
+|         1000684 | 2016-02-14    | HIT SHOOTING INCIDENT | HISPANIC    |         32 |                8 |                       0 |
+|         1000874 | 2016-09-08    | HIT SHOOTING INCIDENT | WHITE       |         26 |                4 |                       0 |
+|         1000450 | 2013-07-19    | HIT SHOOTING INCIDENT | HISPANIC    |         44 |               18 |                       1 |
+{:.table-sql}
+
+
+
+
+### people
+
+A list of people (who were shot) connected to each shooting incident.
+
+
+`0` and `1` are meant to stand for "false" and "true", respectively.
+
+
+
+|  INCIDENT NUMBER | PERSON AGE | PERSON RACE | DECEASED | WOUNDED | MENTAL HEALTH CONCERNS | ON PAROLE  |
+|------------------+------------+-------------+----------+---------+------------------------+------------|
+|  1000472         | 46         | WHITE       | 0        | 0       | 0                      | 0          |
+|  1000380         | 35         | HISPANIC    | 0        | 0       | 0                      | 1          |
+|  1000467         | 49         | BLACK       | 1        | 0       | 0                      | 1          |
+|  1000332         | 25         | HISPANIC    | 0        | 0       | 0                      | 1          |
+|  1000654         | 53         | BLACK       | 1        | 0       | 0                      | 0       |
+{:.table-sql}
+
+
+
+## Example
+
+To get the race of the deputy and person in the 5 most recent incidents in which the person died:
+
+(remember to quote fields that have non-alphanumeric characters, i.e. `"DEPUTY RACE"`)
+
+
+~~~sql
+SELECT people."INCIDENT NUMBER",
+  "INCIDENT DATE", 
+  "PERSON RACE", 
+  "DEPUTY RACE"
+FROM  people
+INNER JOIN 
+  deputies ON
+     deputies."INCIDENT NUMBER" = people."INCIDENT NUMBER"
+WHERE "DECEASED" = 1
+ORDER BY "INCIDENT DATE"  DESC
+LIMIT 5;
+~~~
+
+| INCIDENT NUMBER | INCIDENT DATE | PERSON RACE | DEPUTY RACE |
+|-----------------|---------------|-------------|-------------|
+|         1000896 | 2016-10-14    | HISPANIC    | HISPANIC    |
+|         1000895 | 2016-10-14    | BLACK       | WHITE       |
+|         1000894 | 2016-10-14    | WHITE       | HISPANIC    |
+|         1000874 | 2016-09-14    | WHITE       | WHITE       |
+|         1000874 | 2016-09-14    | WHITE       | WHITE       |
+{:.table-sql}
+
+
+
+## Questions
+
+### P1. Get the count of incidents grouped by the person's race and the deputy's race, in descending order of incident count 
+
+
+(3 points)
+
+
+Write out this query. It requires a `JOIN` and `GROUP BY`. And remember to quote field names, i.e. `"DEPUTY RACE"`, when necessary. And alias the count of incidents as `'icount'` (see the header below)
+
+Example result:
+
+
+| PERSON RACE | DEPUTY RACE | icount |
+|-------------|-------------|--------|
+| HISPANIC    | HISPANIC    |     65 |
+| HISPANIC    | WHITE       |     42 |
+| BLACK       | HISPANIC    |     25 |
+| BLACK       | WHITE       |     23 |
+| WHITE       | WHITE       |      7 |
+| WHITE       | HISPANIC    |      3 |
+{:.table-sql}
+
+
+
+
+
+### P2. Essay SQL
+
+(6 points)
+
+A lot of police shootings analyses focus on race of officer and subject. But there are often many other aspects to the data.
+
+
+1. Describe a question you have of the data.
+2. Tell me why it's interesting, or at least more interesting to you beyond total number of shootings and race of the persons involved.
+3. Write out the SQL query using the `deputies` and/or the `people` tables.
+4. Sketch out the table results. They don't have to be correct answers, since you don't have the whole data at hand. I'm looking to see what you _expect_ the data's _format_ to look like, based on your query.
+
+Your query for #4 doesn't have to be as complicated as the example or previous problem. But it should have at least:
+
+1. A filtering of the data by some condition
+2. An aggregation (count, average, max, min) **or** a JOIN statement between people and deputies.
+3. Be selective of the columns, i.e. don't use `*`
+
+
+In other words, I want something more complicated than this:
+
+~~~sql
+SELECT * FROM deputies
+LIMIT 5;
+~~~
+
+
+
+
+
+

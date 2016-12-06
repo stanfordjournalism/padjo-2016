@@ -1,0 +1,415 @@
+---
+title: assignments/election-stock-shock-sql
+stub: true
+due_date: 2016-11-17
+points: 10
+type: Homework
+description: |
+    lorem ipsum title title title
+---
+
+
+The story:
+
+https://www.washingtonpost.com/business/mr-business-goes-to-washington-now-what/2016/11/12/8c7f7846-a6e2-11e6-ba59-a7d93165c6d4_story.html
+
+
+
+# Query review fun
+
+## Just filtering
+
+
+### Daily closing price for Corrections Corp (CXW)
+
+
+So what happened? http://www.bloomberg.com/news/articles/2016-08-18/prison-reits-sink-on-report-u-s-to-end-private-facility-use
+
+~~~sql
+SELECT date, closing_price
+FROM stock_prices 
+WHERE symbol = "CXW";
+~~~
+
+Exporting that data and importing into Google Spreadsheets and making a chart ([see interactive version](https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=0):
+
+<a href="https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=0">
+<img src="images/cxw-01-line-chart.png" alt="cxw-01-line-chart.png">
+</a>
+
+
+### CXW daily price the month before and week after the election
+
+~~~sql
+SELECT date, closing_price
+FROM stock_prices 
+WHERE 
+  date BETWEEN '2016-10-01' AND '2016-11-15'
+  AND symbol = 'CXW'
+~~~
+
+<a href="https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=591617120"><img src="images/cxw-02-election-line-chart.png" alt="cxw-02-election-line-chart.png"></a>
+
+### CXW compared to its peers
+
+We know from [Mother Jones's investigations](http://www.motherjones.com/politics/2016/10/corrections-corporation-america-private-prison-rebranding) that CXW no longer has a name -- Correction Corporation of America -- that makes it sound like prison company. But with its fun sounding new name, __CoreCivic__, maybe it's in a different category?
+
+The `stock_shock.sqlite` database contains a __companies__ table, which contains company information that can be downloaded from [NASDAQ](http://www.nasdaq.com/screening/company-list.aspx), including "sector", "sub_industry", and market cap. 
+
+Let's look up the meta information for `CXW`
+
+
+
+~~~sql
+SELECT *
+FROM companies
+WHERE symbol = 'CXW';
+~~~
+
+I guess owning prisons does mean you'll be owning real estate...
+
+|  symbol | name            | last_sale | market_cap   | ipo_year | sector            | sub_industry                  | nasdaq_url                        |
+|---------+-----------------+-----------+--------------+----------+-------------------+-------------------------------+-----------------------------------|
+|  CXW    | CoreCivic, Inc. | 20.8      | 2450000000.0 |          | Consumer Services | Real Estate Investment Trusts | http://www.nasdaq.com/symbol/cxw  |
+{:.table-sql}
+
+"Consumer Services" obviously contains a lot of companies. Let's do a quick group-by count to see the top 10 kind of "Consumer Services" companies:
+
+
+~~~sql
+SELECT 
+  sub_industry,
+  COUNT(*) AS xcount
+FROM companies
+WHERE sector = 'Consumer Services'
+GROUP BY sub_industry
+ORDER BY xcount DESC
+LIMIT 10;
+~~~
+
+Looks like there's a lot of companies in CXW's "sub_industry" of 'Real Estate Investment Trusts'.
+
+|  sub_industry                       | xcount  |
+|-------------------------------------+---------|
+|  Real Estate Investment Trusts      | 207     |
+|  Restaurants                        | 61      |
+|  Other Consumer Services            | 53      |
+|  Other Specialty Stores             | 37      |
+|  Clothing/Shoe/Accessory Stores     | 36      |
+|  Hotels/Resorts                     | 34      |
+|  Television Services                | 29      |
+|  Broadcasting                       | 26      |
+|  Marine Transportation              | 24      |
+|  Department/Specialty Retail Stores | 21      |
+{:.table-sql}
+
+
+Let's graph the election results for all 207 'Real Estate Investment Trusts'. Here are two approaches using subqueries:
+
+
+#### Using IN
+
+First, make sure you know how to select just the `symbol` for all companies that have a `sub_industry` of 'Real Estate Investment Trusts':
+
+~~~sql
+SELECT symbol
+FROM companies
+WHERE sub_industry = 'Real Estate Investment Trusts';
+~~~
+
+This produces a single-column list, which can be passed into the `IN` expression, which normally takes a list of strings:
+
+~~~sql
+SELECT * FROM mydata 
+WHERE name IN('Donald', 'Hillary', 'Gary', 'Evan');
+~~~
+
+But, we can pass the result of a single-column subquery, and that saves us from having to type out 200+ things to match.
+
+Use the previous query that filtered for CXW's stock near Election Day, and just throw in an `IN` expression with the subquery to replace `symbol = 'CXW'`.
+
+We also need to include `symbol` as a column to return, so we know which date/closing_price belongs to which:
+
+~~~sql
+SELECT symbol, date, closing_price
+FROM stock_prices 
+WHERE 
+  date BETWEEN '2016-10-01' AND '2016-11-15'
+  AND symbol IN
+    (SELECT symbol
+      FROM companies
+      WHERE sub_industry = 'Real Estate Investment Trusts'
+    );
+~~~
+
+#### Doing an INNER JOIN
+
+The use of the subquery above, if I had to be honest, feels icky to me. It's actually faster, for our purposes, though I couldn't explain to you why. I just don't like the look of it.
+
+Luckily, if you think the above subquery looks messy, you can always fall back on good ol JOIN clause, since really, what we need to do is join `companies` and `stock_prices` together:
+
+
+~~~sql
+SELECT companies.symbol, stock_prices.date, closing_price
+FROM 
+  stock_prices 
+INNER JOIN 
+  companies
+    ON companies.symbol = stock_prices.symbol
+WHERE 
+  stock_prices.date BETWEEN '2016-10-01' AND '2016-11-15'
+  AND companies.sub_industry = 'Real Estate Investment Trusts';
+~~~
+
+Either way, the result is nearly 6,400 rows.
+
+
+
+### How to avoid visualizing crap
+
+
+
+This is where visualization, among other things, gets tricky. In fact, this is where we need to become smart editors. But for now, let's be a stupid editor.
+
+Dump all the [6,400 rows into one sheet](https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=817684196).
+
+Do a pivot table so that each stock symbol has its own row, and the dates are along the columns. That leaves `closing_price` as the value in each cell. Here's [what my pivot table looks like](https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=1046219194):
+
+(Be sure to remove the __Show totals__ option, because we don't want to visualize it)
+
+<a href="https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=1046219194"><img src="images/cxw-03-pivot-all-real-estate.png" alt="cxw-03-pivot-all-real-estate.png"></a>
+
+Making this pivot table helps us _think_ about our data. Even without knowing what chart will be best to show the data, we can at least understand how to navigate through the data. Using the pivot table, we scroll up and down to see the different companies, and then left and right to move along time. 
+
+Which is basically what a visual chart can help us do, which is why Google's chart wizard has a much easier time figuring out how to visualize our data.
+
+I'm not going to get into the tedium of which buttons to poke on the Google chart wizard. But if you choose a kind of line chart, and then specify that Row 1 should be headers and Column A should be labels, you'll get something like this:
+
+<img src="images/cxw-04-massive-line-chart.png" alt="cxw-04-massive-line-chart.png">
+
+
+-- which is basically useless for a chart. There's just too much data. I couldn't even include it for an interactive link because it caused my browser to crunch down from the pain.
+
+#### Thinking of smaller groups
+
+In the screenshot above, I included a tool-tip that shows the high end of the closing price scale --
+
+
+In a previous query we got all the metadata for `CXW`, including its `market_cap` and `last_sale_price`, which is $2,450,000,000 and $20.80, respectively. 
+
+We can modify whatever query we used (IN/subquery or standard INNER JOIN) with a few more conditions to choose only companies with the same kind of market cap and price per stock:
+
+~~~sql
+SELECT companies.symbol, stock_prices.date, closing_price
+FROM 
+  stock_prices 
+INNER JOIN 
+  companies
+    ON companies.symbol = stock_prices.symbol
+WHERE 
+  stock_prices.date BETWEEN '2016-10-01' AND '2016-11-15'
+  AND companies.sub_industry = 'Real Estate Investment Trusts'
+  AND (100.0 * companies.market_cap / 2450000000) BETWEEN 50 AND 250
+  AND (100.0 * companies.last_sale / 20.8) BETWEEN 50 AND 200;
+~~~
+
+The result is about ~2000 rows. You can see my [pivot table here](https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=1430254692). The chart ([visit interactive](https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=294235055)) is still a disaster:
+
+<a href="https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=294235055"><img src="images/cxw-05-some-big-tangle-lines.png" alt="cxw-05-some-big-tangle-lines.png"></a>
+
+
+### Be choosy
+
+
+
+
+## Let's aggregate
+
+OK, let's move past the individual companies and their performances, because they are obviously too many to throw on one chart. Let's get the bigger picture with aggregation.
+
+
+### Making a megaindex: The stock price of every company, every day
+
+When you hear about the [S&P500 Index](http://www.marketwatch.com/story/understanding-performance-the-sp-500-in-2015-02-18) or [Dow Jones Industrial Average](https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average) going up 10 points, that's not simply 10 U.S. dollars in stock value of the stocks included in those indexes. Part of the value of these indexes are what companies they include, purportedly as a sign of the overall economy. Then there's weights and statistics and etc. etc.
+
+First, let's ask, how many different companies -- i.e. unique symbols -- are there in `stock_prices`? The following query will work, though I try to avoid `DISTINCT` out of habit out of personal taste (because I keep forgetting how it works):
+
+~~~sql
+SELECT COUNT(DISTINCT(symbol)) AS scount
+FROM stock_prices;
+~~~
+
+| scount |
+|--------|
+|   5377 |
+{:.table-sql}
+
+I prefer using a subquery -- group up all the unique `symbol` values, then count the rows in *that* result table
+
+~~~sql
+SELECT COUNT(*) scount
+FROM (SELECT symbol FROM stock_prices GROUP BY symbol)
+  AS symbols;
+~~~
+
+
+For the purpose of exercise, let's make the simplest index possible: pretend we bought one stock from all 5377 companies in the `stock_prices` table. Day to day, what is the total of our stock holdings?
+
+This is just a good ol' `SUM` aggregate. But since we're counting day-by-day, we need to do a `GROUP BY` on `date`:
+
+~~~sql
+SELECT date, SUM(closing_price) AS total_value
+FROM stock_prices
+GROUP BY DATE
+ORDER BY date;
+~~~
+
+
+Here's the last few days
+
+|  date       | total_value       |
+|-------------+-------------------|
+|  2016-10-31 | 165088.06         |
+|  2016-11-01 | 163740.4          |
+|  2016-11-02 | 162246.75         |
+|  2016-11-03 | 161509.9          |
+|  2016-11-04 | 161736.95         |
+|  2016-11-07 | 164842.92         |
+|  2016-11-08 | 165482.15         |
+|  2016-11-09 | 168163.57         |
+|  2016-11-10 | 169018.54         |
+|  2016-11-11 | 170580.11         |
+|  2016-11-14 | 171597.83         |
+{:.table-sql}
+
+
+Throwing that into a [spreadsheet](https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=1812013573) and charting it leaves much to be desired:
+
+<a href="https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=1812013573">
+<img src="images/cxw-allindex-bad-line.png" alt="cxw-allindex-bad-line.png">
+</a>
+
+Apparently there are a few dates (weekends?) in which a closing price is recorded for a few stocks but not for the stocks that count, hence the crazy dips in the above chart. 
+
+Also, we don't really see much of a stock crash at all after Election day.
+
+
+### Index only the rich companies
+
+Let's repeat the same query and idea, except filter the `companies` table for a `market_cap` of at least $10 billion. Again, you have the choice of doing an `IN` and subquery, or an `INNER JOIN` -- the main idea is that `companies` has the data fields that provide context on each company, such as how wealthy they are, and their `sector`.
+
+To refresh your memory, here are both ways of getting the same result:
+
+#### INNER JOIN
+
+~~~sql
+SELECT stock_prices.date, SUM(closing_price) AS total_value
+FROM 
+  stock_prices 
+INNER JOIN 
+  companies
+    ON companies.symbol = stock_prices.symbol
+WHERE 
+  companies.market_cap > 10000000000
+GROUP BY stock_prices.date
+ORDER BY stock_prices.date;
+~~~
+
+#### IN and a subquery
+
+This ends up being much faster to execute; I don't have much insight on whether that's SQLite's thing, or my poor optimization of the database. For our purposes, the difference is just a few seconds (which *does* count for "much faster" when it comes to real databasing).
+
+But same result
+
+~~~sql
+SELECT date, SUM(closing_price) AS total_value
+FROM 
+  stock_prices 
+WHERE 
+  symbol IN (SELECT symbol FROM companies 
+              WHERE companies.market_cap > 10000000000)
+GROUP BY date
+ORDER BY date;
+~~~
+
+Here's the [spreadsheet and chart](https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=340159941); more sensical, though we don't really see a drop around election, which suggests that the companies with the largest market caps may not have felt much:
+
+<a href="https://docs.google.com/spreadsheets/d/1WfATkk2KMYgkUISe_aXFdoqNdOWDTUOjzP2hXrqQszA/edit#gid=340159941">
+  <img src="images/cxw-10-bigindex-line.png" alt="cxw-10-bigindex-line.png">
+</a>
+
+
+### Graph the combined stock-prices of the S&P500
+
+Why do we have to make up our own list of worthwhile companies when `sp500` contains the list of companies that make up the vaunted [S&P 500 Index?](http://money.cnn.com/data/markets/sandp/).
+
+Let's do a naive sum by day; again, use a subquery + `IN`, or an `INNER JOIN`:
+
+
+~~~sql
+SELECT date, SUM(closing_price) AS total_value
+FROM 
+  stock_prices
+INNER JOIN
+  sp500
+  ON sp500.symbol = stock_prices.symbol
+GROUP BY date
+ORDER BY date;
+~~~
+
+
+
+
+
+
+
+A line chart showing the movement of all stocks
+
+A line chart showing the movement of only the S&P 500
+
+A line chart showing the S&P 500 divided by group
+
+Find the 10 stocks that grew the most percentage wise
+
+Find the 10 industries that grew the most percentage wise
+
+
+
+---------
+
+
+### All companies who were off their pre-November high
+
+https://blog.jooq.org/2016/04/25/10-sql-tricks-that-you-didnt-think-were-possible/
+
+
+
+
+~~~sql
+WITH mx_table AS (
+  SELECT sp500.symbol, MAX(closing_price) AS max_price
+  FROM stock_prices
+  INNER JOIN sp500
+    ON sp500.symbol = stock_prices.symbol
+  WHERE date BETWEEN '2016-01-01' AND '2016-10-31'
+  GROUP BY sp500.symbol
+)
+
+SELECT nov_table.symbol, 
+  100.0 * (closing_price - max_price) / max_price AS off_pct 
+FROM stock_prices AS nov_table
+INNER JOIN mx_table
+  ON mx_table.symbol = nov_table.symbol
+WHERE date = '2016-11-01'
+ORDER BY off_pct;
+~~~
+
+
+
+
+
+~~~
+
+
+SE
+

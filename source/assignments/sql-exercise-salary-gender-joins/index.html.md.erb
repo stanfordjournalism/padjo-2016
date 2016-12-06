@@ -181,8 +181,11 @@ OK, this might be the most painful part of the lesson. Depending on what was in 
 
 What does this have to do with you? Try doing a sort by money, such as `total_pay_benefits`
 
+(note that I alias the cumbersome column name to `total_pay_benefits` because who knows how SQL will interpret the ampersand)
+
 ~~~sql
-SELECT employee_name, job_title, total_pay_benefits
+SELECT EmployeeName, JobTitle, 
+  "TotalPay&Benefits" AS total_pay_benefits
 FROM salaries
 ORDER BY total_pay_benefits DESC
 LIMIT 10;
@@ -215,11 +218,11 @@ The proper SQLite way to handle this would be to wrap all your number fields in 
 
 Here it is in action:
 
-(yeah that's right, I can alias a column name to the same name if I feel like)
+
 
 ~~~sql
-SELECT employee_name, job_title, 
-  CAST(total_pay_benefits AS NUMBER) AS total_pay_benefits
+SELECT EmployeeName, JobTitle, 
+  CAST("TotalPay&Benefits" AS NUMERIC) AS total_pay_benefits
 FROM salaries
 ORDER BY total_pay_benefits DESC
 LIMIT 10;
@@ -227,18 +230,18 @@ LIMIT 10;
 
 And there's the big salaries:
 
-|  employee_name  | job_title            | total_pay_benefits  |
-|-----------------+----------------------+---------------------|
-|  Kenneth Denson | Police Lieut-Adv     | 477703.45           |
-|  Mark Venable   | Police Captain-Adv   | 380998.8            |
-|  Jason Amdur    | Fire Cap Haz Mat EMT | 378926.32           |
-|  James Keene    | City Manager         | 349964.47           |
-|  John Parks     | Fire Inspector EMT   | 334311.31           |
-|  Douglas Keith  | Management Spec      | 325115.7            |
-|  Scott Wong     | Management Spec      | 311450.19           |
-|  Dennis Burns   | Police Chief-Adv     | 309138.22           |
-|  Michael Verga  | Fire Cap Haz Mat EMT | 294068.42           |
-|  Thomas Newland | Fire Inspector EMT   | 289664.24           |
+|  EmployeeName  |       JobTitle       | total_pay_benefits |
+|----------------|----------------------|--------------------|
+| Kenneth Denson | Police Lieut-Adv     |          477703.45 |
+| Mark Venable   | Police Captain-Adv   |           380998.8 |
+| Jason Amdur    | Fire Cap Haz Mat EMT |          378926.32 |
+| James Keene    | City Manager         |          349964.47 |
+| John Parks     | Fire Inspector EMT   |          334311.31 |
+| Douglas Keith  | Management Spec      |           325115.7 |
+| Scott Wong     | Management Spec      |          311450.19 |
+| Dennis Burns   | Police Chief-Adv     |          309138.22 |
+| Michael Verga  | Fire Cap Haz Mat EMT |          294068.42 |
+| Thomas Newland | Fire Inspector EMT   |          289664.24 |
 {:.table-sql}
 
 Learning `CAST` and using it regularly will help you in the long run, so don't shun it because of the extra typing...

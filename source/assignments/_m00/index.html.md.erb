@@ -1,0 +1,711 @@
+---
+title: Midterm 00
+description: |
+  A Midterm
+due_date: 2016-11-10
+due_time: 1:30 PM
+points: 100
+type: Test
+deliverables:
+  - Hand in the test
+  - Hand in your written cheat sheet.
+requirements:
+  - |
+    Relax!
+---
+
+-----------------
+
+# Simple Data
+
+
+## "people" table
+
+~~~sql
+SELECT *
+FROM people;
+~~~
+
+
+
+|   name   | sex | age |  eyes |
+|----------|-----|-----|-------|
+| Austin   | M   |  10 | blue  |
+| Blair    | M   |  32 | brown |
+| Carolina | F   |  28 | brown |
+| Dani     | F   |  22 | blue  |
+| Eliza    | F   |  16 | blue  |
+{:.table-sql}
+
+
+## "homes" table
+
+~~~sql
+SELECT * 
+FROM homes;
+~~~
+
+
+| owner_name |   area  | value |
+|------------|---------|-------|
+| Austin     | urban   |   500 |
+| Blair      | suburbs |   800 |
+| Carolina   | suburbs |   100 |
+| Carolina   | urban   |   200 |
+| Dani       | country |   400 |
+| Donald     | urban   |   200 |
+| Eliza      | urban   |   100 |
+{:.table-sql}
+
+---------------------
+
+
+# Match the query
+
+Just match the right query to the given result.
+
+### Example: Get a sum of home values, grouped by eye color of the owner and area, where the owner is female, ordered by highest total and then area, alphabetically
+
+(this is the toughest kind of query you'll have to do)
+
+
+|  eyes  | area    | total  |
+|--------+---------+--------|
+|  blue  | country | 400    |
+|  brown | urban   | 200    |
+|  brown | suburbs | 100    |
+|  blue  | urban   | 100    |
+{:.table-sql}
+
+#### XA.
+
+~~~sql
+SELECT 
+  eyes, area, value AS total
+FROM homes
+INNER JOIN 
+   people 
+   ON people.sex = 'F'
+ORDER BY total DESC;
+~~~
+
+
+#### XB.
+
+~~~sql
+SELECT 
+  eyes, area, SUM(value) AS total
+FROM homes
+INNER JOIN 
+   people 
+WHERE people.name = homes.owner_name
+  AND sex = 'F'
+GROUP BY eyes, area
+ORDER BY total, area;
+~~~
+
+
+
+#### XC.
+
+
+~~~sql
+SELECT 
+  eyes, area, SUM(value) AS total
+FROM homes
+INNER JOIN 
+   people 
+   ON people.name = homes.owner_name
+WHERE sex = 'F'
+GROUP BY eyes, area
+ORDER BY total DESC,
+          area ASC;
+~~~
+
+
+
+### 1. From "people", select all the males
+
+The result:
+
+|  name   | sex | age | eyes   |
+|---------+-----+-----+--------|
+|  Austin | M   | 10  | blue   |
+|  Blair  | M   | 32  | brown  |
+{:.table-sql}
+
+
+##### 1A.
+
+~~~sql
+SELECT *
+FROM people ;
+~~~
+
+
+##### 1B.
+
+~~~sql
+SELECT *
+FROM people 
+WHERE sex = "M";
+~~~
+
+##### 1C.
+
+~~~sql
+SELECT 'M'
+FROM people;
+~~~
+
+
+
+---------------
+
+
+### 2. List the values of the first 3 "homes", in order of value
+
+The result:
+
+|  value  |
+|---------|
+|  800    |
+|  500    |
+|  400    |
+{:.table-sql}
+
+
+
+##### 2A.
+
+~~~sql
+SELECT value
+FROM homes
+ORDER BY 
+  value DESC 
+LIMIT 3;
+~~~
+
+
+##### 2B. 
+
+
+~~~sql
+SELECT *
+FROM homes
+LIMIT 3
+ORDER BY 
+  value DESC; 
+~~~
+
+
+##### 2C. 
+
+
+~~~sql
+SELECT *
+FROM homes
+WHERE value > 400;
+~~~
+
+
+
+### 3. Count the number of people with brown eyes
+
+
+|  COUNT(*)  |
+|------------|
+|  2         |
+{:.table-sql}
+
+
+##### 3A.
+
+~~~sql
+SELECT *
+FROM people
+GROUP BY eyes;
+~~~
+
+##### 3B.
+
+~~~sql
+SELECT eyes
+FROM people
+WHERE eyes = "brown";
+~~~
+
+
+##### 3C.
+
+~~~sql
+SELECT COUNT(*)
+FROM people
+WHERE eyes = "brown";
+~~~
+
+
+
+### 4. Count the number of people grouped by sex, in descending order of count
+
+
+|  sex | the_count  |
+|------+------------|
+|  F   | 3          |
+|  M   | 2          |
+{:.table-sql}
+
+##### 4A.
+
+~~~sql
+SELECT 
+  COUNT(*) AS the_count
+FROM people;
+~~~
+
+##### 4B.
+
+~~~sql
+SELECT sex, 
+  COUNT(*) AS the_count
+FROM people
+GROUP BY sex;
+~~~
+
+##### 4B.
+
+~~~sql
+SELECT GROUP BY(sex), 
+  COUNT(*) AS the_count
+FROM people;
+~~~
+
+### 5. List all the fields for the people over 20, in order of descending age 
+
+|  name     | sex | age | eyes   |
+|-----------+-----+-----+--------|
+|  Blair    | M   | 32  | brown  |
+|  Carolina | F   | 28  | brown  |
+|  Dani     | F   | 22  | blue   |
+{:.table-sql}
+
+
+##### 5A.
+
+~~~sql
+SELECT *
+FROM people
+WHERE age > 20
+ORDER BY age;
+~~~
+
+##### 5B.
+
+~~~sql
+SELECT *
+FROM people
+WHERE age > 20
+ORDER BY age DESC;
+~~~
+
+##### 5A.
+
+~~~sql
+SELECT *
+FROM people
+ORDER BY age DESC;
+~~~
+
+
+### 6. List the sum of the value of homes by area, in order of the sum per area.
+
+
+
+|  area    | total  |
+|----------+--------|
+|  urban   | 1000   |
+|  suburbs | 900    |
+|  country | 400    |
+{:.table-sql}
+
+
+##### 6A.
+
+~~~sql
+SELECT area, 
+  SUM(value) AS total
+FROM homes 
+GROUP BY area
+ORDER BY total DESC;
+~~~
+
+##### 6B.
+
+~~~sql
+SELECT area, 
+  value AS total
+FROM homes 
+GROUP BY area
+ORDER BY total DESC;
+~~~
+
+
+##### 6C.
+
+~~~sql
+SELECT area, 
+  SUM(value) AS total
+FROM homes 
+ORDER BY total DESC;
+~~~
+
+
+### 7. Join all the "homes" to their proper owner in "people", in reverse alphabetical order of the owner's name
+
+
+|  owner_name | area    | value | name     | sex | age | eyes   |
+|-------------+---------+-------+----------+-----+-----+--------|
+|  Eliza      | urban   | 100   | Eliza    | F   | 16  | blue   |
+|  Dani       | country | 400   | Dani     | F   | 22  | blue   |
+|  Carolina   | suburbs | 100   | Carolina | F   | 28  | brown  |
+|  Carolina   | urban   | 200   | Carolina | F   | 28  | brown  |
+|  Blair      | suburbs | 800   | Blair    | M   | 32  | brown  |
+|  Austin     | urban   | 500   | Austin   | M   | 10  | blue   |
+{:.table-sql}
+
+##### 7A.
+
+~~~sql
+SELECT * 
+FROM homes
+ORDER BY 
+  homes.owner_name DESC;
+~~~
+
+##### 7B.
+
+~~~sql
+SELECT * 
+FROM homes
+INNER JOIN 
+  people ON 
+  people.name = homes.owner_name 
+ORDER BY 
+  homes.owner_name DESC;
+~~~
+
+##### 7C.
+
+~~~sql
+SELECT * 
+FROM homes
+WHERE
+  people.name = homes.owner_name 
+ORDER BY homes.owner_name DESC;
+~~~
+
+
+
+
+
+### 8. Find the homes owned by men, in descending order of value
+
+
+##### 8A.
+
+~~~sql
+SELECT 
+  owner_name, area, value
+FROM homes
+INNER JOIN 
+  people ON 
+WHERE sex = 'M'
+ORDER BY owner_name DESC;
+~~~
+
+##### 8A.
+
+~~~sql
+SELECT 
+  owner_name, area, value
+FROM homes
+WHERE  people.name = owner_name 
+  AND sex = 'M'
+ORDER BY owner_name DESC;
+~~~
+
+##### 8C.
+
+~~~sql
+SELECT 
+  owner_name, area, value
+FROM homes
+INNER JOIN 
+  people ON 
+    people.name = owner_name 
+WHERE sex = 'M'
+ORDER BY owner_name DESC;
+~~~
+
+|  owner_name | area    | value  |
+|-------------+---------+--------|
+|  Blair      | suburbs | 800    |
+|  Austin     | urban   | 500    |
+{:.table-sql}
+
+
+### 9. Count the number of homes owned by women
+
+
+|  COUNT(*)  |
+|------------|
+|  4         |
+{:.table-sql}
+
+
+##### 9A.
+
+~~~sql
+SELECT COUNT(*) 
+FROM homes
+INNER JOIN 
+  people ON 
+  homes.owner_name = people.name
+WHERE sex = 'F';
+~~~
+
+
+##### 9B.
+
+~~~sql
+SELECT sex, COUNT(*) 
+FROM homes
+INNER JOIN 
+  people ON 
+  homes.owner_name = people.name
+~~~
+
+
+##### 9C.
+
+~~~sql
+SELECT COUNT(*) 
+FROM homes
+INNER JOIN 
+  people 
+WHERE sex = 'F';
+~~~
+
+
+### 10. List the count and total value of homes, grouped by owner, in descending order of total value
+
+
+
+|  owner_name | total_value | total_count  |
+|-------------+-------------+--------------|
+|  Blair      | 800         | 1            |
+|  Austin     | 500         | 1            |
+|  Dani       | 400         | 1            |
+|  Carolina   | 300         | 2            |
+|  Eliza      | 100         | 1            |
+{:.table-sql}
+
+
+##### 10A.
+
+~~~sql
+SELECT GROUP BY(owner_name), 
+  SUM(value) AS total_value,
+  COUNT(*) AS total_count
+FROM homes
+INNER JOIN 
+  people ON 
+  homes.owner_name = people.name;
+~~~
+
+##### 10B.
+
+~~~sql
+SELECT owner_name, 
+  SUM(value) AS total_value,
+  COUNT(*) AS total_count
+FROM homes
+INNER JOIN 
+  people ON 
+  homes.owner_name = people.name
+GROUP BY owner_name
+ORDER BY total_value DESC;
+~~~
+
+##### 10C.
+
+~~~sql
+SELECT owner_name, 
+  SUM(value) AS total_value,
+  COUNT(*) AS total_count
+FROM homes
+INNER JOIN 
+  people ON 
+  homes.owner_name = people.name;
+~~~
+
+
+### 11. List all homes owned by people whose names begin with 'D'
+
+Hints:
+
+No join or aggregation needed, just testing out functions. 
+
+Use the substring function, `SUBSTR`, which the first argument is the string/column to "slice", the second argument is where to start cutting from, and the third argument is where to end the slice:
+
+
+~~~sql
+SELECT SUBSTR(owner_name, 1, 3)
+FROM homes
+LIMIT 3;
+~~~
+
+|  SUBSTR(owner_name, 1, 3)  |
+|----------------------------|
+|  Aus                       |
+|  Bla                       |
+|  Car                       |
+{:.table-sql}
+
+
+Result for the query:
+
+
+
+
+|  first_initial | owner_name | area    | value  |
+|----------------+------------+---------+--------|
+|  D             | Dani       | country | 400    |
+|  D             | Donald     | urban   | 200    |
+{:.table-sql}
+
+
+##### 11A.
+
+~~~sql
+SELECT SUBSTR(owner_name, 1, 1) AS 'D',
+  homes.*
+FROM homes;
+~~~
+
+
+##### 11B.
+
+~~~sql
+SELECT SUBSTR(owner_name, 1, 1) AS first_initial,
+  homes.*
+FROM homes
+WHERE first_initial = 'D';
+~~~
+
+
+##### 11C.
+
+~~~sql
+SELECT SUBSTR(owner_name, 1, 1) 
+FROM homes
+WHERE first_initial = 'D';
+~~~
+
+
+
+----------------
+
+
+
+
+# Write out the query
+
+The results are provided, just write the query to get the answer.
+
+### Example: List all the homes owned by women, in order of value
+
+The results:
+
+|  owner_name | area    | value  |
+|-------------+---------+--------|
+|  Dani       | country | 400    |
+|  Carolina   | urban   | 200    |
+|  Carolina   | suburbs | 100    |
+|  Eliza      | urban   | 100    |
+{:.table-sql}
+
+
+The answer:
+
+
+~~~sql
+SELECT homes.*
+FROM homes
+INNER JOIN
+  people
+  ON people.name = homes.owner_name
+WHERE people.sex = 'F'
+ORDER BY value DESC;
+~~~
+
+
+
+
+### 1. List the homes owned by "Carolina"
+
+
+|  owner_name | area    | value  |
+|-------------+---------+--------|
+|  Carolina   | suburbs | 100    |
+|  Carolina   | urban   | 200    |
+{:.table-sql}
+
+
+
+### 2. List all the men in order of oldest to youngest
+
+
+|  name   | sex | age | eyes   |
+|---------+-----+-----+--------|
+|  Blair  | M   | 32  | brown  |
+|  Austin | M   | 10  | blue   |
+{:.table-sql}
+
+
+
+### 3. Sum the values of homes
+
+
+
+|  SUM(value)  |
+|--------------|
+|  2300        |
+{:.table-sql}
+
+
+
+### 4. Show the count of people grouped by eye color, in ascending order of eye color
+
+
+
+|  eyes  | the_count  |
+|--------+------------|
+|  brown | 2          |
+|  blue  | 3          |
+{:.table-sql}
+
+
+### 5. Show all homes owned by brown-eyed men
+
+
+
+|  owner_name | area    | value  |
+|-------------+---------+--------|
+|  Blair      | suburbs | 800    |
+{:.table-sql}
+
+
+
+
+

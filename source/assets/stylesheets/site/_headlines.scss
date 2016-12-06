@@ -12,7 +12,7 @@ h6, .h6 { font-size: $font-size-h6; }
 }
 
 @media  screen and (max-width: breakpoint-max(sm)) {
-    h1, .h1 { font-size: $font-size-h1 * 0.8; }
+    h1, .h1 { font-size: $font-size-h1 * 0.9; }
     h2, .h2 { font-size: $font-size-h2 * 0.8; }
     h3, .h3 { font-size: $font-size-h3 * 0.8; }
     h4, .h4 { font-size: $font-size-h4 * 0.8; }

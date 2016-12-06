@@ -4,9 +4,16 @@
     <article class="page-layout">
       <section id="frontmatter" class="sec">
         <div class="container">
+
+            <% if page_image_url %>
+              <img class="page-image" src="<%=page_image_url%>" alt="">
+            <% end %>
+
             <h1 class="page-title">
                 <%= yield_content(:page_title) || page_title %>
             </h1>
+
+
 
             <% if page_nutgraf %>
               <div class="nutgraf">

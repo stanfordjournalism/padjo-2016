@@ -1,0 +1,506 @@
+---
+title: Midterm Overview and Example Questions
+stub: true
+description: |
+    Oh boy...
+---
+
+# Schedule
+
+- Thursday night: Hope to have a full guide with dozens of routine practice questions
+- Friday, Nov. 4: I'll be around most of all the day for in-person help. Aim to publish more exercises so that you have something flashcard style to work with. And datasets that you will want to be familiar with.
+- Tuesday, Nov. 8: We're doing an election pool. But we'll also be reviewing.
+- 
+
+
+
+
+
+# Content
+
+## All the syntax you need to know
+
+Just to be clear, here are all the keywords and symbols you're expected to know. It's a pretty small vocabulary.
+
+
+|   token    |                                                                     usefulness                                                                     |
+|------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| SELECT     | How to begin a data-selecting query, and how to specify columns in the result set.                                                                 |
+| FROM       | How to specify the table for selecting data                                                                                                        |
+| ORDER BY   | How to specify the order of rows in the result set.                                                                                                |
+| ASC        | A dependent keyword for ORDER BY, to specify that we want to order rows by a column in ascending order.                                            |
+| DESC       | Like ASC, but in reverse order. Usually used to go from biggest to smallest.                                                                       |
+| LIMIT      | How to specify exactly the number of rows in the result set.                                                                                       |
+| WHERE      | How to filter/leave out data rows based on true/false conditions.                                                                                  |
+| LIKE       | Used for fuzzy, case-sensitive matching of strings.                                                                                                |
+| AS         | Assign a new name to a column (or table). Useful for renaming headers and for labeling derived columns.                                            |
+| GROUP BY   | All rows that share the same value in a given column are grouped together in a "bucket" for aggregate calculations.                                |
+| INNER JOIN | Add another table to the analysis.                                                                                                                 |
+| ON         | Kind of like "WHERE", but for JOINs. It's the way we specify the relationship between two different tables.                                        |
+| AND        | Used in a boolean expression when we want another condition to be satisfied.                                                                       |
+| OR         | Used in a boolean expression when we want a condition to be optional.                                                                              |
+| =          | The operator for testing if one value is equal to the other.                                                                                       |
+| !=         | Returns True if the left side value is not equal to the right                                                                                      |
+| ,          | With what we know, the comma is used primarily to separate the individual columns in the SELECT clause                                             |
+| *          | When used by itself, in the SELECT clause, it's shorthand for "include all the columns". But between values, it acts as a multiplication operator. |
+| "          | Double-quotes can be used to denote an identifier, such as a table name that can't be read by SQLite literally, e.g. "First Name"                  |
+| '          | Single-quotes are used to denote literal string values that are not meant as SQL identifiers or keywords.                                          |
+| ()         | Parentheses are used, like in math, to group operations. They are sometimes necessary for enclosing a complex expression to be aliased.            |
+| .          | For our purposes, the dot operator is used as the separator between table name and column, for the occasions when a column name is ambiguous.      |
+| /          | The division operator. Useful for calculating percentages                                                                                                                              |
+{:.table-mono-desc}
+
+
+### Aggregate functions
+
+I don't know know if aggregate functions count as "core syntax", but for our purposes, they might as well be.
+
+You'll be expected to know `COUNT`, `SUM`, `AVG`, `MAX`, `MIN`. There's not much to deeply study, I mean, what they do is right in their names. You just need to know that when I ask for a count of results, that that means you'll be using `COUNT(*)`
+
+
+### Other data-transforming functions
+
+There will be a few questions making sure you know how to transform data. For example, you might need to match one table of people to another by name. But maybe the second table has variations, such as `'MANNY'` vs `'Manuel'`. 
+
+I will give you full descriptions of how `UPPER` (or `LOWER`) and `SUBSTR` works, but these functions are so useful that you should have them memorized. What you *especially* need to be sure of is when functions are chained together. 
+
+Such as this, to get the first capitalized initial of a name:
+
+~~~sql
+SELECT UPPER(SUBSTR(name, 1, 1)) AS first_initial ...
+~~~
+
+Does the result make sense? Does it make sense that this is equivalent?
+
+
+~~~sql
+SELECT SUBSTR(UPPER(name, 1, 1)) AS first_initial ...
+~~~
+
+
+
+
+## Nice to know
+
+There's a lot of functions and even concepts that I'll use on the exam, but I will aim to explain them completely, as if the world's best Googler heard your cry and printed exactly what you need to know to do a given question. That said, being familiar with things reduces reading time during the test.
+
+
+## What kind of/not to know
+
+The list of this is so long that I've had to put everything into a spreadsheet. But to sum it up:
+
+1. I'm not going to try to trick you on capitalization (of SQL code) and whitespace. 
+2. SQL keywords and identifiers are case-insensitive. If you want to annoy me by putting everything in lower-case/upper-case, fine. If a SQL interpreter runs your code and gets the right answer, you get credit. 
+3. You probably aren't going to screw commas up.
+4. Don't expect complex `WHERE` conditions, such as `(AND x = y OR (AND a != b))`. Nothing will be more difficult to grok than a double-negative in an English sentence.
+
+## Things I'll be reasonably anal about
+
+That said, there are certain things that seem like minor details that cannot be treated as such. The exam won't emphasize them, but I won't overlook these errors either:
+
+1. Everything has to be spelled exactly as required. If a table is named `people`, do not refer to it as `persons` or `peoples` (unless you're aliasing it).
+2. Including columns that are explicitly not called for (i.e. when I show the expected result set), or out of order.
+3. Not using aliases. In the questions, I try to make it clear what things should be labeled, not because the names are always important, but it's just easier to dock you for not paying attention. 
+4. Literal string values, i.e. the things enclosed in single-quotes, are _not_ case-insensitive. Expect to see a problem in which one table has all-caps names, and the other is title case. If you don't account for that, your code won't work.
+
+-----------------------------------------
+
+
+
+
+## Most complicated query
+
+Here is the most complicated-kind of query that I feel I could justify asking you to do:
+
+~~~sql
+SELECT 
+  businesses.business_id,
+  businesses.name,
+  COUNT(*) AS vermin_violation_count
+FROM 
+  businesses
+INNER JOIN
+  violations ON
+    businesses.business_id = violations.business_id
+WHERE
+  violations.description LIKE '%vermin%'
+  AND date >= '20160101'
+GROUP BY
+  businesses.business_id,  businesses.name
+ORDER BY vermin_violation_count DESC,
+  businesses.name ASC
+LIMIT 10;
+~~~
+
+
+
+Before you panic, let's look at the result:
+
+|  business_id | vermin_violation_count  |
+|--------------+-------------------------|
+|  5925        | 3                       |
+|  80112       | 3                       |
+|  420         | 2                       |
+|  489         | 2                       |
+|  1144        | 2                       |
+|  1381        | 2                       |
+|  1641        | 2                       |
+|  1757        | 2                       |
+|  2336        | 2                       |
+|  2418        | 2                       |
+{:.table-sql}
+
+Then, take a look at the data source: the [San Francisco restaurant scores database](http://2016.padjo.org/tutorials/sqlite-data-starterpacks/#toc-s-f-food-inspections-lives-), with its 3 tables: businesses, inspections, and violations.
+
+Finally, consider the hypothetical prompt from a hypothetical editor:
+
+> Find all the local restaurants that have had the most problems with vermin in 2016.
+
+There's a lot of ways to interpret that directive -- particularly, how exactly do you quantify the size of a vermin problem: number or physical size of each creature? Should we prefer 10 cockroach-sized rats, or one rat-sized cockroach? What about frequency of sightings? And so forth. 
+
+It might be a fun, creative journalism test to have you write a 500-word essay on how you would investigate and report on this topic. But I prefer testing your ability to understand the subject, and even possibly tell the story by understanding the data and its potential insights.
+
+Ignore the quantity of syntax for now -- and let's look at what concepts you've managed to internalize when you're able to write this query in any context:
+
+1. You understand that, for various common-sense reasons, "most-vermin-infested" is not an awards show. But even if it were, why trust someone else's assessment when you can access the source data yourself?
+2. You understand that computers, database software in particular, will not *think* for you. We have to know for ourselves how to describe the relationships between restaurants, and their inspections and violations.
+3. You understand that data, being often limited to rows of either text and numbers, can't nearly describe the reality of a restaurant, nor all the things and data related to a restaurant. Even if you need a cheat sheet, you still understand the value of JOINing datasets.
+4. You understand that not all data is useful, nor is more better. But you also know how ease it is to filter with `WHERE`, and how to describe the data you find useful.
+5. You know the trade offs in summarizing (i.e. aggregating data) of summarization/aggregation. Granular data -- in this case, one record per violation -- is ideal, but we need to eventually communicate the big picture. Do the dates and details matter for each individual vermin-related violation? Or is it more relevant to condense the details and get an overall count?
+6. You understand that a summary can be so broad as to be bland of any insight, i.e. there are 9000-vermin related violations in San Francisco.
+7. You understand the scalability of programming. To count records even just for San Francisco is a huge undertaking. Doing that count by individual business (or even, business and year) is so resource-intensive that it might as well be impossible. But with `GROUP BY`, we can aggregate by any "bucket" in seconds.
+8. You understand the power in being able to declare what you want to compute, and even exactly how you want that computed information, via sorting and limiting and aliasing.
+
+
+### Concepts as code
+
+Think of code as just a concise way to describe -- to me and to your computer -- what you intend to find. The best way to be prepared for this exam is to be able to write that massive query by hand, even if I don't put anything that complex on the exam.
+
+If you're like most normal people and programmers, you will understand that query when you understand its individual pieces.
+
+Try to write these queries on your own:
+
+
+#### Count the total number of violations recorded in 2016
+
+#### Figure out how to filter for only vermin-related violations
+
+#### Now, count the total number of vermin-related violations in 2016
+
+#### Do a count of vermin violations _per business_ (no need to JOIN to businesses yet)
+
+#### Rank that list of vermin-violations-per-business-ID by count of violations
+
+#### Do an INNER JOIN of that vermin violation list with the businesses table
+
+#### Limit that list to the top 5
+
+
+
+
+
+## Types of questions
+
+There will probably be a few, short, "Write-this-Query" from scratch. But I expect you won't have much problem with that, especially with a cheat sheet, and I don't want too much of the test devoted to pure writing.
+
+So expect questions that mostly follow the formats below: they allow for more interesting queries that aren't tied down to memorizing (and re-writing) repetitive SQL syntax. 
+
+In the examples below, I've included what's probably the upper-limit in complexity. There will probably be a couple of pages of "gimmes" that, if you forgot to make your own cheat sheet, you can use the examples as a quick syntax reference.
+
+
+
+## Complete this query
+
+These problems will have a narrative prompt, a partial query, and a sample of the source data and the anticipated results. You just have to fill in the missing lines.
+
+Prompt:
+
+> For every Starbucks, count the number of its routine-unscheduled inspections and its average score. List the top 10 Starbucks, by their business IDs, in order of highest average score and most inspections.
+
+
+(Pretend you have a printout of rows for the 3 tables)
+
+Partial query:
+
+~~~sql
+SELECT 
+  businesses.business_id,
+  ...
+  COUNT(*) AS icount
+FROM 
+  businesses
+INNER JOIN 
+  ...
+  ON
+    ...
+WHERE 
+  inspections.type = 'Routine - Unscheduled'
+  AND  ... LIKE 'STARBUCK%'
+GROUP BY
+  ...
+ORDER BY avgscore DESC, icount DESC
+LIMIT 10;
+~~~
+
+
+
+Answer:
+
+~~~sql
+SELECT 
+  businesses.business_id,
+  AVG(inspections.score) AS avgscore,
+  COUNT(*) AS icount
+FROM 
+  businesses
+INNER JOIN 
+  inspections
+  ON
+    businesses.business_id = inspections.business_id
+WHERE 
+  inspections.type = 'Routine - Unscheduled'
+  AND businesses.name LIKE 'STARBUCK%'
+GROUP BY
+  businesses.business_id
+ORDER BY avgscore DESC, icount DESC
+LIMIT 10;
+~~~
+
+
+
+## Translate this query into human-speak
+
+Instead of writing a query to solve someone's question, _read_ a query and explain to a layperson what the point of the query is.
+
+
+~~~sql
+SELECT 
+  SUBSTR(time, 1, 4) AS the_year,
+  COUNT(*) AS num_of_quakes
+FROM quakes
+WHERE 
+  mag >= 5.0 
+  AND the_year >= '2008'
+GROUP BY the_year
+ORDER BY num_of_quakes DESC;
+~~~
+
+(Pretend you have a printout of the `quakes` table)
+
+
+Here's one acceptable answer, notice how every line is referred to:
+
+> From the earthquake records since 2008, count the number of relatively serious earthquakes (M5.0+) per year, and rank the years based on how many quakes happened each year, from highest to low.
+
+These answers would not get full credit:
+
+
+- "List the year and magnitude of every M5.0+ earthquake since 2008": this would get the lowest score because a list of every earthquake is fundamentally different than an aggregation of that list, i.e. counting the number of quakes.
+- "Count the number of quakes that have happened since 2008": omits the filtering by magnitude and, more importantly, also fails to mention that the count is by year.
+- "Show the number of M5.0+ quakes by year since 2008": doesn't mention the sort order
+
+
+
+## Why is this dataset better than the other?
+
+If SQL is hard for you, I'm willing to bet the problem is not SQL or you, but the limited, frustrating nature of real-world data. Learning to program in SQL is a useful skill in itself. But experiencing the pain of data first-hand is the best way to learn what's not being counted.
+
+Sample question: Both [San Francisco](http://sanfranciscopolice.org/sites/default/files/SFPDOfficerInvolvedSuspectInvolvedShootings2000-Present.xlsx) and the [Dallas Police Department](http://www.dallaspolice.net/ois/ois) disclose officer-involved shootings.
+
+Make the case that one of the datasets is superior to the other. And provide 3 concrete examples of stories, backed by pseudo-SQL code, that are possible to research and tell because of the superior dataset's structure.
+
+Example of insight and pseudo-SQL: The Dallas dataset has a separate field for the race of the suspect and cop, and a column for whether the suspect was armed. To get a quick list of officer-involved shootings in which the black suspect was found to be unarmed:
+
+(pseudo means exact structure or naming doesn't have to be correct)
+
+~~~sql
+SELECT * FROM dallas_shootings
+WHERE officers LIKE "W/%"
+  AND suspects LIKE "B/%"
+  AND suspect_weapon LIKE "Unarmed";
+~~~
+
+Note that the above query doesn't result in a chartable datapoint, but it sure makes it a __lot__ easier to triage and focus on certain incidents.
+
+
+
+
+
+## What's wrong with my query?
+
+In these questions, you'll get the sample data, an example of what the expected results should be, a query, and the query's actual results/error.
+
+Explain in a short answer why something went "wrong". And fix the query.
+
+
+### Earthquake grouping
+
+
+
+
+Prompt: 
+
+> I want to count the number of M4.0+ earthquakes and also, find the biggest magnitude recorded for every year since 2010.
+
+Expected result:
+
+5 rows:
+
+|  year | maxmag | qcount  |
+|-------+--------+---------|
+|  2011 | 6.0    | 156     |
+|  2012 | 7.0    | 122     |
+|  2013 | 6.6    | 109     |
+|  2014 | 6.02   | 110     |
+|  2015 | 6.7    | 93      |
+{:.table-sql}
+
+
+
+
+Possible broken queries and their broken answers:
+
+
+#### You didn't specify what you wanted to count/aggregate by
+
+~~~sql
+SELECT 
+  SUBSTR(time, 1, 4) AS year,
+  MAX(mag) AS maxmag,
+  COUNT(*) AS qcount
+FROM quakes
+WHERE year > '2010'
+  AND mag >= 4.0 
+ORDER BY 
+  qcount DESC;
+~~~
+
+|  year | maxmag | qcount  |
+|-------+--------+---------|
+|  2012 | 7.0    | 5259    |
+{:.table-sql}
+
+#### What exactly are you grouping by?
+
+~~~sql
+SELECT 
+  SUBSTR(time, 1, 4) AS year,
+  MAX(mag) AS maxmag,
+  COUNT(*) AS qcount
+FROM quakes
+WHERE year > '2010' 
+  AND mag >= 4.0
+GROUP BY time
+ORDER BY year ASC;
+~~~
+
+
+590 rows.
+
+|  year | maxmag | qcount  |
+|-------+--------+---------|
+|  2011 | 4.6    | 1       |
+|  2011 | 5.0    | 1       |
+|  2011 | 4.3    | 1       |
+|  2011 | 4.05   | 1       |
+|  2011 | 4.04   | 1       |
+|  2011 | 4.1    | 1       |
+{:.table-sql}
+
+
+
+#### Correct query
+
+~~~sql
+SELECT 
+  SUBSTR(time, 1, 4) AS year,
+  MAX(mag) AS maxmag,
+  COUNT(*) AS qcount
+FROM quakes
+WHERE year > '2010' 
+  AND mag >= 4.0
+GROUP BY year
+ORDER BY year ASC;
+~~~
+
+
+Note: this is a particularly complicated example, though it's a query you should be able to write out on your own, without the pressures of an exam.
+
+
+### Joins and collisions
+
+There will likely be a few questions that are not just "I didn't get what I wanted" but also, "I got an error message!" This is a way to focus on some syntax specifics without making perfect-syntax -- the kind of thing that we use a computer to assist us in every real-world situation -- a burdensome part of the exam.
+
+
+Sample bad query:
+
+*I want a list of business IDs and number of inspections*
+
+~~~sql
+SELECT business_id, COUNT(*) AS icount
+FROM businesses
+INNER JOIN
+  inspections ON
+    inspections.business_id = businesses.business_id
+GROUP BY business_id;
+~~~
+
+*But I get this error message:*
+
+      ambiguous column name: business_id:
+
+
+
+
+
+
+## Short-table building
+
+Given examples of data tables small enough to keep in your head:
+
+
+`students`
+
+|  id |  name | age |
+|-----|-------|-----|
+| 001 | Dan   |  42 |
+| 003 | Blake |  35 |
+
+
+`grades`
+
+| s_id | score |
+|------|-------|
+|  003 |    90 |
+|  004 |    78 |
+|  003 |    60 |
+
+
+And given a query:
+
+~~~sql
+SELECT students.name, 
+  AVG(grades.score) AS avgscore,
+  MIN(grades.score) AS minscore,
+  MAX(grades.score) AS maxscore
+FROM students
+INNER JOIN 
+  grades ON
+    students.id = grades.s_id
+GROUP BY students.id
+ORDER BY avgscore DESC;
+~~~
+
+Or, perhaps a prompt:
+
+> For each student, list their name, average grading score, lowest score, and highest score
+
+Write out the results by hand -- yes, you'll have to do some slight arithmetic to calculate that average:
+
+
+| name | avgscore | minscore | maxscore |
+|------|----------|----------|----------|
+| Dan  |       75 |       60 |       90 |
+{:table-sql}
+
+

@@ -1,0 +1,98 @@
+---
+title: "Carto, Political Boundaries, SQL, and Guns and Coffee"
+description: |
+  Using Carto and SQL Joins to make a choropleth of Starbucks and gunshops by zip code
+---
+
+
+
+
+# Data to download
+
+Just copy-and-paste the following URLs ([from this subset of data](/tutorials/carto-sql-fast-intro/data-downloads/)) and import into your Carto Dataset maker:
+
+
+- [https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/congress_districts_114th.zip](https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/congress_districts_114th.zip)
+- [https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/us_county_shapes.zip](https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/us_county_shapes.zip)
+- [https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/zcta_simplified.zip](https://dannguyen.github.io/sql-carto-journalism-exercises/data/shapefiles/zcta_simplified.zip)
+- [https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/congressmembers.csv](https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/congressmembers.csv)
+- [https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/starbucks_locations.csv](https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/starbucks_locations.csv)
+- [https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/atf_firearm_dealers_2016_08.csv](https://dannguyen.github.io/sql-carto-journalism-exercises/data/wrangled/atf_firearm_dealers_2016_08.csv)
+
+
+
+
+
+# Map the Congressional house districts
+
+Creating a map from a dataset of __shapes__ is same as creating map from CSV and points, except we'll get shapes, i.e polygons instead of points.
+
+This is what the dataset looks like:
+
+<img src="images/table-congress-114th=dataset-geojson.png" alt="table-congress-114th=dataset-geojson.png">
+
+And Carto is easily able to map it like this: 
+
+<img src="images/mapped-congress-district-polygons.png" alt="mapped-congress-district-polygons.png">
+
+Go into the __Layer > Style__ editor to set the __Fill__ of each Polygon to 0.0 alpha (totally transparent) and a solid black outline:
+
+<img src="images/outline-districts-in-black.png" alt="outline-districts-in-black.png">
+
+
+## The limits of the Census
+
+Looking at the column names of the Census District shapefiles, you'll see that there's very little information beyond the boilerplate. And it doesn't have what we ostensibly most care about: is a particular district Republican or Democrat? When you think of what the Census's core purpose is -- to count people in an area -- you'll understand why they don't do the work of listing which Congressmember (or party) represents each district.
+
+Which is why we have SQL JOIN statements...
+
+
+## Detour: Usjng a NAA basemap to show urban density
+
+Before getting into SQL, let's play with more of Carto's map editor, including the option to __choose basemaps__. As all digital images are 1s and 0s, we technically _are_ adding a data layer to our visualization, just not one via database.
+
+Change the __Basemap__ of the Congress Districts layer from the default of Positron to: __NASA__ and __Night__ style. Here's what I got:
+
+<img src="images/districts-at=night-normal.jpg" alt="districts-at=night-normal.jpg">
+
+
+Change the style of the __Layer__ , e.g, the __Stroke color__, to something more visible than black on black:
+
+<img src="images/lavender-districts.jpg" alt="lavender-districts.jpg">
+
+
+Knowing nothing else, we might surmise that the really lighted-up areas represent the most urban of America, and ence, the most likely to be Democratic. But we really don't know beyond a visual guess...
+
+
+
+# Using SQL and Joins
+
+## Join state postal codes to district shapefiles
+
+
+## Join Congressmembers (and their parties) to shapefiles
+
+
+
+~~~sql
+SELECT
+  congressmembers.party,
+  us_lookups.postal_code, 
+  congress_districts_114th.*  
+
+FROM 
+  congress_districts_114th
+
+INNER JOIN 
+  us_lookups ON 
+      congress_districts_114th.statefp = us_lookups.fips
+        
+INNER JOIN 
+  congressmembers ON 
+      congressmembers.state = us_lookups.postal_code
+
+~~~
+
+
+
+

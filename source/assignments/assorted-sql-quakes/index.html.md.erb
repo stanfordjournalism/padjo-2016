@@ -62,13 +62,16 @@ The results:
 {:.table-sql}
 
 
-<!-- ~~~sql
+#### The answer
+
+~~~sql
 SELECT id, time, mag, place
 FROM quakes
+where SUBSTR(time, 1, 4) = '2015'
 ORDER BY mag DESC
 LIMIT 5;
 ~~~
- -->
+
 
 ### 2. For 2011 and 2015, the count of earthquakes and the biggest magnitude
 
@@ -84,15 +87,10 @@ Hint: `STRFTIME` might be treated as a string, so you might have to do: `year='2
 You could use SUBSTR, but it's better to practice [STRFTIME](https://www.sqlite.org/lang_datefunc.html).
 
 
-<!-- ~~~sql
-SELECT STRFTIME('%Y', time) AS year,
-  COUNT(*) AS quakecount,
-  MAX(mag) AS maxmag
-FROM quakes
-WHERE year IN ('2011', '2015')
-GROUP BY year;
-~~~
- -->
+
+
+The expected result:
+
 
 |  year | quakecount | maxmag  |
 |-------+------------+---------|
@@ -101,18 +99,23 @@ GROUP BY year;
 {:.table-sql}
 
 
-### 3. For every year in the database, get the count and max magnitude for each quake.
+#### The answer query
 
-Just like #2, but no `WHERE` clause. Same kind of `GROUP BY`. Pretty much the same query, but simpler, because we aren't filtering out years.
-<!-- 
 ~~~sql
 SELECT STRFTIME('%Y', time) AS year,
   COUNT(*) AS quakecount,
   MAX(mag) AS maxmag
 FROM quakes
+WHERE year IN ('2011', '2015')
 GROUP BY year;
 ~~~
- -->
+
+
+### 3. For every year in the database, get the count and max magnitude for each quake.
+
+Just like #2, but no `WHERE` clause. Same kind of `GROUP BY`. Pretty much the same query, but simpler, because we aren't filtering out years.
+
+The expected result:
 
 |  year | quakecount | maxmag  |
 |-------+------------+---------|
@@ -138,6 +141,18 @@ GROUP BY year;
 |  2014 | 1460       | 6.02    |
 |  2015 | 1696       | 6.7     |
 {:.table-sql}
+
+
+#### The answer
+
+~~~sql
+SELECT STRFTIME('%Y', time) AS year,
+  COUNT(*) AS quakecount,
+  MAX(mag) AS maxmag
+FROM quakes
+GROUP BY year;
+~~~
+
 
 ### 4. Find Oklahoma's 10 largest earthquakes in 2009
 
@@ -201,9 +216,9 @@ LIMIT 10;
 
 
 
-<!-- 
+ 
 
-The query:
+#### The answer
 
 ~~~sql
 SELECT id, time, place, mag
@@ -214,7 +229,7 @@ WHERE (latitude > 33.65 AND latitude < 37.51 ) AND
 ORDER BY mag DESC
 LIMIT 10;
 ~~~
--->
+
 
 
 ### 5. For Oklahoma, count the number of earthquakes per year
@@ -226,12 +241,11 @@ There should only be two columns: `year` and a count
 
 As a hint, the first part of the query:
 
-<!-- ~~~sql
+~~~sql
 SELECT STRFTIME('%Y', time) AS year, 
   COUNT(*) quakecount
-
 ~~~
- -->
+
 Looks like something is going on in Oklahoma:
 
 |  year | quakecount  |
@@ -259,9 +273,9 @@ Looks like something is going on in Oklahoma:
 {:.table-sql}
 
 
-The query:
+#### The answer
 
-<!-- 
+
 ~~~sql
 SELECT substr(time, 1, 4) AS year, 
   COUNT(*) quakecount
@@ -270,10 +284,9 @@ WHERE (latitude > 33.65 AND latitude < 37.51 ) AND
   (longitude > -103.25 AND longitude < -94.17)
 GROUP BY year
 ORDER BY year ASC;
-
 ~~~
 
- -->
+
 
 
 
@@ -298,8 +311,6 @@ Remember to sort by year-month.
 Here's the chart:
 
 <img src="images/q6-chart.png" alt="q6-chart.png">
-
-
 
 
 
@@ -328,7 +339,9 @@ Result (just the first 20 rows of 252, think of 12 * number of years):
 |  1996-07   | 43          |
 |  1996-08   | 44          |
 {:.table-sql}
-<!-- 
+
+
+#### The answer
 
 ~~~sql
 SELECT 
@@ -338,10 +351,6 @@ FROM quakes
 GROUP BY yearmonth
 ORDER BY yearmonth limit 20;
 ~~~
-
-
-
- -->
 
 
 
@@ -413,7 +422,7 @@ Result:
 |  7.2  | 1           |
 {:.table-sql}
 
-<!-- 
+
 ~~~sql
 SELECT 
   ROUND(mag, 1) as magx,
@@ -422,7 +431,7 @@ FROM quakes
 GROUP BY magx
 ORDER BY magx;
 ~~~
- -->
+
 
 ### 8. How many earthquakes per year and magnitude (rounded to integer)?
 
@@ -452,8 +461,18 @@ Once you've queried and exported the data to a spreadsheet, you'll have to do a 
 
 Then create a stacked bar/area chart (hint: highlight the entire pivot chart):
 
+<img src="images/question-8-chart-example.png" alt="question-8-chart-example.png">
 
-<!-- 
+
+
+The point of that chart? Shows that there are far more quakes in the M3 to 4.0 range.
+
+
+
+
+
+#### The answer.
+
 
 ~~~sql
 SELECT 
@@ -464,4 +483,4 @@ FROM quakes
 GROUP BY year, magx
 ORDER BY year, magx;
 ~~~
- -->
+

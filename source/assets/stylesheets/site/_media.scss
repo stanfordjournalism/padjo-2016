@@ -2,7 +2,7 @@
   img{
     @extend .img-fluid !optional;
     border: thin solid $gray-default;
-    max-width: 92%;
+    max-width: 99%;
   }
 }
 
@@ -10,10 +10,15 @@
 
 .container img{
     @extend .img-fluid;
-    border: thin solid $gray-default;
-    max-width: 92%;
+    border: thin solid #555;
+    box-shadow: 10px 10px 5px #999999;
+    max-width: 99%;
 
     margin-bottom: 2.0em;
     margin-left: auto;
     margin-right: auto;
+}
+
+.container img.page-image{
+    max-width: 100%;
 }
